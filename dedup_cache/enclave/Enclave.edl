@@ -1,6 +1,6 @@
 enclave {
 	trusted {
-		public void ecall_cache_get([in, size=256] char *tag,
+		public int ecall_cache_get([in, size=256] char *tag,
 									[out, size=rlt_size] char *rlt, int rlt_size,
 									[out, size=256] char *r);
 		public void ecall_cache_put([in, size=256] char *tag,

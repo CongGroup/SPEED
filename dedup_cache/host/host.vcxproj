@@ -27,12 +27,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Enclave_u.c" />
     <ClCompile Include="server.cpp" />
     <ClCompile Include="enclave_management.cpp" />
     <ClCompile Include="host.cpp" />
     <ClCompile Include="sysutils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Enclave_u.h" />
     <ClInclude Include="server.h" />
     <ClInclude Include="enclave_management.h" />
   </ItemGroup>

@@ -1,13 +1,20 @@
-#include <utility>
-#include <unordered_map>
 #include <cstring>
+#include <string>
+//#include <unordered_map>
+#include <utility>
+#include <map>
+
+#include "Enclave_t.h"
 
 #define TAG_SIZE 256
 #define RAND_SIZE 256
 
+std::map<int, int> dd;
+
 typedef std::string binary;
 typedef std::pair<binary, binary> entry_t;
-typedef std::unordered_map<binary, entry_t> cache_t;
+// TODO: replace with unordered_map
+typedef std::map<binary, entry_t> cache_t;
 
 cache_t cache;
 

@@ -126,7 +126,6 @@ int initialize_enclave(void)
      */
     /* try to get the token saved in $HOME */
     const char *home_dir = getpwuid(getuid())->pw_dir;
-    
     if (home_dir != NULL && 
         (strlen(home_dir)+strlen("/")+sizeof(TOKEN_FILENAME)+1) <= MAX_PATH) {
         /* compose the token path */
@@ -152,6 +151,7 @@ int initialize_enclave(void)
             printf("Warning: Invalid launch token read from \"%s\".\n", token_path);
         }
     }
+    printf("5555\n");
     /* Step 2: call sgx_create_enclave to initialize an enclave instance */
     /* Debug Support: set 2nd parameter to 1 */
     ret = sgx_create_enclave(ENCLAVE_FILENAME, SGX_DEBUG_FLAG, &token, &updated, &global_eid, NULL);
@@ -160,14 +160,14 @@ int initialize_enclave(void)
         if (fp != NULL) fclose(fp);
         return -1;
     }
-
+    printf("6766\n");
     /* Step 3: save the launch token if it is updated */
     if (updated == FALSE || fp == NULL) {
         /* if the token is not updated, or file handler is invalid, do not perform saving */
         if (fp != NULL) fclose(fp);
         return 0;
     }
-
+    printf("7777\n");
     /* reopen the file with write capablity */
     fp = freopen(token_path, "wb", fp);
     if (fp == NULL) return 0;

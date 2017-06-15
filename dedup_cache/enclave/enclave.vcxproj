@@ -69,9 +69,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cache.cpp" />
+    <ClCompile Include="Enclave_t.c" />
     <ClCompile Include="sysutils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Enclave_t.h" />
     <ClInclude Include="sysutils.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">

@@ -14,6 +14,7 @@ int SGX_CDECL main(int argc, char *argv[])
         return -1; 
     }
 
+    printf("22222\n");
     init_server();
 
     // main loop
