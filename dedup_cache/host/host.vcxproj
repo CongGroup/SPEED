@@ -26,6 +26,16 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="server.cpp" />
+    <ClCompile Include="enclave_management.cpp" />
+    <ClCompile Include="host.cpp" />
+    <ClCompile Include="sysutils.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="server.h" />
+    <ClInclude Include="enclave_management.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{09283e8f-167a-4c03-a7cb-9002c4667f6b}</ProjectGuid>
     <Keyword>Linux</Keyword>
@@ -60,12 +70,6 @@
   <ImportGroup Label="Shared" />
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
-  <ItemGroup>
-    <ClCompile Include="dedup_cache.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="dedup_cache.h" />
-  </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
       <AdditionalIncludeDirectories>$(SolutionDir)../env/sgxsdk/include;$(SolutionDir)../env/usr/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>

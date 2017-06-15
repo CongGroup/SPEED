@@ -68,10 +68,11 @@
     <None Include="Enclave.lds" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="utils.cpp" />
+    <ClCompile Include="cache.cpp" />
+    <ClCompile Include="sysutils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="utils.h" />
+    <ClInclude Include="sysutils.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
