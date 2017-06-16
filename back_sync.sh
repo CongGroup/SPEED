@@ -1,7 +1,7 @@
 #!/bin/bash
  
 flags=-avz
-filter=(--exclude="*.sln" --exclude="*.VC.*" --exclude="*bin/" --exclude="*obj/" --exclude="*.o" --exclude="*Debug/" --exclude="*vcxproj*" --exclude=".git*" --exclude="env" --exclude="*.sh")
+filter=(--exclude="*.sln" --exclude="*.VC.*" --exclude="*bin/" --exclude="*obj/" --exclude="*.o" --exclude="*Debug/" --exclude="*vcxproj*" --exclude=".git*" --exclude="env" --exclude="*.sh" --exclude=".config*")
 
 local_dir=./
 remote_dir=comdedup/

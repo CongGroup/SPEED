@@ -11,8 +11,7 @@ void init_server() {
     // remember to register signal handler
 }
 
-void run_server() {
-    /*** test code ***/
+void test_cache() {
     sgx_status_t ret = SGX_ERROR_UNEXPECTED;
     int hit = 0;
     char tag[256] = "12345";
@@ -36,7 +35,11 @@ void run_server() {
         printf("Fail to get cache entry!\n");
     }
     printf("Get result: %d\n", hit);
+}
 
+void run_server() {
+    /*** test code ***/
+    test_cache();
     exit(0);
     /*** End ***/
 
