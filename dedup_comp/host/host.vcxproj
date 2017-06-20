@@ -61,10 +61,15 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
+    <ClCompile Include="dedup_service_u.cpp" />
+    <ClCompile Include="enclave_management.cpp" />
     <ClCompile Include="host.cpp" />
+    <ClCompile Include="server.cpp" />
+    <ClCompile Include="sysutils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="host.h" />
+    <ClInclude Include="enclave_management.h" />
+    <ClInclude Include="server.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
