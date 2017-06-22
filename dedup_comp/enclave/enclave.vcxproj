@@ -70,12 +70,15 @@
   <ItemGroup>
     <ClCompile Include="crypto.cpp" />
     <ClCompile Include="dedup_service_t.cpp" />
+    <ClCompile Include="Enclave_t.c" />
     <ClCompile Include="instance.cpp" />
     <ClCompile Include="sysutils.cpp" />
     <ClCompile Include="word_count.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="crypto.h" />
+    <ClInclude Include="dedup_service_t.h" />
+    <ClInclude Include="Enclave_t.h" />
     <ClInclude Include="function.h" />
     <ClInclude Include="sysutils.h" />
     <ClInclude Include="word_count.h" />

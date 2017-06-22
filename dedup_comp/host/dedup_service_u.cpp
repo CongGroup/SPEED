@@ -16,6 +16,9 @@ void ocall_request_find(const uint8_t *tag,
     // parse response
 
     // copy responsed data to rlt and r
+    // dummy for simulation
+    *resp_size = 0;
+    memset(rlt, 1, exp_size);
 }
 
 void ocall_request_put(const uint8_t *tag,

@@ -10,7 +10,7 @@
 class WordCount : public Function
 {
 public:
-    WordCount(int id, const char *file);
+    WordCount(int id, const char *textfile, int filesize);
 
     const char *get_name();
 
