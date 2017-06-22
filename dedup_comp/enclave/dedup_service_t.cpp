@@ -1,5 +1,6 @@
+#include "dedup_service_t.h"
+
 #include "crypto.h"
-#include "function.h"
 #include "sysutils.h"
 
 #include "Enclave_t.h"
@@ -11,18 +12,22 @@
 
 void dedup(Function *func)
 {
+    eprintf("[*] Dedup service launched!\n");
+
     int resp_size = 0;
     metadata meta;
+
     ocall_request_find(
         func->get_tag(),
         &resp_size,
         func->output(), func->exp_output_size(),
         RAW(&meta));
+
     // hit
     if (resp_size > 0) {
         assert(resp_size <= func->exp_output_size());
 
-        eprintf("[*] %s with id %d successfuly fetched!\n", func->get_name(), func->get_id());
+        eprintf("[*] %s with id <%d> successfuly fetched!\n", func->get_name(), func->get_id());
 
         // decrypt
         if (veri_dec(func->output(), resp_size, func->output(), meta.mac)) {
@@ -34,7 +39,7 @@ void dedup(Function *func)
     }
     // miss
     else {
-        eprintf("[*] %s with id %d cannot be found at the server! Now process locally ...\n", func->get_name(), func->get_id());
+        eprintf("[*] %s with id <%d> cannot be found at the server! Now process locally ...\n", func->get_name(), func->get_id());
         
         func->process();
 

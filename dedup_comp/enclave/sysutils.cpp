@@ -14,6 +14,16 @@ void eprintf(const char *fmt, ...)
     ocall_print_string(buf);
 }
 
+void load_text_file(const char *filename,
+                    char **textfile, int *filesize)
+{
+    static char buffer[FILE_BUFFER_SIZE];
+    ocall_load_text_file(filename, buffer, FILE_BUFFER_SIZE, filesize);
+    if (*filesize == 0)
+        abort();
+    *textfile = buffer;
+}
+
 void get_time(hrtime *time)
 {
     ocall_get_time(&time->second, &time->nanosecond);
