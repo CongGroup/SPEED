@@ -7,16 +7,42 @@
 class Network
 {
 public:
-	int sendRequest(char* ip, int port, Request& request);
+	//Init Network tools
+	//If ServerIP == null the tools will use in server side.
+	//The port is always need.
+	Network(char* ServerIP, int port);
+	~Network();
+
+	/*
+	 * send request to server
+	 */
+	int sendRequest(const Request* request);
+
+	/*
+	 * recv msg from server
+	 */
+	int recvRespons(Response* response);
+
+	/*
+	 * recv msg from client
+	 */
 	int recvRequest(Request* request);
 
-	int sendRespons(const Request& request, Response& response);
-	int recvRespons(int sockid, Response* response);
+	/*
+	 * send response for specific request
+	 */
+	int sendRespons(const Request* request, const Response* response);
+
 
 protected:
 	int newUDPSocket();
 	sockaddr_in newAddr(char * ip, int port);
 	int bindSocket(int sid, char* ip, int port);
+	int sendMsg(int sid, sockaddr_in * to, const char * data, const uint32_t dataSize);
 	int recvMsg(int sid, sockaddr_in* from, char** data, uint32_t* dataSize);
+
+protected:
+	int sockfd;						//socket ID
+	sockaddr_in serv_addr;			//server addr
 };
 

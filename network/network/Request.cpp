@@ -5,6 +5,7 @@ Request::Request()
 {
 	size = 0;
 	data = 0;
+	memset(&fromAddr, 0, sizeof(fromAddr));
 }
 
 Request::Request(char* data, uint32_t size)
@@ -13,6 +14,7 @@ Request::Request(char* data, uint32_t size)
 	this->data = new char[size];
 	
 	memcpy(this->data, data, size);
+	memset(&fromAddr, 0, sizeof(fromAddr));
 }
 
 

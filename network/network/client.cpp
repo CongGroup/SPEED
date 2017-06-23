@@ -8,13 +8,20 @@
 
 int main(int argc, char *argv[])
 {
-	Network net;
+	//init network
+	Network net("127.0.0.1",SERV_PORT);
 
+	//send request
 	char* str = "Hello server.";
 	Request req(str, strlen(str) + 1);
-	int sendid = net.sendRequest("127.0.0.1", SERV_PORT, req);
+	net.sendRequest(&req);
+
+	//recv response
 	Response res;
-	net.recvRespons(sendid, &res);
+	net.recvRespons(&res);
+
+	//check msg
 	printf("%d :%s\n", res.getSize(), res.getData());
+
 	return 0;
 }

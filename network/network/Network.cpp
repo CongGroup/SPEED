@@ -9,107 +9,70 @@
 #include "Network.h"
 #include "config.h"
 
-
-/*
- * send request to server
- * return socketID if success
- * return -1 if socket init error
- */
-int Network::sendRequest(char * ip, int port, Request & request)
+Network::Network(char * ServerIP, int port)
 {
-	int sockfd;						//socket ID
-	sockaddr_in serv_addr;   //server addr
-
 	sockfd = newUDPSocket();
-	if (sockfd == -1)
-	{
-		return -1;
-	}
 	
-	serv_addr = newAddr(ip, port);
-
-	uint32_t dataSize = request.getSize();
-	sendto(sockfd, &dataSize, sizeof(dataSize), 0, (sockaddr *)&serv_addr, sizeof(serv_addr));
-	sendto(sockfd, request.getData(), request.getSize(), 0, (sockaddr *)&serv_addr, sizeof(serv_addr));
-
-	return sockfd;
+	if (ServerIP)
+	{
+		serv_addr = newAddr(ServerIP, port);
+	}
+	else
+	{
+		bindSocket(sockfd, 0, port); //bind server
+	}
 }
 
-/*
-* recv msg from server port then close it
-* return  0 if success
-* return -1 if socket init error
-* return -2 if bind error
-*/
+Network::~Network()
+{
+	close(sockfd);
+}
+
+int Network::sendRequest(const Request* request)
+{
+	sendMsg(sockfd, &serv_addr, request->getData(), request->getSize());
+	return 0;
+}
+
+
 int Network::recvRequest(Request * request)
 {
-	int sockid;				 //socketID
-	sockaddr_in host_addr;   //server address
 	sockaddr_in client_addr; //client address
-
-	sockid = newUDPSocket();  //TCP/IP-UPD
-	if (sockid == -1)
-	{
-		return -1;
-	}
-
-	int ret = bindSocket(sockid, "127.0.0.1", SERV_PORT); //bind server
-	if (ret == -1)
-	{
-		return -2;
-	}
 
 	char* data;
 	uint32_t dataSize;
-	recvMsg(sockid, &client_addr, &data, &dataSize);
+	recvMsg(sockfd, &client_addr, &data, &dataSize);
 
 	request->set(data, dataSize);
 	request->setAddr(client_addr);
 	
 	delete[] data;
-	close(sockid);   //close
 	return 0;
 }
 
-/*
- * use per request to send response
- * return  0 if success
- * return -1 if socket init error
- */
-int Network::sendRespons(const Request& request, Response & response)
+
+int Network::sendRespons(const Request* request, const Response* response)
 {
-	int sockfd;						//socket ID   
+	int sockfdtoClient;						//socket ID   
+	sockfdtoClient = newUDPSocket();
 
-	sockfd = newUDPSocket();
-	if (sockfd == -1)
-	{
-		return -1;
-	}
+	sockaddr_in client_addr = request->getAddr();
 
-	sockaddr_in client_addr = request.getAddr();
+	sendMsg(sockfdtoClient, &client_addr, response->getData(), response->getSize());
 
-	uint32_t dataSize = response.getSize();
-	sendto(sockfd, &dataSize, sizeof(dataSize), 0, (sockaddr *)&client_addr, sizeof(client_addr));
-	sendto(sockfd, response.getData(), response.getSize(), 0, (sockaddr *)&client_addr, sizeof(client_addr));
-
-	close(sockfd);
+	close(sockfdtoClient);
 	return 0;
 }
 
-/*
- * use request sock to recv server response
- * return  0 if success
- */
-int Network::recvRespons(int sockid, Response * response)
+int Network::recvRespons(Response * response)
 {
 	char* data;
 	uint32_t dataSize;
-	recvMsg(sockid, 0, &data, &dataSize);
+	recvMsg(sockfd, 0, &data, &dataSize);
 
 	response->set(data, dataSize);
-	
+
 	delete[] data;
-	close(sockid);
 	return 0;
 }
 
@@ -130,16 +93,29 @@ sockaddr_in Network::newAddr(char * ip, int port)
 
 int Network::bindSocket(int sid, char * ip, int port)
 {
-	sockaddr_in host_addr;				//address
+	sockaddr_in host_addr;						//address
 	memset(&host_addr, 0, sizeof(host_addr));
 	host_addr.sin_family = AF_INET;             //TCP/IP
-	host_addr.sin_port = htons(SERV_PORT);      //set port
-	//host_addr.sin_addr.s_addr = INADDR_ANY;     //server IP
-	inet_aton(ip, (in_addr *)&host_addr.sin_addr.s_addr);
-	return bind(sid, (struct sockaddr *)&host_addr, sizeof host_addr); //bind server
+	host_addr.sin_port = htons(port);			//set port
+	if (ip)
+	{
+		inet_aton(ip, (in_addr *)&host_addr.sin_addr.s_addr);
+	}
+	else
+	{
+		host_addr.sin_addr.s_addr = INADDR_ANY;     //server IP
+	}
+	return bind(sid, (sockaddr *)&host_addr, sizeof(host_addr)); //bind server
 }
 
-int Network::recvMsg(int sid, sockaddr_in * from, char ** pdata, uint32_t * size)
+int Network::sendMsg(int sid, sockaddr_in * to, const char * data, const uint32_t dataSize)
+{
+	sendto(sid, &dataSize, sizeof(uint32_t), 0, (sockaddr *)to, sizeof(sockaddr));
+	sendto(sid, data, dataSize, 0, (sockaddr *)to, sizeof(sockaddr));
+	return 0;
+}
+
+int Network::recvMsg(int sid, sockaddr_in * from, char ** pdata, uint32_t * psize)
 {
 	socklen_t len = from ? sizeof(*from) : 0;
 
@@ -151,11 +127,8 @@ int Network::recvMsg(int sid, sockaddr_in * from, char ** pdata, uint32_t * size
 	memset(databuf, 0, dataSize);
 	recvfrom(sid, databuf, dataSize, 0, (struct sockaddr *)from, &len);
 
-	if (pdata)
-	{
-		*pdata = databuf;
-		*size = dataSize;
-	}
+	*pdata = databuf;
+	*psize = dataSize;
 
 	return 0;
 }
