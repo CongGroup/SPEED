@@ -10,7 +10,7 @@ public:
 	//Init Network tools
 	//If ServerIP == null the tools will use in server side.
 	//The port is always need.
-	Network(char* ServerIP, int port);
+	Network(char* ServerIP, int port, bool useTCP = false);
 	~Network();
 
 	/*
@@ -39,10 +39,18 @@ protected:
 	sockaddr_in newAddr(char * ip, int port);
 	int bindSocket(int sid, char* ip, int port);
 	int sendMsg(int sid, sockaddr_in * to, const char * data, const uint32_t dataSize);
-	int recvMsg(int sid, sockaddr_in* from, char** data, uint32_t* dataSize);
+	int recvMsg(int sid, sockaddr_in * from, char ** pdata, uint32_t * psize);
+
+public:
+	int newTCPSocket();
+	int accept(int sid, sockaddr_in * from);
+	int sendMsg(int sid, const char * data, const uint32_t dataSize);
+	int recvMsg(int sid, char** data, uint32_t* dataSize);
 
 protected:
 	int sockfd;						//socket ID
 	sockaddr_in serv_addr;			//server addr
+
+	bool isTCP;
 };
 

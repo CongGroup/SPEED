@@ -8,7 +8,7 @@
 int main(int argc, char *argv[])
 {
 	//init network
-	Network net(0,SERV_PORT);
+	Network net(0, SERV_PORT);
 
 	//init data
 	char* str = "Hello client.";

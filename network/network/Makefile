@@ -1,7 +1,7 @@
 CC=g++
 BIN=server client
 #TestAll
-FLAGS=-Wall -g -fpermissive -std=c++0x -O3
+FLAGS=-Wall -g -fpermissive -std=c++0x
 RM=-rm -f
 SRC=$(wildcard *.cpp)
 OBJ=$(SRC:.cpp=.o)

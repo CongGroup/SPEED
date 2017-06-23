@@ -41,6 +41,11 @@ sockaddr_in Request::getAddr() const
 	return fromAddr;
 }
 
+int Request::getClientfd() const
+{
+	return clientfd;
+}
+
 void Request::set(char * data, uint32_t size)
 {
 	if (this->data)
@@ -57,4 +62,9 @@ void Request::set(char * data, uint32_t size)
 void Request::setAddr(const sockaddr_in& from)
 {
 	fromAddr = from;
+}
+
+void Request::setClientfd(int clientfd)
+{
+	this->clientfd = clientfd;
 }
