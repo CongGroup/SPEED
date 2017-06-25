@@ -48,7 +48,7 @@ else
 	Urts_Library_Name := sgx_urts
 endif
 
-App_Cpp_Files := $(wildcard host/*.cpp)
+App_Cpp_Files := $(wildcard host/*.cpp) $(wildcard ../common/network/*.cpp)
 App_Include_Paths := -Ihost -I$(SGX_SDK)/include
 
 App_C_Flags := $(SGX_COMMON_CFLAGS) -fPIC -Wno-attributes $(App_Include_Paths)

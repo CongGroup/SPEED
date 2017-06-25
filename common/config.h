@@ -9,4 +9,11 @@
 // file buffer for I/O wrapper
 #define FILE_BUFFER_SIZE 1024*1024 // 1M
 
+// network
+#define SERV_IP "192.168.1.5"
+#define SERV_PORT 5678
+
+#define TX_BUFFER_SIZE 1024*1024*10 // 10M
+#define RX_BUFFER_SIZE 1024*1024*10 // 10M
+
 #endif

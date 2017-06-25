@@ -3,12 +3,14 @@
 #include "Enclave_u.h"
 #include "sgx_urts.h"
 
-#include <iostream>
+#include "../../common/network/network.h"
+
+#include <stdio.h>
 
 extern sgx_enclave_id_t global_eid;
 
 void init_server() {
-    // remember to register signal handler
+    // Do whatever initialization
 }
 
 void test_cache() {
@@ -38,16 +40,12 @@ void test_cache() {
 }
 
 void run_server() {
-    /*** test code ***/
-    test_cache();
-    exit(0);
-    /*** End ***/
+    Network responser(0);
+    Request *req;
 
     while (true) {
-        // on receiving request (depend on how we handle networking)
-
-        // parse request
-
+        req = responser.recv_request();
+        
         // make ECALL ...
 
         // prepare response

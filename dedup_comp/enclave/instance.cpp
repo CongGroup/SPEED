@@ -1,6 +1,6 @@
 #include "Enclave_t.h"
 
-#include "dedup_service_t.h"
+#include "dedup_service.h"
 #include "function.h"
 #include "sysutils.h"
 #include "word_count.h"

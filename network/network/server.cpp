@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "Network.h"
+#include "network.h"
 #include "config.h"
 
 

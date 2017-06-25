@@ -7,6 +7,22 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "enclave", "enclave\enclave.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "host", "host\host.vcxproj", "{09283E8F-167A-4C03-A7CB-9002C4667F6B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{D5D34B7E-1FB6-43F3-8B96-FE861317AA12}"
+	ProjectSection(SolutionItems) = preProject
+		..\common\config.h = ..\common\config.h
+		..\common\data_type.h = ..\common\data_type.h
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "network", "network", "{C80951EC-02CE-44AC-BEE0-6720A69E1E48}"
+	ProjectSection(SolutionItems) = preProject
+		..\common\network\network.cpp = ..\common\network\network.cpp
+		..\common\network\network.h = ..\common\network\network.h
+		..\common\network\request.cpp = ..\common\network\request.cpp
+		..\common\network\request.h = ..\common\network\request.h
+		..\common\network\response.cpp = ..\common\network\response.cpp
+		..\common\network\response.h = ..\common\network\response.h
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
@@ -44,5 +60,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C80951EC-02CE-44AC-BEE0-6720A69E1E48} = {D5D34B7E-1FB6-43F3-8B96-FE861317AA12}
 	EndGlobalSection
 EndGlobal

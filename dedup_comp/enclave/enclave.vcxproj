@@ -68,16 +68,24 @@
     <None Include="Enclave.lds" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\common\network\network.cpp" />
+    <ClCompile Include="..\..\common\network\request.cpp" />
+    <ClCompile Include="..\..\common\network\response.cpp" />
     <ClCompile Include="crypto.cpp" />
-    <ClCompile Include="dedup_service_t.cpp" />
+    <ClCompile Include="dedup_service.cpp" />
     <ClCompile Include="Enclave_t.c" />
     <ClCompile Include="instance.cpp" />
     <ClCompile Include="sysutils.cpp" />
     <ClCompile Include="word_count.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\common\config.h" />
+    <ClInclude Include="..\..\common\data_type.h" />
+    <ClInclude Include="..\..\common\network\network.h" />
+    <ClInclude Include="..\..\common\network\request.h" />
+    <ClInclude Include="..\..\common\network\response.h" />
     <ClInclude Include="crypto.h" />
-    <ClInclude Include="dedup_service_t.h" />
+    <ClInclude Include="dedup_service.h" />
     <ClInclude Include="Enclave_t.h" />
     <ClInclude Include="function.h" />
     <ClInclude Include="sysutils.h" />

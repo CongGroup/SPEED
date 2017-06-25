@@ -61,11 +61,10 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
-    <ClCompile Include="dedup_service_u.cpp" />
+    <ClCompile Include="server.cpp" />
     <ClCompile Include="enclave_management.cpp" />
     <ClCompile Include="Enclave_u.c" />
     <ClCompile Include="host.cpp" />
-    <ClCompile Include="server.cpp" />
     <ClCompile Include="sysutils.cpp" />
   </ItemGroup>
   <ItemGroup>

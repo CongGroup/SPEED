@@ -20,7 +20,7 @@ public:
 
     uint8_t *output();
 
-    int exp_output_size();
+    int expt_output_size();
 
     void process();
 
@@ -31,7 +31,7 @@ private:
     std::string     m_content;
     uint8_t         m_tag[TAG_SIZE];
     
-    int             m_exp_size; // TODO
+    int             m_expt_output_size; // TODO
     std::string     m_output;
 };
 

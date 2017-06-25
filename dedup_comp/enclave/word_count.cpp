@@ -47,9 +47,9 @@ uint8_t * WordCount::output()
     return RAW(m_output.data());
 }
 
-int WordCount::exp_output_size()
+int WordCount::expt_output_size()
 {
-    return m_exp_size;
+    return m_expt_output_size;
 }
 
 void WordCount::process()
