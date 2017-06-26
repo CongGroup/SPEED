@@ -18,18 +18,18 @@
 
 
 typedef struct ms_ecall_cache_get_t {
-	int ms_retval;
-	char* ms_tag;
-	char* ms_rlt;
-	int ms_rlt_size;
-	char* ms_r;
+	uint8_t* ms_tag;
+	uint8_t* ms_meta;
+	uint8_t* ms_rlt;
+	int ms_expt_size;
+	int* ms_true_size;
 } ms_ecall_cache_get_t;
 
 typedef struct ms_ecall_cache_put_t {
-	char* ms_tag;
-	char* ms_rlt;
+	uint8_t* ms_tag;
+	uint8_t* ms_meta;
+	uint8_t* ms_rlt;
 	int ms_rlt_size;
-	char* ms_r;
 } ms_ecall_cache_put_t;
 
 typedef struct ms_ocall_print_string_t {
@@ -40,57 +40,73 @@ static sgx_status_t SGX_CDECL sgx_ecall_cache_get(void* pms)
 {
 	ms_ecall_cache_get_t* ms = SGX_CAST(ms_ecall_cache_get_t*, pms);
 	sgx_status_t status = SGX_SUCCESS;
-	char* _tmp_tag = ms->ms_tag;
-	size_t _len_tag = 256;
-	char* _in_tag = NULL;
-	char* _tmp_rlt = ms->ms_rlt;
-	int _tmp_rlt_size = ms->ms_rlt_size;
-	size_t _len_rlt = _tmp_rlt_size;
-	char* _in_rlt = NULL;
-	char* _tmp_r = ms->ms_r;
-	size_t _len_r = 256;
-	char* _in_r = NULL;
+	uint8_t* _tmp_tag = ms->ms_tag;
+	size_t _len_tag = 32;
+	uint8_t* _in_tag = NULL;
+	uint8_t* _tmp_meta = ms->ms_meta;
+	size_t _len_meta = 48;
+	uint8_t* _in_meta = NULL;
+	uint8_t* _tmp_rlt = ms->ms_rlt;
+	int _tmp_expt_size = ms->ms_expt_size;
+	size_t _len_rlt = _tmp_expt_size;
+	uint8_t* _in_rlt = NULL;
+	int* _tmp_true_size = ms->ms_true_size;
+	size_t _len_true_size = 4;
+	int* _in_true_size = NULL;
 
 	CHECK_REF_POINTER(pms, sizeof(ms_ecall_cache_get_t));
 	CHECK_UNIQUE_POINTER(_tmp_tag, _len_tag);
+	CHECK_UNIQUE_POINTER(_tmp_meta, _len_meta);
 	CHECK_UNIQUE_POINTER(_tmp_rlt, _len_rlt);
-	CHECK_UNIQUE_POINTER(_tmp_r, _len_r);
+	CHECK_UNIQUE_POINTER(_tmp_true_size, _len_true_size);
 
 	if (_tmp_tag != NULL) {
-		_in_tag = (char*)malloc(_len_tag);
+		_in_tag = (uint8_t*)malloc(_len_tag);
 		if (_in_tag == NULL) {
 			status = SGX_ERROR_OUT_OF_MEMORY;
 			goto err;
 		}
 
-		memcpy(_in_tag, _tmp_tag, _len_tag);
+		memcpy((void*)_in_tag, _tmp_tag, _len_tag);
+	}
+	if (_tmp_meta != NULL) {
+		if ((_in_meta = (uint8_t*)malloc(_len_meta)) == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		memset((void*)_in_meta, 0, _len_meta);
 	}
 	if (_tmp_rlt != NULL) {
-		if ((_in_rlt = (char*)malloc(_len_rlt)) == NULL) {
+		if ((_in_rlt = (uint8_t*)malloc(_len_rlt)) == NULL) {
 			status = SGX_ERROR_OUT_OF_MEMORY;
 			goto err;
 		}
 
 		memset((void*)_in_rlt, 0, _len_rlt);
 	}
-	if (_tmp_r != NULL) {
-		if ((_in_r = (char*)malloc(_len_r)) == NULL) {
+	if (_tmp_true_size != NULL) {
+		if ((_in_true_size = (int*)malloc(_len_true_size)) == NULL) {
 			status = SGX_ERROR_OUT_OF_MEMORY;
 			goto err;
 		}
 
-		memset((void*)_in_r, 0, _len_r);
+		memset((void*)_in_true_size, 0, _len_true_size);
 	}
-	ms->ms_retval = ecall_cache_get(_in_tag, _in_rlt, _tmp_rlt_size, _in_r);
+	ecall_cache_get((const uint8_t*)_in_tag, _in_meta, _in_rlt, _tmp_expt_size, _in_true_size);
 err:
-	if (_in_tag) free(_in_tag);
+	if (_in_tag) free((void*)_in_tag);
+	if (_in_meta) {
+		memcpy(_tmp_meta, _in_meta, _len_meta);
+		free(_in_meta);
+	}
 	if (_in_rlt) {
 		memcpy(_tmp_rlt, _in_rlt, _len_rlt);
 		free(_in_rlt);
 	}
-	if (_in_r) {
-		memcpy(_tmp_r, _in_r, _len_r);
-		free(_in_r);
+	if (_in_true_size) {
+		memcpy(_tmp_true_size, _in_true_size, _len_true_size);
+		free(_in_true_size);
 	}
 
 	return status;
@@ -100,54 +116,54 @@ static sgx_status_t SGX_CDECL sgx_ecall_cache_put(void* pms)
 {
 	ms_ecall_cache_put_t* ms = SGX_CAST(ms_ecall_cache_put_t*, pms);
 	sgx_status_t status = SGX_SUCCESS;
-	char* _tmp_tag = ms->ms_tag;
-	size_t _len_tag = 256;
-	char* _in_tag = NULL;
-	char* _tmp_rlt = ms->ms_rlt;
+	uint8_t* _tmp_tag = ms->ms_tag;
+	size_t _len_tag = 32;
+	uint8_t* _in_tag = NULL;
+	uint8_t* _tmp_meta = ms->ms_meta;
+	size_t _len_meta = 48;
+	uint8_t* _in_meta = NULL;
+	uint8_t* _tmp_rlt = ms->ms_rlt;
 	int _tmp_rlt_size = ms->ms_rlt_size;
 	size_t _len_rlt = _tmp_rlt_size;
-	char* _in_rlt = NULL;
-	char* _tmp_r = ms->ms_r;
-	size_t _len_r = 256;
-	char* _in_r = NULL;
+	uint8_t* _in_rlt = NULL;
 
 	CHECK_REF_POINTER(pms, sizeof(ms_ecall_cache_put_t));
 	CHECK_UNIQUE_POINTER(_tmp_tag, _len_tag);
+	CHECK_UNIQUE_POINTER(_tmp_meta, _len_meta);
 	CHECK_UNIQUE_POINTER(_tmp_rlt, _len_rlt);
-	CHECK_UNIQUE_POINTER(_tmp_r, _len_r);
 
 	if (_tmp_tag != NULL) {
-		_in_tag = (char*)malloc(_len_tag);
+		_in_tag = (uint8_t*)malloc(_len_tag);
 		if (_in_tag == NULL) {
 			status = SGX_ERROR_OUT_OF_MEMORY;
 			goto err;
 		}
 
-		memcpy(_in_tag, _tmp_tag, _len_tag);
+		memcpy((void*)_in_tag, _tmp_tag, _len_tag);
+	}
+	if (_tmp_meta != NULL) {
+		_in_meta = (uint8_t*)malloc(_len_meta);
+		if (_in_meta == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		memcpy((void*)_in_meta, _tmp_meta, _len_meta);
 	}
 	if (_tmp_rlt != NULL) {
-		_in_rlt = (char*)malloc(_len_rlt);
+		_in_rlt = (uint8_t*)malloc(_len_rlt);
 		if (_in_rlt == NULL) {
 			status = SGX_ERROR_OUT_OF_MEMORY;
 			goto err;
 		}
 
-		memcpy(_in_rlt, _tmp_rlt, _len_rlt);
+		memcpy((void*)_in_rlt, _tmp_rlt, _len_rlt);
 	}
-	if (_tmp_r != NULL) {
-		_in_r = (char*)malloc(_len_r);
-		if (_in_r == NULL) {
-			status = SGX_ERROR_OUT_OF_MEMORY;
-			goto err;
-		}
-
-		memcpy(_in_r, _tmp_r, _len_r);
-	}
-	ecall_cache_put(_in_tag, _in_rlt, _tmp_rlt_size, _in_r);
+	ecall_cache_put((const uint8_t*)_in_tag, (const uint8_t*)_in_meta, (const uint8_t*)_in_rlt, _tmp_rlt_size);
 err:
-	if (_in_tag) free(_in_tag);
-	if (_in_rlt) free(_in_rlt);
-	if (_in_r) free(_in_r);
+	if (_in_tag) free((void*)_in_tag);
+	if (_in_meta) free((void*)_in_meta);
+	if (_in_rlt) free((void*)_in_rlt);
 
 	return status;
 }

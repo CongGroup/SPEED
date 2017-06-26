@@ -21,10 +21,10 @@ WordCount::WordCount(int id, const char *textfile, int filesize)
 {
     hash(RAW((m_name + m_content).data()), m_content.size(), m_tag);
 
-    m_exp_size = m_content.size();
+    m_expt_output_size = m_content.size();
 
     // secure a reservation for making get request
-    m_output.reserve(m_exp_size);
+    m_output.reserve(m_expt_output_size);
 }
 
 const char * WordCount::get_name()
@@ -86,5 +86,5 @@ void WordCount::process()
     }
 
     //if (m_output.size() > m_exp_size)
-        m_exp_size = m_output.size();
+    m_expt_output_size = m_output.size();
 }

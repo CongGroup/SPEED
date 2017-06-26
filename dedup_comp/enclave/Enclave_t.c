@@ -36,17 +36,17 @@ typedef struct ms_ocall_get_time_t {
 
 typedef struct ms_ocall_request_find_t {
 	uint8_t* ms_tag;
-	int* ms_resp_size;
-	uint8_t* ms_rlt;
-	int ms_exp_size;
 	uint8_t* ms_meta;
+	uint8_t* ms_rlt;
+	int ms_expt_size;
+	int* ms_true_size;
 } ms_ocall_request_find_t;
 
 typedef struct ms_ocall_request_put_t {
 	uint8_t* ms_tag;
+	uint8_t* ms_meta;
 	uint8_t* ms_rlt;
 	int ms_rlt_size;
-	uint8_t* ms_meta;
 } ms_ocall_request_put_t;
 
 static sgx_status_t SGX_CDECL sgx_ecall_entrance(void* pms)
@@ -237,22 +237,22 @@ sgx_status_t SGX_CDECL ocall_get_time(long int* second, long int* nanosecond)
 	return status;
 }
 
-sgx_status_t SGX_CDECL ocall_request_find(const uint8_t* tag, int* resp_size, uint8_t* rlt, int exp_size, uint8_t* meta)
+sgx_status_t SGX_CDECL ocall_request_find(const uint8_t* tag, uint8_t* meta, uint8_t* rlt, int expt_size, int* true_size)
 {
 	sgx_status_t status = SGX_SUCCESS;
 	size_t _len_tag = 32;
-	size_t _len_resp_size = 4;
-	size_t _len_rlt = exp_size;
 	size_t _len_meta = 48;
+	size_t _len_rlt = expt_size;
+	size_t _len_true_size = 4;
 
 	ms_ocall_request_find_t* ms = NULL;
 	size_t ocalloc_size = sizeof(ms_ocall_request_find_t);
 	void *__tmp = NULL;
 
 	ocalloc_size += (tag != NULL && sgx_is_within_enclave(tag, _len_tag)) ? _len_tag : 0;
-	ocalloc_size += (resp_size != NULL && sgx_is_within_enclave(resp_size, _len_resp_size)) ? _len_resp_size : 0;
-	ocalloc_size += (rlt != NULL && sgx_is_within_enclave(rlt, _len_rlt)) ? _len_rlt : 0;
 	ocalloc_size += (meta != NULL && sgx_is_within_enclave(meta, _len_meta)) ? _len_meta : 0;
+	ocalloc_size += (rlt != NULL && sgx_is_within_enclave(rlt, _len_rlt)) ? _len_rlt : 0;
+	ocalloc_size += (true_size != NULL && sgx_is_within_enclave(true_size, _len_true_size)) ? _len_true_size : 0;
 
 	__tmp = sgx_ocalloc(ocalloc_size);
 	if (__tmp == NULL) {
@@ -273,12 +273,12 @@ sgx_status_t SGX_CDECL ocall_request_find(const uint8_t* tag, int* resp_size, ui
 		return SGX_ERROR_INVALID_PARAMETER;
 	}
 	
-	if (resp_size != NULL && sgx_is_within_enclave(resp_size, _len_resp_size)) {
-		ms->ms_resp_size = (int*)__tmp;
-		__tmp = (void *)((size_t)__tmp + _len_resp_size);
-		memset(ms->ms_resp_size, 0, _len_resp_size);
-	} else if (resp_size == NULL) {
-		ms->ms_resp_size = NULL;
+	if (meta != NULL && sgx_is_within_enclave(meta, _len_meta)) {
+		ms->ms_meta = (uint8_t*)__tmp;
+		__tmp = (void *)((size_t)__tmp + _len_meta);
+		memset(ms->ms_meta, 0, _len_meta);
+	} else if (meta == NULL) {
+		ms->ms_meta = NULL;
 	} else {
 		sgx_ocfree();
 		return SGX_ERROR_INVALID_PARAMETER;
@@ -295,13 +295,13 @@ sgx_status_t SGX_CDECL ocall_request_find(const uint8_t* tag, int* resp_size, ui
 		return SGX_ERROR_INVALID_PARAMETER;
 	}
 	
-	ms->ms_exp_size = exp_size;
-	if (meta != NULL && sgx_is_within_enclave(meta, _len_meta)) {
-		ms->ms_meta = (uint8_t*)__tmp;
-		__tmp = (void *)((size_t)__tmp + _len_meta);
-		memset(ms->ms_meta, 0, _len_meta);
-	} else if (meta == NULL) {
-		ms->ms_meta = NULL;
+	ms->ms_expt_size = expt_size;
+	if (true_size != NULL && sgx_is_within_enclave(true_size, _len_true_size)) {
+		ms->ms_true_size = (int*)__tmp;
+		__tmp = (void *)((size_t)__tmp + _len_true_size);
+		memset(ms->ms_true_size, 0, _len_true_size);
+	} else if (true_size == NULL) {
+		ms->ms_true_size = NULL;
 	} else {
 		sgx_ocfree();
 		return SGX_ERROR_INVALID_PARAMETER;
@@ -309,28 +309,28 @@ sgx_status_t SGX_CDECL ocall_request_find(const uint8_t* tag, int* resp_size, ui
 	
 	status = sgx_ocall(3, ms);
 
-	if (resp_size) memcpy((void*)resp_size, ms->ms_resp_size, _len_resp_size);
-	if (rlt) memcpy((void*)rlt, ms->ms_rlt, _len_rlt);
 	if (meta) memcpy((void*)meta, ms->ms_meta, _len_meta);
+	if (rlt) memcpy((void*)rlt, ms->ms_rlt, _len_rlt);
+	if (true_size) memcpy((void*)true_size, ms->ms_true_size, _len_true_size);
 
 	sgx_ocfree();
 	return status;
 }
 
-sgx_status_t SGX_CDECL ocall_request_put(const uint8_t* tag, const uint8_t* rlt, int rlt_size, const uint8_t* meta)
+sgx_status_t SGX_CDECL ocall_request_put(const uint8_t* tag, const uint8_t* meta, const uint8_t* rlt, int rlt_size)
 {
 	sgx_status_t status = SGX_SUCCESS;
 	size_t _len_tag = 32;
-	size_t _len_rlt = rlt_size;
 	size_t _len_meta = 48;
+	size_t _len_rlt = rlt_size;
 
 	ms_ocall_request_put_t* ms = NULL;
 	size_t ocalloc_size = sizeof(ms_ocall_request_put_t);
 	void *__tmp = NULL;
 
 	ocalloc_size += (tag != NULL && sgx_is_within_enclave(tag, _len_tag)) ? _len_tag : 0;
-	ocalloc_size += (rlt != NULL && sgx_is_within_enclave(rlt, _len_rlt)) ? _len_rlt : 0;
 	ocalloc_size += (meta != NULL && sgx_is_within_enclave(meta, _len_meta)) ? _len_meta : 0;
+	ocalloc_size += (rlt != NULL && sgx_is_within_enclave(rlt, _len_rlt)) ? _len_rlt : 0;
 
 	__tmp = sgx_ocalloc(ocalloc_size);
 	if (__tmp == NULL) {
@@ -351,6 +351,17 @@ sgx_status_t SGX_CDECL ocall_request_put(const uint8_t* tag, const uint8_t* rlt,
 		return SGX_ERROR_INVALID_PARAMETER;
 	}
 	
+	if (meta != NULL && sgx_is_within_enclave(meta, _len_meta)) {
+		ms->ms_meta = (uint8_t*)__tmp;
+		__tmp = (void *)((size_t)__tmp + _len_meta);
+		memcpy((void*)ms->ms_meta, meta, _len_meta);
+	} else if (meta == NULL) {
+		ms->ms_meta = NULL;
+	} else {
+		sgx_ocfree();
+		return SGX_ERROR_INVALID_PARAMETER;
+	}
+	
 	if (rlt != NULL && sgx_is_within_enclave(rlt, _len_rlt)) {
 		ms->ms_rlt = (uint8_t*)__tmp;
 		__tmp = (void *)((size_t)__tmp + _len_rlt);
@@ -363,17 +374,6 @@ sgx_status_t SGX_CDECL ocall_request_put(const uint8_t* tag, const uint8_t* rlt,
 	}
 	
 	ms->ms_rlt_size = rlt_size;
-	if (meta != NULL && sgx_is_within_enclave(meta, _len_meta)) {
-		ms->ms_meta = (uint8_t*)__tmp;
-		__tmp = (void *)((size_t)__tmp + _len_meta);
-		memcpy((void*)ms->ms_meta, meta, _len_meta);
-	} else if (meta == NULL) {
-		ms->ms_meta = NULL;
-	} else {
-		sgx_ocfree();
-		return SGX_ERROR_INVALID_PARAMETER;
-	}
-	
 	status = sgx_ocall(4, ms);
 
 

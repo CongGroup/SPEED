@@ -19,9 +19,9 @@ void dedup(Function *func)
 
     ocall_request_find(
         func->get_tag(),
+        RAW(&meta),
         func->output(), func->expt_output_size(),
-        &true_size,
-        RAW(&meta));
+        &true_size);
 
     // hit
     if (true_size > 0) {
@@ -49,8 +49,8 @@ void dedup(Function *func)
 
         ocall_request_put(
             func->get_tag(),
-            func->output(), func->expt_output_size(),
-            RAW(&meta));
+            RAW(&meta),
+            func->output(), func->expt_output_size());
         
         eprintf("    The computation result is cached!\n");
     }

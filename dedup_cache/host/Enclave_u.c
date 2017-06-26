@@ -2,18 +2,18 @@
 #include <errno.h>
 
 typedef struct ms_ecall_cache_get_t {
-	int ms_retval;
-	char* ms_tag;
-	char* ms_rlt;
-	int ms_rlt_size;
-	char* ms_r;
+	uint8_t* ms_tag;
+	uint8_t* ms_meta;
+	uint8_t* ms_rlt;
+	int ms_expt_size;
+	int* ms_true_size;
 } ms_ecall_cache_get_t;
 
 typedef struct ms_ecall_cache_put_t {
-	char* ms_tag;
-	char* ms_rlt;
+	uint8_t* ms_tag;
+	uint8_t* ms_meta;
+	uint8_t* ms_rlt;
 	int ms_rlt_size;
-	char* ms_r;
 } ms_ecall_cache_put_t;
 
 typedef struct ms_ocall_print_string_t {
@@ -37,27 +37,27 @@ static const struct {
 		(void*)Enclave_ocall_print_string,
 	}
 };
-sgx_status_t ecall_cache_get(sgx_enclave_id_t eid, int* retval, char* tag, char* rlt, int rlt_size, char* r)
+sgx_status_t ecall_cache_get(sgx_enclave_id_t eid, const uint8_t* tag, uint8_t* meta, uint8_t* rlt, int expt_size, int* true_size)
 {
 	sgx_status_t status;
 	ms_ecall_cache_get_t ms;
-	ms.ms_tag = tag;
+	ms.ms_tag = (uint8_t*)tag;
+	ms.ms_meta = meta;
 	ms.ms_rlt = rlt;
-	ms.ms_rlt_size = rlt_size;
-	ms.ms_r = r;
+	ms.ms_expt_size = expt_size;
+	ms.ms_true_size = true_size;
 	status = sgx_ecall(eid, 0, &ocall_table_Enclave, &ms);
-	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }
 
-sgx_status_t ecall_cache_put(sgx_enclave_id_t eid, char* tag, char* rlt, int rlt_size, char* r)
+sgx_status_t ecall_cache_put(sgx_enclave_id_t eid, const uint8_t* tag, const uint8_t* meta, const uint8_t* rlt, int rlt_size)
 {
 	sgx_status_t status;
 	ms_ecall_cache_put_t ms;
-	ms.ms_tag = tag;
-	ms.ms_rlt = rlt;
+	ms.ms_tag = (uint8_t*)tag;
+	ms.ms_meta = (uint8_t*)meta;
+	ms.ms_rlt = (uint8_t*)rlt;
 	ms.ms_rlt_size = rlt_size;
-	ms.ms_r = r;
 	status = sgx_ecall(eid, 1, &ocall_table_Enclave, &ms);
 	return status;
 }

@@ -20,17 +20,17 @@ typedef struct ms_ocall_get_time_t {
 
 typedef struct ms_ocall_request_find_t {
 	uint8_t* ms_tag;
-	int* ms_resp_size;
-	uint8_t* ms_rlt;
-	int ms_exp_size;
 	uint8_t* ms_meta;
+	uint8_t* ms_rlt;
+	int ms_expt_size;
+	int* ms_true_size;
 } ms_ocall_request_find_t;
 
 typedef struct ms_ocall_request_put_t {
 	uint8_t* ms_tag;
+	uint8_t* ms_meta;
 	uint8_t* ms_rlt;
 	int ms_rlt_size;
-	uint8_t* ms_meta;
 } ms_ocall_request_put_t;
 
 static sgx_status_t SGX_CDECL Enclave_ocall_print_string(void* pms)
@@ -60,7 +60,7 @@ static sgx_status_t SGX_CDECL Enclave_ocall_get_time(void* pms)
 static sgx_status_t SGX_CDECL Enclave_ocall_request_find(void* pms)
 {
 	ms_ocall_request_find_t* ms = SGX_CAST(ms_ocall_request_find_t*, pms);
-	ocall_request_find((const uint8_t*)ms->ms_tag, ms->ms_resp_size, ms->ms_rlt, ms->ms_exp_size, ms->ms_meta);
+	ocall_request_find((const uint8_t*)ms->ms_tag, ms->ms_meta, ms->ms_rlt, ms->ms_expt_size, ms->ms_true_size);
 
 	return SGX_SUCCESS;
 }
@@ -68,7 +68,7 @@ static sgx_status_t SGX_CDECL Enclave_ocall_request_find(void* pms)
 static sgx_status_t SGX_CDECL Enclave_ocall_request_put(void* pms)
 {
 	ms_ocall_request_put_t* ms = SGX_CAST(ms_ocall_request_put_t*, pms);
-	ocall_request_put((const uint8_t*)ms->ms_tag, (const uint8_t*)ms->ms_rlt, ms->ms_rlt_size, (const uint8_t*)ms->ms_meta);
+	ocall_request_put((const uint8_t*)ms->ms_tag, (const uint8_t*)ms->ms_meta, (const uint8_t*)ms->ms_rlt, ms->ms_rlt_size);
 
 	return SGX_SUCCESS;
 }

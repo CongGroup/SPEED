@@ -19,8 +19,8 @@ extern "C" {
 void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_print_string, (const char* str));
 void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_load_text_file, (const char* filename, char* buffer, int buffer_size, int* filesize));
 void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_get_time, (long int* second, long int* nanosecond));
-void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_request_find, (const uint8_t* tag, int* resp_size, uint8_t* rlt, int exp_size, uint8_t* meta));
-void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_request_put, (const uint8_t* tag, const uint8_t* rlt, int rlt_size, const uint8_t* meta));
+void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_request_find, (const uint8_t* tag, uint8_t* meta, uint8_t* rlt, int expt_size, int* true_size));
+void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_request_put, (const uint8_t* tag, const uint8_t* meta, const uint8_t* rlt, int rlt_size));
 
 sgx_status_t ecall_entrance(sgx_enclave_id_t eid);
 

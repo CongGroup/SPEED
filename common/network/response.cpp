@@ -2,9 +2,9 @@
 
 #include "../data_type.h"
 
-Response::Response(const uint8_t * data, int raw_size)
+Response::Response(const uint8_t * data, int size)
     : m_data (data),
-      m_size (raw_size)
+      m_size (size)
 {
 }
 

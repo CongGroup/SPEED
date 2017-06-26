@@ -61,7 +61,7 @@ Request *Network::recv_request()
         return req;
     }
     else {
-        return nullptr;
+        return NULL;
     }
 }
 
@@ -79,7 +79,7 @@ Response * Network::recv_response()
         return resp;
     }
     else {
-        return nullptr;
+        return NULL;
     }
 }
 
@@ -90,7 +90,7 @@ void Network::set_send_buffer(const uint8_t * data, int size, int pos)
     }
 }
 
-const uint8_t *Network::get_send_buffer() const
+uint8_t *Network::get_send_buffer()
 {
     return m_send_buffer;
 }

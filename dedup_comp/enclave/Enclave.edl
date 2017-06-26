@@ -17,7 +17,7 @@ enclave {
 		// dedup api
 		void ocall_request_find([in, size=32] const uint8_t *tag,
 								[out, size=48] uint8_t *meta,
-								[out, size=exp_size] uint8_t *rlt, int expt_size,
+								[out, size=expt_size] uint8_t *rlt, int expt_size,
 								[out, size=4] int *true_size);
 		
 		void ocall_request_put([in, size=32] const uint8_t *tag,

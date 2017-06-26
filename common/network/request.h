@@ -3,29 +3,40 @@
 
 #include "../config.h"
 
-#include <stdint.h>
-#include <netinet/in.h>
-
 // Find request
 // This class is for parsing purpose, holding no actual data
 class Request
 {
 public:
-	Request(const uint8_t* data, int size);
+    static const uint8_t Get;
+    static const uint8_t Put;
 
-	const uint8_t* get_data() const;
-	int get_size() const;
+public:
+    Request(const uint8_t* data, int size);
+
+    // raw data
+    const uint8_t* get_data() const;
+    int get_size() const;
+
+    // for both types
+    uint8_t get_type() const;
+    const uint8_t *get_tag() const;
+
+    // for Get request
+    int get_expt_rlt_size() const;
+
+    // for Put request
+    const uint8_t *get_meta() const;
+    const uint8_t *get_rlt() const;
+    int get_rlt_size() const;
 
 private:
     const uint8_t* m_data;
 	int            m_size;
-};
-
-class PutRequest : public Request
-{
-public:
-    PutRequest(const uint8_t* data, int size) 
-        : Request(data, size) {}
+    // Get
+    int            m_expt_rlt_size;
+    // Put
+    int            m_rlt_size;
 };
 
 #endif

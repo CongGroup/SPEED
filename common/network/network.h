@@ -1,8 +1,10 @@
 #ifndef NETWOKR_H
 #define NETWOKR_H
 
-#include "Request.h"
-#include "Response.h"
+#include "request.h"
+#include "response.h"
+
+#include <netinet/ip.h>
 
 // Currently we underlay our service with TCP
 // Interfacize this if other protocols are considered in the future
@@ -43,7 +45,7 @@ public:
      * buffer accesser
      */
     void set_send_buffer(const uint8_t *data, int size, int pos);
-    const uint8_t* get_send_buffer() const;
+    uint8_t* get_send_buffer();
 
 private:
 	sockaddr_in new_addr(char * ip);

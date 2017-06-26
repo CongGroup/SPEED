@@ -1,49 +1,58 @@
-#include <cstring>
-#include <string>
-//#include <unordered_map>
-#include <utility>
-#include <map>
-
 #include "Enclave_t.h"
+#include "sgx_trts.h"
 
-#define TAG_SIZE 256
-#define RAND_SIZE 256
+#include "../../common/data_type.h"
 
-std::map<int, int> dd;
+#include <cstring>
+#include <map>
+#include <vector>
+#include <utility> // pair
 
-typedef std::string binary;
+typedef std::vector<uint8_t> binary;
 typedef std::pair<binary, binary> entry_t;
 // TODO: replace with unordered_map
 typedef std::map<binary, entry_t> cache_t;
 
 cache_t cache;
 
-int ecall_cache_get(char *tag,
-                    char *rlt, int rlt_size,
-                    char *r) 
+void ecall_cache_get(const uint8_t *tag,
+                     uint8_t *meta,
+                     uint8_t *rlt, int expt_size,
+                     int *true_size)
 {
-    cache_t::const_iterator it= cache.find(binary(tag, TAG_SIZE));
+    binary key(TAG_SIZE, 0);
+    memcpy(&key[0], tag, TAG_SIZE);
+
+    cache_t::const_iterator it = cache.find(key);
     // cache miss
     if (it == cache.end()) {
-        return 0;
+        *true_size = 0;
     }
     // cache hit
     else {
         const entry_t &entry = it->second;
 
-        // copy computation result, rlt_size >= entry.first.size()
-        memcpy(rlt, entry.first.data(), entry.first.size());
-        // copy randomness
-        memcpy(r, entry.second.data(), RAND_SIZE);
+        // copy meta data
+        memcpy(meta, &entry.first[0], entry.first.size());
 
-        return 1;
+        // copy computation result
+        *true_size = entry.second.size();
+        memcpy(rlt, &entry.second[0], (*true_size > expt_size) ? expt_size : *true_size);
     }
 }
 
-void ecall_cache_put(char *tag,
-                     char *rlt, int rlt_size,
-                     char *r)
+void ecall_cache_put(const uint8_t *tag,
+                     const uint8_t *meta,
+                     const uint8_t *rlt, int rlt_size)
 {
-    cache[binary((char *)tag, TAG_SIZE)] =
-        entry_t(binary(rlt, rlt_size), binary(r, RAND_SIZE));
+    binary key(TAG_SIZE, 0);
+    memcpy(&key[0], tag, TAG_SIZE);
+
+    binary entry_meta(sizeof(metadata), 0);
+    memcpy(&entry_meta[0], meta, sizeof(metadata));
+
+    binary entry_rlt(rlt_size);
+    memcpy(&entry_rlt[0], rlt, rlt_size);
+
+    cache[key] = entry_t(entry_meta, entry_rlt);
 }

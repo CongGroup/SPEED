@@ -11,7 +11,6 @@ Network requester(SERV_IP);
 
 void init_server() {
     // Do whatever initializaiton
-
 }
 
 void run_server() {
@@ -27,20 +26,31 @@ void ocall_request_find(const uint8_t *tag,
                         uint8_t *rlt, int expt_size,
                         int *true_size)
 {
-    Request req(tag, TAG_SIZE);
+    int req_size = TYPE_SIZE + TAG_SIZE + sizeof(int);
 
-    requester.send_request(&req);
+    if (req_size <= TX_BUFFER_SIZE) {
+        requester.set_send_buffer(&Request::Get, TYPE_SIZE, 0);
+        requester.set_send_buffer(tag, TAG_SIZE, TYPE_SIZE);
+        requester.set_send_buffer((uint8_t *)(&expt_size), sizeof(int), TYPE_SIZE + TAG_SIZE);
 
-    Response* resp = requester.recv_response();
+        Request req(requester.get_send_buffer(), req_size);
 
-    if (resp) {
-        // copy back responsed data
-        memcpy(meta, resp->get_meta(), sizeof(metadata));
-        memcpy(rlt, resp->get_rlt(), resp->get_rlt_size());
-        *true_size = resp->get_rlt_size();
+        requester.send_request(&req);
+
+        Response* resp = requester.recv_response();
+
+        if (resp) {
+            // copy back responsed data
+            memcpy(meta, resp->get_meta(), sizeof(metadata));
+            memcpy(rlt, resp->get_rlt(), resp->get_rlt_size());
+            *true_size = resp->get_rlt_size();
+        }
+        else {
+            *true_size = 0;
+        }
     }
     else {
-        *true_size = 0;
+        printf("[*] The get request is oversized!\n");
     }
 }
 
@@ -51,12 +61,12 @@ void ocall_request_put(const uint8_t *tag,
     int req_size = TAG_SIZE + sizeof(metadata) + rlt_size;
 
     if(req_size <= TX_BUFFER_SIZE) {
-        requester.set_send_buffer(tag, TAG_SIZE, 0);
-        requester.set_send_buffer(meta, sizeof(metadata), TAG_SIZE);
-        requester.set_send_buffer(rlt, rlt_size, TAG_SIZE + sizeof(metadata));
+        requester.set_send_buffer(&Request::Put, TYPE_SIZE, 0);
+        requester.set_send_buffer(tag, TAG_SIZE, TYPE_SIZE);
+        requester.set_send_buffer(meta, sizeof(metadata), TYPE_SIZE + TAG_SIZE);
+        requester.set_send_buffer(rlt, rlt_size, TYPE_SIZE + TAG_SIZE + sizeof(metadata));
 
-        PutRequest req(requester.get_send_buffer(),
-                       req_size);
+        Request req(requester.get_send_buffer(), req_size);
 
         // send out request
         requester.send_request(&req);

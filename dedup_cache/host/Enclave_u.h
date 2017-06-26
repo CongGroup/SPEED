@@ -18,8 +18,8 @@ extern "C" {
 
 void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_print_string, (const char* str));
 
-sgx_status_t ecall_cache_get(sgx_enclave_id_t eid, int* retval, char* tag, char* rlt, int rlt_size, char* r);
-sgx_status_t ecall_cache_put(sgx_enclave_id_t eid, char* tag, char* rlt, int rlt_size, char* r);
+sgx_status_t ecall_cache_get(sgx_enclave_id_t eid, const uint8_t* tag, uint8_t* meta, uint8_t* rlt, int expt_size, int* true_size);
+sgx_status_t ecall_cache_put(sgx_enclave_id_t eid, const uint8_t* tag, const uint8_t* meta, const uint8_t* rlt, int rlt_size);
 
 #ifdef __cplusplus
 }

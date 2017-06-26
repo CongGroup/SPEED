@@ -16,8 +16,8 @@ extern "C" {
 #endif
 
 
-int ecall_cache_get(char* tag, char* rlt, int rlt_size, char* r);
-void ecall_cache_put(char* tag, char* rlt, int rlt_size, char* r);
+void ecall_cache_get(const uint8_t* tag, uint8_t* meta, uint8_t* rlt, int expt_size, int* true_size);
+void ecall_cache_put(const uint8_t* tag, const uint8_t* meta, const uint8_t* rlt, int rlt_size);
 
 sgx_status_t SGX_CDECL ocall_print_string(const char* str);
 
