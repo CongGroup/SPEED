@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "network.h"
 #include "../config.h"
@@ -97,15 +98,16 @@ uint8_t *Network::get_send_buffer()
 
 int Network::send_msg(int sockfd, const uint8_t *data, int data_size)
 {
-	send(sockfd, &data_size, sizeof(int), SEND_FLAG);
-	send(sockfd, data, data_size, SEND_FLAG);
+    int size = data_size;
+	send(sockfd, &size, sizeof(int), SEND_FLAG);
+	send(sockfd, data, size, SEND_FLAG);
 	return 0;
 }
 
 int Network::recv_msg(int sockfd)
 {
-    ssize_t recv_size = 0;
-    recv_size = recv(sockfd, m_recv_buffer, sizeof(ssize_t), RECV_FLAG);
+    int recv_size = 0;
+    recv(sockfd, &recv_size, sizeof(int), RECV_FLAG);
     if (recv_size > 0) {
         recv_size = recv(sockfd, m_recv_buffer, recv_size, RECV_FLAG);
         if (recv_size > 0)

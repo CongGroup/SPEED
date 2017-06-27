@@ -6,14 +6,20 @@
 
 #include <netinet/ip.h>
 
-// Currently we underlay our service with TCP
-// Interfacize this if other protocols are considered in the future
+/*
+ * Currently we underlay our service with TCP.
+ * Interfacize this if other protocols are to be included.
+ * We maintain persistent TCP connection between caching and
+ * computing server for performance.
+ */
 class Network
 {
 public:
-	//Init Network tools
-	//If ServerIP == null the tools will use in server side.
-	//The port is always need.
+	/*
+     * Init Network tools
+	 * If ServerIP == null the tools will use in server side.
+	 * The port is always need.
+     */
 	Network(char* server_ip);
 	~Network();
 
@@ -47,13 +53,13 @@ public:
     void set_send_buffer(const uint8_t *data, int size, int pos);
     uint8_t* get_send_buffer();
 
-private:
+//private:
 	sockaddr_in new_addr(char * ip);
 	int bind_socket(int sockfd, char* ip);
 	int send_msg(int sockfd, const uint8_t *data, int data_size);
 	int recv_msg(int sockfd);
 
-private:
+//private:
 	int requester;	
     sockaddr_in client_addr;
     

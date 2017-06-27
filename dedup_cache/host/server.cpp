@@ -8,62 +8,62 @@
 
 #include <assert.h>
 #include <memory>
+#include <signal.h>
 #include <stdio.h>
 
 extern sgx_enclave_id_t global_eid;
 
-Network responser(0);
+std::auto_ptr<Network> responser;
+
+void shutdown(int sig) {
+    printf("[*] Stopping caching server ...\n");
+
+    sgx_destroy_enclave(global_eid);
+
+    responser.release();
+
+    // Do whatever tear-down
+}
 
 void init_server() {
     // Do whatever initialization
-    printf("[*] Initializing ...\n");
-}
+    printf("[*] Initializing caching server ...\n");
 
-//void test_cache() {
-//    sgx_status_t ret = SGX_ERROR_UNEXPECTED;
-//    int hit = 0;
-//    char tag[256] = "12345";
-//    char rlt[] = "asdadadadqweqfsadadadasdada";
-//    int rlt_size = sizeof(rlt) / sizeof(rlt[0]);
-//    char r[256] = "asdqewq123";
-//    // get inexistent entry
-//    ret = ecall_cache_get(global_eid, &hit, tag, rlt, rlt_size, r);
-//    if (ret != SGX_SUCCESS) {
-//        printf("Fail to get cache entry!\n");
-//    }
-//    printf("Get result: %d\n", hit);
-//    // put the entry
-//    ret = ecall_cache_put(global_eid, tag, rlt, rlt_size, r);
-//    if (ret != SGX_SUCCESS) {
-//        printf("Fail to put cache entry!\n");
-//    }
-//    // get again
-//    ret = ecall_cache_get(global_eid, &hit, tag, rlt, rlt_size, r);
-//    if (ret != SGX_SUCCESS) {
-//        printf("Fail to get cache entry!\n");
-//    }
-//    printf("Get result: %d\n", hit);
-//}
+    signal(SIGTERM, shutdown);
+    signal(SIGQUIT, shutdown);
+    signal(SIGTSTP, shutdown); // Ctrl + z
+    signal(SIGINT, shutdown); // Ctrl + c
+
+    printf("[*] Connecting to computing server ...\n");
+    responser.reset(new Network(0));
+
+    printf("[*] Initialization is finished!\n");
+}
 
 Response *parse_request_get(const Request *req)
 {
     int true_size = 0;
-    uint8_t *buffer = responser.get_send_buffer();
+    uint8_t *buffer = responser->get_send_buffer();
 
     sgx_status_t ret = SGX_ERROR_UNEXPECTED;
-    ret = ecall_cache_get(global_eid, req->get_tag(), 
-                          buffer, // meta
-                          buffer + sizeof(metadata),  req->get_expt_rlt_size(), // result
+    ret = ecall_cache_get(global_eid, req->get_tag(),
+                          buffer + RESP_TYPE_SIZE, // meta
+                          buffer + RESP_TYPE_SIZE + sizeof(metadata),  req->get_expt_rlt_size(),
                           &true_size);
-    if (ret != SGX_SUCCESS || true_size == 0) {
-        printf("[*] Fail to get cache entry!\n");
+
+    if (ret != SGX_SUCCESS) {
+        printf("***Enclave error***");
         return NULL;
     }
+    else if (true_size == 0) {
+        responser->set_send_buffer(&Response::Negative, RESP_TYPE_SIZE, 0);
+        Response *resp = new Response(buffer, RESP_TYPE_SIZE);
+        return resp;
+    }
     else {
-        if (true_size > req->get_expt_rlt_size())
-            printf("[*] The result has been truancated from %d bytes to %d bytes!\n",
-                true_size, req->get_expt_rlt_size());
-        Response *resp = new Response(buffer, sizeof(metadata)+req->get_expt_rlt_size());
+        int resp_size = RESP_TYPE_SIZE + sizeof(metadata) + std::min(true_size, req->get_expt_rlt_size());
+        responser->set_send_buffer(&Response::Positive, RESP_TYPE_SIZE, 0);
+        Response *resp = new Response(buffer, resp_size);
         return resp;
     }
 }
@@ -73,8 +73,9 @@ Response *parse_request_put(const Request *req)
     sgx_status_t ret = SGX_ERROR_UNEXPECTED;
     ret = ecall_cache_put(global_eid, req->get_tag(), req->get_meta(),
                                       req->get_rlt(), req->get_rlt_size());
+
     if (ret != SGX_SUCCESS) {
-        printf("[*] Fail to put cache entry!\n");
+        printf("***Enclave error***");
         return NULL;
     }
     else {
@@ -87,29 +88,38 @@ void run_server() {
     std::auto_ptr<Request> req;
     std::auto_ptr<Response> resp;
 
+    /*int size = responser->recv_msg(responser->responser);
+    char *buffer = (char *)responser->m_recv_buffer;
+    *(buffer + size) = 0;
+    printf("%d %s\n", size, buffer);*/
+
     printf("[*] Waiting for request ...\n");
     while (true) {
         // block until timeout (20s)
-        req.reset(responser.recv_request());
+        req.reset(responser->recv_request());
 
         if (req.get()) {
-            printf("[*] Request received! Now processing ...\n");
-
             switch (req->get_type()) {
-            case 1: //Request::Get:
-                resp.reset(parse_request_get(req.get()));
-                break;
-            case 2: //Request::Put:
-                resp.reset(parse_request_put(req.get()));
-                break;
-            default:
-                assert(false);
+                case 1: //Request::Get:
+                    printf("[*] Get request received --> ");
+                    resp.reset(parse_request_get(req.get()));
+                    if (resp.get())
+                        printf("%d bytes retrived!\n", resp->get_rlt_size());
+                    else
+                        printf("missed in cache!\n");
+                    break;
+                case 2: //Request::Put:
+                    printf("[*] Put request received --> ");
+                    resp.reset(parse_request_put(req.get()));
+                    printf("%d bytes cached!\n", req->get_rlt_size());
+                    break;
+                default:
+                    assert(false);
             }
             
-            printf("[*] Request processed! Now sending back response ...\n");
             // send out response
             if (resp.get()) {
-                responser.send_response(resp.get());
+                responser->send_response(resp.get());
             }
         }
     }

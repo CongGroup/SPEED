@@ -12,46 +12,47 @@
 
 void dedup(Function *func)
 {
-    eprintf("[*] Dedup service launched!\n");
+    eprintf("[*] [ %s - %d ] ", func->get_name(), func->get_id());
 
     int true_size = 0;
     metadata meta;
 
-    ocall_request_find(
-        func->get_tag(),
-        RAW(&meta),
-        func->output(), func->expt_output_size(),
-        &true_size);
+    ocall_request_find(func->get_tag(),
+                       RAW(&meta),
+                       func->output(), func->expt_output_size(),
+                       &true_size);
 
     // hit
     if (true_size > 0) {
         assert(true_size <= func->expt_output_size());
 
-        eprintf("[*] %s with id <%d> successfuly fetched!\n", func->get_name(), func->get_id());
+        eprintf("--> fetched ");
 
         // decrypt
         if (veri_dec(func->output(), true_size, func->output(), meta.mac)) {
-            eprintf("    The result is verified and decrypted!\n");
+            eprintf("--> verified and decrypted!\n");
         }
         else {
-            eprintf("    The result cannot be verified, the data may have been corrupted at the cache server!\n");
+            eprintf("--> unverified, the data may have been corrupted at the caching server!\n");
         }
     }
     // miss
     else {
-        eprintf("[*] %s with id <%d> cannot be found at the server! Now process locally ...\n", func->get_name(), func->get_id());
+        eprintf("--> missed ");
         
         func->process();
 
         auth_enc(func->output(), func->expt_output_size(), func->output(), meta.mac);
 
+        eprintf("--> locally processed ");
+
         draw_rand(meta.r, RAND_SIZE);
 
-        ocall_request_put(
-            func->get_tag(),
-            RAW(&meta),
-            func->output(), func->expt_output_size());
+        ocall_request_put(func->get_tag(),
+                          RAW(&meta),
+                          func->output(), func->expt_output_size());
         
-        eprintf("    The computation result is cached!\n");
+        // TODO check put response
+        eprintf("--> remotely cached!\n");
     }
 }

@@ -10,18 +10,20 @@
 // a 4-byte specical delimeter for map serialization
 #define DLMT 0x0
 
-
 // TODO replace with unordered_map
 typedef std::map<std::string, int> CounterMap;
 
+// this needs to be large enough
+#define WORD_COUNT_RLT_SIZE 1024*1024 // 1M
+
 WordCount::WordCount(int id, const char *textfile, int filesize)
     : m_id ( id ),
-      m_name ( "<Word Count>" ),
+      m_name ( "Word Count" ),
       m_content (textfile, filesize)
 {
     hash(RAW((m_name + m_content).data()), m_content.size(), m_tag);
 
-    m_expt_output_size = m_content.size();
+    m_expt_output_size = std::max((int)m_content.size(), WORD_COUNT_RLT_SIZE);
 
     // secure a reservation for making get request
     m_output.reserve(m_expt_output_size);
@@ -72,6 +74,11 @@ void WordCount::process()
 
         delim_pos = m_content.find_first_of(delim, word_pos);
     }
+    // last word
+    if (word_pos < m_content.size()) {
+        word = m_content.substr(word_pos, m_content.size() - word_pos);
+        ++counter[word];
+    }
 
     // customized serialization
     m_output.clear();
@@ -82,7 +89,7 @@ void WordCount::process()
         //m_output += std::to_string(DLMT);
         m_output += "1234"; // fake
         m_output += "0000"; // fake
-        eprintf("%s %d \n", it->first.c_str(), it->second);
+        //eprintf("%s %d \n", it->first.c_str(), it->second);
     }
 
     //if (m_output.size() > m_exp_size)

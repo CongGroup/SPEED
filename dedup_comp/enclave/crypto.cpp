@@ -20,7 +20,7 @@ int auth_enc(uint8_t * src, int src_len, uint8_t *dst, uint8_t *out_mac) {
         return 1;
     }
     else {
-        eprintf("[*] auth_enc error: %d\n", ret);
+        //eprintf("[*] auth_enc error: %d\n", ret);
         return 0;
     }
 }
@@ -38,7 +38,7 @@ int veri_dec(uint8_t *src, int src_len, uint8_t *dst, const uint8_t *in_mac) {
         return 1;
     }
     else {
-        eprintf("[*] veri_dec error: %d\n", ret);
+        //eprintf("[*] veri_dec error: %d\n", ret);
         return 0;
     }
 }

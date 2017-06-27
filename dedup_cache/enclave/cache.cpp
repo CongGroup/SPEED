@@ -37,7 +37,7 @@ void ecall_cache_get(const uint8_t *tag,
 
         // copy computation result
         *true_size = entry.second.size();
-        memcpy(rlt, &entry.second[0], (*true_size > expt_size) ? expt_size : *true_size);
+        memcpy(rlt, &entry.second[0], std::min(*true_size, expt_size));
     }
 }
 
@@ -51,7 +51,7 @@ void ecall_cache_put(const uint8_t *tag,
     binary entry_meta(sizeof(metadata), 0);
     memcpy(&entry_meta[0], meta, sizeof(metadata));
 
-    binary entry_rlt(rlt_size);
+    binary entry_rlt(rlt_size, 0);
     memcpy(&entry_rlt[0], rlt, rlt_size);
 
     cache[key] = entry_t(entry_meta, entry_rlt);
