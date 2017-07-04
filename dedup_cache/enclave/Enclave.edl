@@ -1,12 +1,12 @@
 enclave {
 	trusted {
 		public void ecall_cache_get([in, size=32] const uint8_t *tag,
-									[out, size=48] uint8_t *meta,
+									[out, size=64] uint8_t *meta,
 									[out, size=expt_size] uint8_t *rlt, int expt_size,
 									[out, size=4] int *true_size);
 
 		public void ecall_cache_put([in, size=32] const uint8_t *tag,
-									[in, size=48] const uint8_t *meta,
+									[in, size=64] const uint8_t *meta,
 									[in, size=rlt_size] const uint8_t *rlt, int rlt_size);
 	};
 

@@ -2,15 +2,24 @@
 
 #include "sysutils.h"
 
-const sgx_aes_gcm_128bit_key_t p_key = { 0 };
-sgx_aes_gcm_128bit_tag_t p_out_mac = { 0 };
-#define NIST_IV_LEN 12
-const uint8_t p_iv[NIST_IV_LEN] = { 0 };
+#include "sgx_trts.h"
 
-int auth_enc(uint8_t * src, int src_len, uint8_t *dst, uint8_t *out_mac) {
+//const sgx_aes_gcm_128bit_key_t p_key = { 0 };
+//sgx_aes_gcm_128bit_tag_t p_out_mac = { 0 };
+#define NIST_IV_LEN 12
+const byte p_iv[NIST_IV_LEN] = { 0 };
+
+void key_gen(byte *key, int len) {
+    draw_rand(key, len);
+}
+
+// AES-GCM-128
+int auth_enc(byte *key, int key_len,
+             byte * src, int src_len, 
+             byte *dst, byte *out_mac) {
     sgx_status_t ret = SGX_ERROR_UNEXPECTED;
     ret = sgx_rijndael128GCM_encrypt(
-        &p_key,
+        (sgx_aes_gcm_128bit_key_t*)key,
         src, src_len,
         dst,
         p_iv, NIST_IV_LEN,
@@ -25,10 +34,13 @@ int auth_enc(uint8_t * src, int src_len, uint8_t *dst, uint8_t *out_mac) {
     }
 }
 
-int veri_dec(uint8_t *src, int src_len, uint8_t *dst, const uint8_t *in_mac) {
+// AES-GCM-128
+int veri_dec(byte *key, int key_len,
+             byte *src, int src_len, 
+             byte *dst, const byte *in_mac) {
     sgx_status_t ret = SGX_ERROR_UNEXPECTED;
     ret = sgx_rijndael128GCM_decrypt(
-        &p_key,
+        (sgx_aes_gcm_128bit_key_t*)key,
         src, src_len,
         dst,
         p_iv, NIST_IV_LEN,
@@ -43,12 +55,13 @@ int veri_dec(uint8_t *src, int src_len, uint8_t *dst, const uint8_t *in_mac) {
     }
 }
 
-void draw_rand(uint8_t * r, int length)
+void draw_rand(byte *r, int len)
 {
-    // TODO
+    sgx_status_t ret = SGX_ERROR_UNEXPECTED;
+    ret = sgx_read_rand(r, len);
 }
 
-void hash(const uint8_t * src, int src_len, uint8_t * hash)
+void hash(const byte *src, int src_len, byte * hash)
 {
     sgx_status_t ret = SGX_ERROR_UNEXPECTED;
     ret = sgx_sha256_msg(

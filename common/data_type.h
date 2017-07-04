@@ -4,13 +4,15 @@
 #include "config.h"
 #include <stdint.h>
 
+// for all sources except enclave boundary
+typedef uint8_t byte;
+
 // meta data for cache entry
 typedef struct metadata_t {
-    uint8_t r[RAND_SIZE];
-    uint8_t mac[MAC_SIZE];
+    byte r[RAND_SIZE];
+    byte enc_key[ENC_KEY_SIZE];
+    byte mac[MAC_SIZE];
 } metadata;
-
-#define RAW(data) ((uint8_t*)(data))
 
 // timing
 typedef struct hrtime_t {

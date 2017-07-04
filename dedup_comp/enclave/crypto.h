@@ -3,12 +3,20 @@
 
 #include "sgx_tcrypto.h"
 
-int auth_enc(uint8_t *src, int src_len, uint8_t *dst, uint8_t *out_mac);
+#include "../../common/data_type.h"
 
-int veri_dec(uint8_t *src, int src_len, uint8_t *dst, const uint8_t *in_mac);
+void key_gen(byte *key, int len);
 
-void draw_rand(uint8_t *r, int length);
+int auth_enc(byte *key, int key_len,
+             byte *src, int src_len, 
+             byte *dst, byte *out_mac);
 
-void hash(const uint8_t *src, int src_len, uint8_t *hash);
+int veri_dec(byte *key, int key_len,
+             byte *src, int src_len, 
+             byte *dst, const byte *in_mac);
+
+void draw_rand(byte *r, int len);
+
+void hash(const byte *src, int src_len, byte *hash);
 
 #endif

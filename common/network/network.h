@@ -4,6 +4,8 @@
 #include "request.h"
 #include "response.h"
 
+#include "../data_type.h"
+
 #include <netinet/ip.h>
 
 /*
@@ -50,13 +52,13 @@ public:
     /*
      * buffer accesser
      */
-    void set_send_buffer(const uint8_t *data, int size, int pos);
-    uint8_t* get_send_buffer();
+    void set_send_buffer(const byte *data, int size, int pos);
+    byte* get_send_buffer();
 
 //private:
 	sockaddr_in new_addr(char * ip);
 	int bind_socket(int sockfd, char* ip);
-	int send_msg(int sockfd, const uint8_t *data, int data_size);
+	int send_msg(int sockfd, const byte *data, int data_size);
 	int recv_msg(int sockfd);
 
 //private:
@@ -66,8 +68,8 @@ public:
     int responser;
     sockaddr_in serv_addr;
 
-    uint8_t m_send_buffer[TX_BUFFER_SIZE];
-    uint8_t m_recv_buffer[RX_BUFFER_SIZE];
+    byte m_send_buffer[TX_BUFFER_SIZE];
+    byte m_recv_buffer[RX_BUFFER_SIZE];
 };
 
 #endif

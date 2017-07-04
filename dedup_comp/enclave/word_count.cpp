@@ -17,11 +17,12 @@ typedef std::map<std::string, int> CounterMap;
 #define WORD_COUNT_RLT_SIZE 1024*1024 // 1M
 
 WordCount::WordCount(int id, const char *textfile, int filesize)
-    : m_id ( id ),
-      m_name ( "Word Count" ),
+    : m_id(id),
+      m_name("Word Count"),
+      m_type(FUNC_WC),
       m_content (textfile, filesize)
 {
-    hash(RAW((m_name + m_content).data()), m_content.size(), m_tag);
+    hash((byte *)((m_name + m_content).data()), m_content.size(), m_tag);
 
     m_expt_output_size = std::max((int)m_content.size(), WORD_COUNT_RLT_SIZE);
 
@@ -37,16 +38,31 @@ const char * WordCount::get_name()
 const int WordCount::get_id()
 {
     return m_id;
-
 }
-const uint8_t * WordCount::get_tag()
+
+const int WordCount::get_type()
+{
+    return m_type;
+}
+
+const byte * WordCount::get_tag()
 {
     return m_tag;
 }
 
-uint8_t * WordCount::output()
+byte * WordCount::input()
 {
-    return RAW(m_output.data());
+    return (byte *)m_content.data();
+}
+
+int WordCount::input_size()
+{
+    return m_content.size();
+}
+
+byte * WordCount::output()
+{
+    return (byte *)m_output.data();
 }
 
 int WordCount::expt_output_size()

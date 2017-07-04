@@ -8,7 +8,6 @@
 #include <stdio.h>
 
 #include "network.h"
-#include "../config.h"
 
 #define SEND_FLAG 0
 #define RECV_FLAG 0
@@ -84,19 +83,19 @@ Response * Network::recv_response()
     }
 }
 
-void Network::set_send_buffer(const uint8_t * data, int size, int pos)
+void Network::set_send_buffer(const byte * data, int size, int pos)
 {
     if ((pos + size -1) <= TX_BUFFER_SIZE) {
         memcpy(m_send_buffer + pos, data, size);
     }
 }
 
-uint8_t *Network::get_send_buffer()
+byte *Network::get_send_buffer()
 {
     return m_send_buffer;
 }
 
-int Network::send_msg(int sockfd, const uint8_t *data, int data_size)
+int Network::send_msg(int sockfd, const byte *data, int data_size)
 {
     int size = data_size;
 	send(sockfd, &size, sizeof(int), SEND_FLAG);

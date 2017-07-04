@@ -3,8 +3,6 @@
 
 #include "function.h"
 
-#include "../../common/config.h"
-
 #include <string>
 
 class WordCount : public Function
@@ -12,24 +10,31 @@ class WordCount : public Function
 public:
     WordCount(int id, const char *textfile, int filesize);
 
-    const char *get_name();
-
     const int get_id();
 
-    const uint8_t *get_tag();
+    const char *get_name();
 
-    uint8_t *output();
+    const int get_type();
+
+    const byte *get_tag();
+
+    byte *input();
+
+    int input_size();
+
+    byte *output();
 
     int expt_output_size();
 
     void process();
 
 private:
-    int             m_id;
     std::string     m_name;
+    int             m_id;
+    int             m_type;
 
     std::string     m_content;
-    uint8_t         m_tag[TAG_SIZE];
+    byte            m_tag[TAG_SIZE];
     
     int             m_expt_output_size; // TODO
     std::string     m_output;

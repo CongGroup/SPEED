@@ -1,11 +1,9 @@
 #include "request.h"
 
-#include "../data_type.h"
+const byte Request::Get = 1;
+const byte Request::Put = 2;
 
-const uint8_t Request::Get = 1;
-const uint8_t Request::Put = 2;
-
-Request::Request(const uint8_t * data, int size)
+Request::Request(const byte * data, int size)
     : m_data      (data),
       m_size      (size),
       m_rlt_size  (size- REQ_TYPE_SIZE - TAG_SIZE - sizeof(metadata)),
@@ -15,7 +13,7 @@ Request::Request(const uint8_t * data, int size)
         m_expt_rlt_size = *((int *)(&m_data[REQ_TYPE_SIZE + TAG_SIZE]));
 }
 
-const uint8_t * Request::get_data() const
+const byte * Request::get_data() const
 {
     return m_data;
 }
@@ -26,19 +24,19 @@ int Request::get_size() const
 
 }
 
-uint8_t Request::get_type() const
+byte Request::get_type() const
 {
     // parse first byte as type
     return m_data[0];
 }
 
-const uint8_t *Request::get_tag() const
+const byte *Request::get_tag() const
 {
     // tag starts from the second byte
     return &m_data[0 + REQ_TYPE_SIZE];
 }
 
-const uint8_t *Request::get_meta() const
+const byte *Request::get_meta() const
 {
     // metadata follows tag, if any
     if (m_rlt_size > 0)
@@ -47,7 +45,7 @@ const uint8_t *Request::get_meta() const
         return 0;
 }
 
-const uint8_t *Request::get_rlt() const
+const byte *Request::get_rlt() const
 {
     // computation result follows metadata, if any
     if (m_rlt_size > 0)

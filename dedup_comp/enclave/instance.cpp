@@ -30,7 +30,3 @@ void ecall_entrance()
     delete func3;
     delete func4;
 }
-
-
-original : func->process()
-    now  : dudup(func)
