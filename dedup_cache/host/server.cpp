@@ -20,6 +20,8 @@ void shutdown(int sig) {
 
     sgx_destroy_enclave(global_eid);
 
+
+
     responser.release();
 
     // Do whatever tear-down

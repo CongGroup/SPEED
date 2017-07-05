@@ -3,8 +3,6 @@
 #include "crypto.h"
 #include "sysutils.h"
 
-#include "../../common/data_type.h"
-
 #include <map>
 
 // a 4-byte specical delimeter for map serialization
@@ -13,61 +11,39 @@
 // TODO replace with unordered_map
 typedef std::map<std::string, int> CounterMap;
 
-// this needs to be large enough
-#define WORD_COUNT_RLT_SIZE 1024*1024 // 1M
+// the result is most very compact, but we keep this large enough
+#define WC_RLT_SIZE 1024*1024 // 1M
 
 WordCount::WordCount(int id, const char *textfile, int filesize)
-    : m_id(id),
-      m_name("Word Count"),
-      m_type(FUNC_WC),
-      m_content (textfile, filesize)
+    : Function(id, FUNC_WC, "Word Count"),
+      m_input (textfile, filesize)
 {
-    hash((byte *)((m_name + m_content).data()), m_content.size(), m_tag);
-
-    m_expt_output_size = std::max((int)m_content.size(), WORD_COUNT_RLT_SIZE);
+    m_expt_output_size = std::max((int)m_input.size(), WC_RLT_SIZE);
 
     // secure a reservation for making get request
     m_output.reserve(m_expt_output_size);
 }
 
-const char * WordCount::get_name()
+const byte *WordCount::get_tag()
 {
-    return m_name.c_str();
-}
-
-const int WordCount::get_id()
-{
-    return m_id;
-}
-
-const int WordCount::get_type()
-{
-    return m_type;
-}
-
-const byte * WordCount::get_tag()
-{
+    // slightly deviate from the paper specification for ease of implmentation
+    hash((byte *)((m_name + m_input).data()), m_name.size() + m_input.size(), m_tag);
     return m_tag;
 }
 
 byte * WordCount::input()
 {
-    return (byte *)m_content.data();
+    return (byte *)m_input.data();
 }
 
 int WordCount::input_size()
 {
-    return m_content.size();
+    return m_input.size();
 }
 
 byte * WordCount::output()
 {
     return (byte *)m_output.data();
-}
-
-int WordCount::expt_output_size()
-{
-    return m_expt_output_size;
 }
 
 void WordCount::process()
@@ -77,22 +53,22 @@ void WordCount::process()
 
     // currently we do tokenization by whitespace or common punctuations
     static std::string delim = " ,;.?!\t\n";
-    size_t delim_pos = m_content.find_first_of(delim);
+    size_t delim_pos = m_input.find_first_of(delim);
     size_t word_pos = 0;
     while (delim_pos !=std::string::npos) {
         // in case of continous punctuations
         if ((delim_pos - word_pos) > 1) {
-            word = m_content.substr(word_pos, delim_pos - word_pos);
+            word = m_input.substr(word_pos, delim_pos - word_pos);
             ++counter[word];
         }
 
         word_pos = delim_pos + 1;
 
-        delim_pos = m_content.find_first_of(delim, word_pos);
+        delim_pos = m_input.find_first_of(delim, word_pos);
     }
     // last word
-    if (word_pos < m_content.size()) {
-        word = m_content.substr(word_pos, m_content.size() - word_pos);
+    if (word_pos < m_input.size()) {
+        word = m_input.substr(word_pos, m_input.size() - word_pos);
         ++counter[word];
     }
 

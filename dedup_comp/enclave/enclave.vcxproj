@@ -71,10 +71,13 @@
     <ClCompile Include="..\..\common\network\network.cpp" />
     <ClCompile Include="..\..\common\network\request.cpp" />
     <ClCompile Include="..\..\common\network\response.cpp" />
+    <ClCompile Include="compression.cpp" />
     <ClCompile Include="crypto.cpp" />
     <ClCompile Include="dedup_service.cpp" />
     <ClCompile Include="Enclave_t.c" />
+    <ClCompile Include="function.cpp" />
     <ClCompile Include="instance.cpp" />
+    <ClCompile Include="pattern_matching.cpp" />
     <ClCompile Include="sysutils.cpp" />
     <ClCompile Include="word_count.cpp" />
   </ItemGroup>
@@ -84,10 +87,12 @@
     <ClInclude Include="..\..\common\network\network.h" />
     <ClInclude Include="..\..\common\network\request.h" />
     <ClInclude Include="..\..\common\network\response.h" />
+    <ClInclude Include="compression.h" />
     <ClInclude Include="crypto.h" />
     <ClInclude Include="dedup_service.h" />
     <ClInclude Include="Enclave_t.h" />
     <ClInclude Include="function.h" />
+    <ClInclude Include="pattern_matching.h" />
     <ClInclude Include="sysutils.h" />
     <ClInclude Include="word_count.h" />
   </ItemGroup>

@@ -16,6 +16,9 @@
       <Filter>common\network</Filter>
     </ClCompile>
     <ClCompile Include="dedup_service.cpp" />
+    <ClCompile Include="pattern_matching.cpp" />
+    <ClCompile Include="function.cpp" />
+    <ClCompile Include="compression.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="crypto.h" />
@@ -39,6 +42,8 @@
       <Filter>common\network</Filter>
     </ClInclude>
     <ClInclude Include="dedup_service.h" />
+    <ClInclude Include="pattern_matching.h" />
+    <ClInclude Include="compression.h" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="Enclave.config.xml" />

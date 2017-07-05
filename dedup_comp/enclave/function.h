@@ -3,15 +3,19 @@
 
 #include "../../common/data_type.h"
 
+#include <string>
+
 class Function {
 public:
-    // unique id
-    virtual const int get_id() = 0;
+    Function(int id, int type, const std::string& name);
 
-    virtual const char *get_name() = 0;
+    // unique id
+    int get_id();
 
     // type id, which is used for computing tag
-    virtual const int get_type() = 0;
+    int get_type();
+
+    const char *get_name();
 
     virtual const byte *get_tag() = 0;
 
@@ -21,11 +25,20 @@ public:
 
     virtual byte *output() = 0;
 
-    virtual int expt_output_size() = 0;
+    int expt_output_size();
 
     // All main logic go here, including customized serialization (Do NOT use boost).
     // We minimize overhead in other function (benefit for our design against baseline D-:).
     virtual void process() = 0;
+
+protected:
+    int             m_id;
+    int             m_type;
+    std::string     m_name;
+    byte            m_tag[TAG_SIZE];
+
+    // for OCALL memory allocation
+    int             m_expt_output_size;
 };
 
 #endif

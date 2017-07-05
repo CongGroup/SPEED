@@ -241,7 +241,7 @@ sgx_status_t SGX_CDECL ocall_request_find(const uint8_t* tag, uint8_t* meta, uin
 {
 	sgx_status_t status = SGX_SUCCESS;
 	size_t _len_tag = 32;
-	size_t _len_meta = 48;
+	size_t _len_meta = 64;
 	size_t _len_rlt = expt_size;
 	size_t _len_true_size = 4;
 
@@ -321,7 +321,7 @@ sgx_status_t SGX_CDECL ocall_request_put(const uint8_t* tag, const uint8_t* meta
 {
 	sgx_status_t status = SGX_SUCCESS;
 	size_t _len_tag = 32;
-	size_t _len_meta = 48;
+	size_t _len_meta = 64;
 	size_t _len_rlt = rlt_size;
 
 	ms_ocall_request_put_t* ms = NULL;
