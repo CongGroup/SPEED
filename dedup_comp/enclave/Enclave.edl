@@ -11,8 +11,8 @@ enclave {
 							      [out, size=buffer_size] char *buffer, int buffer_size,
 								  [out, size=4] int *filesize);
 
-		void ocall_get_time([out, size=4] long *second,
-							[out, size=4] long *nanosecond);
+		void ocall_get_time([out, size=4] int *second,
+							[out, size=4] int *nanosecond);
 		
 		// dedup api
 		void ocall_request_find([in, size=32] const uint8_t *tag,

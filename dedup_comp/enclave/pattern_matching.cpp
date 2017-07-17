@@ -26,7 +26,7 @@ PatternMatching::PatternMatching(int id, const char *regex, const char *str, int
 const byte *PatternMatching::get_tag()
 {
     // slightly deviate from the paper specification for ease of implmentation
-    hash((byte *)((m_name + m_str).data()), m_name.size() + m_str.size(), m_tag);
+    hash((byte *)((m_str).data()),m_str.size(), m_tag);
     return m_tag;
 }
 

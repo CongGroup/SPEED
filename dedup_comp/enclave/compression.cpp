@@ -16,7 +16,7 @@ Compression::Compression(int id, const byte *file, int file_size)
 const byte *Compression::get_tag()
 {
     // slightly deviate from the paper specification for ease of implmentation
-    hash((byte *)((m_name + m_input).data()), m_name.size() + m_input.size(), m_tag);
+    hash((byte *)((m_input).data()), m_input.size(), m_tag);
     return m_tag;
 }
 

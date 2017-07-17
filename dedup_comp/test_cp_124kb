@@ -1,0 +1,2466 @@
+30 Remarks: The expression inside noexcept is equivalent to:
+is_nothrow_assignable<T1&, U&&>::value &&
+is_nothrow_assignable<T2&, V&&>::value
+31 Requires: is_assignable<first_type&, U&&>::value is true and is_assignable<second_type&,
+V&&>::value is true.
+32 Effects: Assigns to first with std::forward<first_typeU>(p.first) and to second with
+std::forward<second_typeV >(p.second).
+33 Returns: *this.
+void swap(pair& p) noexcept;
+34 Remarks: The expression inside noexcept is equivalent to:
+noexcept(swap(first, p.first)) &&
+noexcept(swap(second, p.second))
+35 Requires: first shall be swappable with (17.6.3.2) p.first and second shall be swappable with
+p.second.
+36 Effects: Swaps first with p.first and second with p.second.
+20.3.3 Specialized algorithms [pairs.spec]
+template <class T1, class T2>
+bool operator==(const pair<T1, T2>& x, const pair<T1, T2>& y);
+1 Returns: x.first == y.first && x.second == y.second.
+template <class T1, class T2>
+bool operator<(const pair<T1, T2>& x, const pair<T1, T2>& y);
+2 Returns: x.first < y.first || (!(y.first < x.first) && x.second < y.second).
+template <class T1, class T2>
+bool operator!=(const pair<T1, T2>& x, const pair<T1, T2>& y);
+3 Returns: !(x == y)
+template <class T1, class T2>
+bool operator>(const pair<T1, T2>& x, const pair<T1, T2>& y);
+4 Returns: y < x
+template <class T1, class T2>
+bool operator>=(const pair<T1, T2>& x, const pair<T1, T2>& y);
+5 Returns: !(x < y)
+template <class T1, class T2>
+bool operator<=(const pair<T1, T2>& x, const pair<T1, T2>& y);
+6 Returns: !(y < x)
+template<class T1, class T2> void swap(pair<T1, T2>& x, pair<T1, T2>& y) noexcept(noexcept(x.swap(y)));
+7 Effects: x.swap(y)
+§ 20.3.3 501
+
+ c ISO/IEC N3242=11-0012
+template <class T1, class T2>
+pair<V1, V2> make_pair(T1&& x, T2&& y) noexcept;
+8 The expression inside noexcept is equivalent to:
+is_nothrow_constructible<V1, T1&&>::value &&
+is_nothrow_constructible<V2, T2&&>::value
+9 Returns: pair<V1, V2>(std::forward<T1>(x), std::forward<T2>(y));
+where V1 and V2 are determined as follows: Let Ui be decay<Ti>::type for each Ti. Then each Vi is
+X& if Ui equals reference_wrapper<X>, otherwise Vi is Ui.
+10 [ Example: In place of:
+return pair<int, double>(5, 3.1415926); // explicit types
+a C++ program may contain:
+return make_pair(5, 3.1415926); // types are deduced
+— end example ]
+20.3.4 Tuple-like access to pair [pair.astuple]
+tuple_size<pair<T1, T2> >::value
+1 Returns: Integral constant expression.
+2 Value: 2.
+tuple_element<0, pair<T1, T2> >::type
+3 Value: the type T1.
+tuple_element<1, pair<T1, T2> >::type
+4 Value: the type T2.
+template<size_t I, class T1, class T2>
+typename tuple_element<I, std::pair<T1, T2> >::type& get(pair<T1, T2>&) noexcept;
+template<size_t I, class T1, class T2>
+const typename tuple_element<I, std::pair<T1, T2> >::type& get(const pair<T1, T2>&) noexcept;
+5 Returns: If I == 0 returns p.first; if I == 1 returns p.second; otherwise the program is ill-formed.
+template<size_t I, class T1, class T2>
+typename tuple_element<I, std::pair<T1, T2> >::type&& get(std::pair<T1, T2>&&) noexcept;
+6 Returns: If I == 0 returns std::forward<T1&&>(p.first); if I == 1 returns std::forward<T2&&>(p.second);
+otherwise the program is ill-formed.
+20.3.5 Piecewise construction [pair.piecewise]
+struct piecewise_construct_t { };
+constexpr piecewise_construct_t piecewise_construct = piecewise_construct_t();
+§ 20.3.5 502
+
+ c ISO/IEC N3242=11-0012
+1 The struct piecewise_construct_t is an empty structure type used as a unique type to disambiguate
+constructor and function overloading. Specifically, pair has a constructor with piecewise_construct_t as
+the first argument, immediately followed by two tuple (20.4) arguments used for piecewise construction of
+the elements of the pair object.
+20.4 Tuples [tuple]
+20.4.1 In general [tuple.general]
+1 This subclause describes the tuple library that provides a tuple type as the class template tuple that can
+be instantiated with any number of arguments. Each template argument specifies the type of an element
+in the tuple. Consequently, tuples are heterogeneous, fixed-size collections of values. An instantiation of
+tuple with two arguments is similar to an instantiation of pair with the same two arguments. See 20.3.
+2 Header <tuple> synopsis
+namespace std {
+// 20.4.2, class template tuple:
+template <class... Types> class tuple;
+// 20.4.2.4, tuple creation functions:
+const unspecified ignore;
+template <class... Types>
+tuple<VTypes...> make_tuple(Types&&...);
+template <class... Types>
+tuple<Types...> forward_as_tuple(Types&&...) noexcept;
+template<class... Types>
+tuple<Types&...> tie(Types&...) noexcept;
+template <class... TTypes, class... UTypes>
+tuple<TTypes..., UTypes...> tuple_cat(const tuple<TTypes...>&, const tuple<UTypes...>&);
+template <class... TTypes, class... UTypes>
+tuple<TTypes..., UTypes...> tuple_cat(tuple<TTypes...>&&, const tuple<UTypes...>&);
+template <class... TTypes, class... UTypes>
+tuple<TTypes..., UTypes...> tuple_cat(const tuple<TTypes...>&, tuple<UTypes...>&&);
+template <class... TTypes, class... UTypes>
+tuple<TTypes..., UTypes...> tuple_cat(tuple<TTypes...>&&, tuple<UTypes...>&&);
+// 20.4.2.5, tuple helper classes:
+template <class T> class tuple_size; // undefined
+template <class T> class tuple_size<const T>;
+template <class T> class tuple_size<volatile T>;
+template <class T> class tuple_size<const volatile T>;
+template <class... Types> class tuple_size<tuple<Types...> >;
+template <size_t I, class T> class tuple_element; // undefined
+template <size_t I, class T> class tuple_element<I, const T>;
+template <size_t I, class T> class tuple_element<I, volatile T>;
+template <size_t I, class T> class tuple_element<I, const volatile T>;
+template <size_t I, class... Types> class tuple_element<I, tuple<Types...> >;
+// 20.4.2.6, element access:
+§ 20.4.1 503
+
+ c ISO/IEC N3242=11-0012
+template <size_t I, class... Types>
+typename tuple_element<I, tuple<Types...> >::type& get(tuple<Types...>&) noexcept;
+template <size_t I, class... types>
+typename tuple_element<I, tuple<Types...> >::type&& get(tuple<Types...>&&) noexcept;
+template <size_t I, class... types>
+typename tuple_element<I, tuple<Types...> >::type const& get(const tuple<Types...>&) noexcept;
+// 20.4.2.7, relational operators:
+template<class... TTypes, class... UTypes>
+bool operator==(const tuple<TTypes...>&, const tuple<UTypes...>&);
+template<class... TTypes, class... UTypes>
+bool operator<(const tuple<TTypes...>&, const tuple<UTypes...>&);
+template<class... TTypes, class... UTypes>
+bool operator!=(const tuple<TTypes...>&, const tuple<UTypes...>&);
+template<class... TTypes, class... UTypes>
+bool operator>(const tuple<TTypes...>&, const tuple<UTypes...>&);
+template<class... TTypes, class... UTypes>
+bool operator<=(const tuple<TTypes...>&, const tuple<UTypes...>&);
+template<class... TTypes, class... UTypes>
+bool operator>=(const tuple<TTypes...>&, const tuple<UTypes...>&);
+// 20.4.2.8, allocator-related traits
+template <class... Types, class Alloc>
+struct uses_allocator<tuple<Types...>, Alloc>;
+// 20.4.2.9, specialized algorithms:
+template <class... Types>
+void swap(tuple<Types...>& x, tuple<Types...>& y) noexcept;
+}
+20.4.2 Class template tuple [tuple.tuple]
+namespace std {
+template <class... Types>
+class tuple {
+public:
+// 20.4.2.1, tuple construction
+constexpr tuple();
+explicit tuple(const Types&...);
+template <class... UTypes>
+explicit tuple(UTypes&&...) noexcept;
+tuple(const tuple&) = default;
+tuple(tuple&&) = default;
+template <class... UTypes>
+tuple(const tuple<UTypes...>&);
+template <class... UTypes>
+tuple(tuple<UTypes...>&&) noexcept;
+template <class U1, class U2>
+tuple(const pair<U1, U2>&); // iff sizeof...(Types) == 2
+template <class U1, class U2>
+tuple(pair<U1, U2>&&) noexcept; // iff sizeof...(Types) == 2
+§ 20.4.2 504
+
+ c ISO/IEC N3242=11-0012
+// allocator-extended constructors
+template <class Alloc>
+tuple(allocator_arg_t, const Alloc& a);
+template <class Alloc>
+tuple(allocator_arg_t, const Alloc& a, const Types&...);
+template <class Alloc, class... UTypes>
+tuple(allocator_arg_t, const Alloc& a, const UTypes&&...);
+template <class Alloc>
+tuple(allocator_arg_t, const Alloc& a, const tuple&);
+template <class Alloc>
+tuple(allocator_arg_t, const Alloc& a, tuple&&);
+template <class Alloc, class... UTypes>
+tuple(allocator_arg_t, const Alloc& a, const tuple<UTypes...>&);
+template <class Alloc, class... UTypes>
+tuple(allocator_arg_t, const Alloc& a, tuple<UTypes...>&&);
+template <class Alloc, class U1, class U2>
+tuple(allocator_arg_t, const Alloc& a, const pair<U1, U2>&);
+template <class Alloc, class U1, class U2>
+tuple(allocator_arg_t, const Alloc& a, pair<U1, U2>&&);
+// 20.4.2.2, tuple assignment
+tuple& operator=(const tuple&);
+tuple& operator=(tuple&&) noexcept;
+template <class... UTypes>
+tuple& operator=(const tuple<UTypes...>&);
+template <class... UTypes>
+tuple& operator=(tuple<UTypes...>&&) noexcept;
+template <class U1, class U2>
+tuple& operator=(const pair<U1, U2>&); // iff sizeof...(Types) == 2
+template <class U1, class U2>
+tuple& operator=(pair<U1, U2>&&) noexcept; // iff sizeof...(Types) == 2
+// 20.4.2.3, tuple swap
+void swap(tuple&) noexcept;
+};
+}
+20.4.2.1 Construction [tuple.cnstr]
+1 For each tuple constructor, an exception is thrown only if the construction of one of the types in Types
+throws an exception.
+2 In the constructor descriptions that follow, let i be in the range [0,sizeof...(Types)) in order, Ti be the
+ith type in Types, and Ui be the ith type in a template parameter pack named UTypes, where indexing is
+zero-based.
+constexpr tuple();
+3 Requires: is_default_constructible<Ti>::value is true for all i.
+4 Effects: Value initializes each element.
+explicit tuple(const Types&...);
+§ 20.4.2.1 505
+
+ c ISO/IEC N3242=11-0012
+5 Requires: is_copy_constructible<Ti>::value is true for all i.
+6 Effects: Initializes each element with the value of the corresponding parameter.
+template <class... UTypes>
+explicit tuple(UTypes&&... u) noexcept;
+7 Remark: The expression inside noexcept is equivalent to the logical and of the following expressions:
+is_nothrow_constructible<Ti, Ui&&>::value
+where Ti is the ith type in Types and Ui is the ith type in UTypes.
+8 Requires: sizeof...(Types) == sizeof...(UTypes). is_constructible<Ti, Ui&&>::value is true
+for all i.
+9 Effects: Initializes the elements in the tuple with the corresponding value in std::forward<UTypes>(u).
+10 Remark: This constructor shall not participate in overload resolution unless each type in UTypes is
+implicitly convertible to its corresponding type in Types.
+tuple(const tuple& u) = default;
+11 Requires: is_copy_constructible<Ti>::value is true for all i.
+12 Effects: Initializes each element of *this with the corresponding element of u.
+tuple(tuple&& u) = default;
+13 Requires: is_move_constructible<Ti>::value is true for all i.
+14 Effects: For all i, initializes the ith element of *this with std::forward<Ti>(get<i>(u)).
+template <class... UTypes> tuple(const tuple<UTypes...>& u);
+15 Requires: sizeof...(Types) == sizeof...(UTypes). is_constructible<Ti, const Ui&>::value
+is true for all i.
+16 Effects: Constructs each element of *this with the corresponding element of u.
+17 Remark: This constructor shall not participate in overload resolution unless const Ui& is implicitly
+convertible to Ti for all i.
+template <class... UTypes> tuple(tuple<UTypes...>&& u) noexcept;
+18 Remark: The expression inside noexcept is equivalent to the logical and of the following expressions:
+is_nothrow_constructible<Ti, Ui&&>::value
+where Ti is the ith type in Types and Ui is the ith type in UTypes.
+19 Requires: sizeof...(Types) == sizeof...(UTypes). is_constructible<Ti, UI&&>::value is true
+for all i.
+20 Effects: For all i, initializes the ith element of *this with std::forward<Ui>(get<i>(u)).
+21 Remark: This constructor shall not participate in overload resolution unless each type in UTypes is
+implicitly convertible to its corresponding type in Types.
+template <class U1, class U2> tuple(const pair<U1, U2>& u);
+§ 20.4.2.1 506
+
+ c ISO/IEC N3242=11-0012
+22 Requires: sizeof...(Types) == 2. is_constructible<T0, const U1&>::value is true for the first
+type T0 in Types and is_constructible<T1, const U2&>::value is true for the second type T1 in
+Types.
+23 Effects: Constructs the first element with u.first and the second element with u.second.
+24 Remark: This constructor shall not participate in overload resolution unless const U1& is implicitly
+convertible to T0 and const U2& is implicitly convertible to T1.
+template <class U1, class U2> tuple(pair<U1, U2>&& u) noexcept;
+25 Remark: The expression inside noexcept is equivalent to:
+is_nothrow_constructible<T1, U1&&>::value &&
+is_nothrow_constructible<T2, U2&&>::value
+where T1 and T2 are the first and second types, respectively, in Types.
+26 Requires: sizeof...(Types) == 2. is_constructible<T0, U1&&>::value is true for the first type
+T0
+in Types and is_constructible<T1, U2&&>::value is true for the second type T1 in Types.
+27 Effects: Initializes the first element with std::forward<U1>(u.first) and the second element with
+std::forward<U2>(u.second).
+28 Remark: This constructor shall not participate in overload resolution unless U1 is implicitly convertible
+to T0 and U2 is implicitly convertible to T1.
+template <class Alloc>
+tuple(allocator_arg_t, const Alloc& a);
+template <class Alloc>
+tuple(allocator_arg_t, const Alloc& a, const Types&...);
+template <class Alloc, class... UTypes>
+tuple(allocator_arg_t, const Alloc& a, const UTypes&&...);
+template <class Alloc>
+tuple(allocator_arg_t, const Alloc& a, const tuple&);
+template <class Alloc>
+tuple(allocator_arg_t, const Alloc& a, tuple&&);
+template <class Alloc, class... UTypes>
+tuple(allocator_arg_t, const Alloc& a, const tuple<UTypes...>&);
+template <class Alloc, class... UTypes>
+tuple(allocator_arg_t, const Alloc& a, tuple<UTypes...>&&);
+template <class Alloc, class U1, class U2>
+tuple(allocator_arg_t, const Alloc& a, const pair<U1, U2>&);
+template <class Alloc, class U1, class U2>
+tuple(allocator_arg_t, const Alloc& a, pair<U1, U2>&&);
+29 Requires: Alloc shall meet the requirements for an Allocator (17.6.3.5).
+30 Effects: Equivalent to the preceding constructors except that each element is constructed with usesallocator construction (20.6.7.2).
+20.4.2.2 Assignment [tuple.assign]
+1 For each tuple assignment operator, an exception is thrown only if the assignment of one of the types in
+Types throws an exception. In the function descriptions that follow, let i be in the range [0,sizeof...(Types)
+) in order, Ti be the ith type in Types, and Ui be the ith type in a template parameter pack named UTypes,
+where indexing is zero-based.
+§ 20.4.2.2 507
+
+ c ISO/IEC N3242=11-0012
+tuple& operator=(const tuple& u);
+2 Requires: is_copy_assignable<Ti>::value is true for all i.
+3 Effects: Assigns each element of u to the corresponding element of *this.
+4 Returns: *this
+tuple& operator=(tuple&& u) noexcept;
+5 Remark: The expression inside noexcept is equivalent to the logical and of the following expressions:
+is_nothrow_move_assignable<Ti>::value
+where Ti is the ith type in Types.
+6 Requires: is_move_assignable<Ti>::value is true for all i.
+7 Effects: For all i, assigns std::forward<Ti>(get<i>(u)) to get<i>(*this).
+8 Returns: *this.
+template <class... UTypes>
+tuple& operator=(const tuple<UTypes...>& u);
+9 Requires: sizeof...(Types) == sizeof...(UTypes) and is_assignable<Ti&, const Ui&>::value
+is true for all i.
+10 Effects: Assigns each element of u to the corresponding element of *this.
+11 Returns: *this
+template <class... UTypes>
+tuple& operator=(tuple<UTypes...>&& u) noexcept;
+12 Remark: The expression inside noexcept is equivalent to the logical and of the following expressions:
+is_nothrow_assignable<Ti&, Ui&&>::value
+where Ti is the ith type in Types and Ui is the ith type in UTypes.
+13 Requires: Each type in Types shall satisfy the requirements of MoveAssignable (Table 22) from the
+corresponding type in UTypes. is_assignable<Ti&, Ui&&>::value == true for all i. sizeof...(Types)
+== sizeof...(UTypes).
+14 Effects: For all i, assigns std::forward<Ui>(get<i)>(u)) to get<i>(*this).
+15 Returns: *this.
+template <class U1, class U2> tuple& operator=(const pair<U1, U2>& u);
+16 Requires: sizeof...(Types) == 2. is_assignable<T0&, const U1&>::value is true for the first
+type T0 in Types and is_assignable<T1&, const U2&>::value is true for the second type T1 in
+Types.
+17 Effects: Assigns u.first to the first element of *this and u.second to the second element of *this.
+18 Returns: *this
+template <class U1, class U2> tuple& operator=(pair<U1, U2>&& u) noexcept;
+19 The expression inside noexcept is equivalent to:
+§ 20.4.2.2 508
+
+ c ISO/IEC N3242=11-0012
+is_nothrow_assignable<T1&, U1&&>::value &&
+is_nothrow_assignable<T2&, U2&&>::value
+where T1 and T2 are the first and second types, respectively, in Types.
+20 Requires: sizeof...(Types) == 2. is_assignable<T0&, U1&&>::value is true for the first type T0
+in Types and is_assignable<T1&, U2&&>::value is true for the second type T1 in Types.
+21 Effects: Assigns std::forward<U1>(u.first) to the first element of *this and
+std::forward<U2>(u.second) to the second element of *this.
+22 Returns: *this.
+20.4.2.3 swap [tuple.swap]
+void swap(tuple& rhs) noexcept;
+1 Remark: The expression inside noexcept is equivalent to the logical and of the following expressions:
+noexcept(swap(declval<Ti&>>(), declval<Ti&>()))
+where T1 is the ith type in Types.
+2 Requires: Each element in *this shall be swappable with (17.6.3.2) the corresponding element in rhs.
+3 Effects: Calls swap for each element in *this and its corresponding element in rhs.
+4 Throws: Nothing unless one of the element-wise swap calls throws an exception.
+20.4.2.4 Tuple creation functions [tuple.creation]
+1 In the function descriptions that follow, let i be in the range [0,sizeof...(TTypes)) in order and let Ti
+be the ith type in a template parameter pack named TTypes; let j be in the range [0,sizeof...(UTypes))
+in order and U
+j be the jth type in a template parameter pack named UTypes, where indexing is zero-based.
+template<class... Types>
+tuple<VTypes...> make_tuple(Types&&... t);
+2 Let Ui be decay<Ti>::type for each Ti in Types. Then each Vi in VTypes is X& if Ui equals
+reference_wrapper<X>, otherwise Vi is Ui.
+3 Returns: tuple<VTypes...>(std::forward<Types>(t)...).
+4 [ Example:
+int i; float j;
+make_tuple(1, ref(i), cref(j))
+creates a tuple of type
+tuple<int, int&, const float&>
+— end example ]
+template<class... Types>
+tuple<Types&&...> forward_as_tuple(Types&&... t) noexcept;
+§ 20.4.2.4 509
+
+ c ISO/IEC N3242=11-0012
+5 Effects: Constructs a tuple of references to the arguments in t suitable for forwarding as arguments to
+a function. Because the result may contain references to temporary variables, a program shall ensure
+that the return value of this function does not outlive any of its arguments. (e.g., the program should
+typically not store the result in a named variable).
+6 Returns: tuple<Types&&...>(std::forward<Types>(t)...)
+template<class... Types>
+tuple<Types&...> tie(Types&... t) noexcept;
+7 Returns: tuple<Types&>(t...). When an argument in t is ignore, assigning any value to the
+corresponding tuple element has no effect.
+8 [ Example: tie functions allow one to create tuples that unpack tuples into variables. ignore can be
+used for elements that are not needed:
+int i; std::string s;
+tie(i, ignore, s) = make_tuple(42, 3.14, "C++");
+// i == 42, s == "C++"
+— end example ]
+template <class... TTypes, class... UTypes>
+tuple<TTypes..., UTypes...> tuple_cat(const tuple<TTypes...>& t, const tuple<UTypes...>& u);
+9 Requires: is_copy_constructible<Ti>::value is true for all i and is_copy_constructible<Uj>::value
+is true for all j.
+10 Returns: A tuple object constructed by initializing its first sizeof...(TTypes) elements from the corresponding elements of t and initializing its last sizeof...(UTypes) elements from the corresponding
+elements of u.
+template <class... TTypes, class... UTypes>
+tuple<TTypes..., UTypes...> tuple_cat(tuple<TTypes...>&& t, const tuple<UTypes...>& u);
+11 Requires: is_move_constructible<Ti>::value is true for all i and is_copy_constructible<Uj>::value
+is true for all j.
+12 Returns: A tuple object constructed by initializing the ith element with std::forward<Ti>(get<i>(t))
+for all i and initializing the (j + sizeof ...(TTypes))th element with get<j>(u) for all j.
+template <class... TTypes, class... UTypes>
+tuple<TTypes..., UTypes...> tuple_cat(const tuple<TTypes...>& t, tuple<UTypes...>&& u);
+13 Requires: is_copy_constructible<Ti>::value is true for all i and is_move_constructible<Uj>::value
+is true for all j.
+14 Returns: A tuple object constructed by initializing the ith element with get<i>(t) for all i and
+initializing the (j + sizeof ...(TTypes))th element with std::forward<Uj>(get<j>(u)) for all j.
+template <class... TTypes, class... UTypes>
+tuple<TTypes..., UTypes...> tuple_cat(tuple<TTypes...>&& t, tuple<UTypes...>&& u);
+15 Requires: is_move_constructible<Ti>::value is true for all i and is_move_constructible<Uj>::value
+is true for all j.
+16 Returns: A tuple object constructed by initializing the ith element with std::forward<Ti>(get<i>(t))
+for all i and initializing the (j + sizeof ...(TTypes))th element with std::forward<Uj>(get<j>(u)) for
+all j.
+§ 20.4.2.4 510
+
+ c ISO/IEC N3242=11-0012
+20.4.2.5 Tuple helper classes [tuple.helper]
+template <class... Types>
+class tuple_size<tuple<Types...> >
+: public integral_constant<size_t, sizeof...(Types)> { };
+template <size_t I, class... Types>
+class tuple_element<I, tuple<Types...> > {
+public:
+typedef TI type;
+};
+1 Requires: I < sizeof...(Types). The program is ill-formed if I is out of bounds.
+2 Type: TI is the type of the Ith element of Types, where indexing is zero-based.
+template <class T> class tuple_size<const T>;
+template <class T> class tuple_size<volatile T>;
+template <class T> class tuple_size<const volatile T>;
+3 Let TS denote tuple_size<T> of the cv-unqualified type T. Then each of the three templates shall
+meet the UnaryTypeTrait requirements (20.9.1) with a BaseCharacteristic of
+integral_constant<remove_cv<decltype(TS::value)>::type, TS::value>
+template <size_t I, class T> class tuple_element<I, const T>;
+template <size_t I, class T> class tuple_element<I, volatile T>;
+template <size_t I, class T> class tuple_element<I, const volatile T>;
+Let TE denote tuple_element<I, T> of the cv-unqualified type T. Then each of the three templates
+shall meet the TransformationTrait requirements (20.9.1) with a member typedef type that names
+the following type:
+— for the first specialization, add_const<TE::type>::type,
+— for the second specialization, add_volatile<TE::type>::type, and
+— for the third specialization, add_cv<TE::type>::type.
+20.4.2.6 Element access [tuple.elem]
+template <size_t I, class... Types>
+typename tuple_element<I, tuple<Types...> >::type& get(tuple<Types...>& t) noexcept;
+1 Requires: I < sizeof...(Types). The program is ill-formed if I is out of bounds.
+2 Returns: A reference to the Ith element of t, where indexing is zero-based.
+template <size_t I, class... types>
+typename tuple_element<I, tuple<Types...> >::type&& get(tuple<Types...>&& t) noexcept;
+3 Effects: Equivalent to return std::forward<typename tuple_element<I, tuple<Types...> >
+::type&&>(get<I>(t));
+4 Note: if a T in Types is some reference type X&, the return type is X&, not X&&. However, if the element
+type is a non-reference type T, the return type is T&&.
+template <size_t I, class... Types>
+typename tuple_element<I, tuple<Types...> >::type const& get(const tuple<Types...>& t) noexcept;
+§ 20.4.2.6 511
+
+ c ISO/IEC N3242=11-0012
+5 Requires: I < sizeof...(Types). The program is ill-formed if I is out of bounds.
+6 Returns: A const reference to the Ith element of t, where indexing is zero-based.
+7 [ Note: Constness is shallow. If a T in Types is some reference type X&, the return type is X&, not
+const X&. However, if the element type is non-reference type T, the return type is const T&. This is
+consistent with how constness is defined to work for member variables of reference type. — end note ]
+8 [ Note: The reason get is a nonmember function is that if this functionality had been provided as a
+member function, code where the type depended on a template parameter would have required using
+the template keyword. — end note ]
+20.4.2.7 Relational operators [tuple.rel]
+template<class... TTypes, class... UTypes>
+bool operator==(const tuple<TTypes...>& t, const tuple<UTypes...>& u);
+1 Requires: For all i, where 0 <= i and i < sizeof...(Types), get<i>(t) == get<i>(u) is a valid
+expression returning a type that is convertible to bool. sizeof...(TTypes) == sizeof...(UTypes).
+2 Returns: true iff get<i>(t) == get<i>(u) for all i. For any two zero-length tuples e and f, e == f
+returns true.
+3 Effects: The elementary comparisons are performed in order from the zeroth index upwards. No
+comparisons or element accesses are performed after the first equality comparison that evaluates to
+false.
+template<class... TTypes, class... UTypes>
+bool operator<(const tuple<TTypes...>& t, const tuple<UTypes...>& u);
+4 Requires: For all i, where 0 <= i and i < sizeof...(Types), get<i>(t) < get<i>(u) and get<i>(u)
+< get<i>(t) are valid expressions returning types that are convertible to bool. sizeof...(TTypes)
+== sizeof...(UTypes).
+5 Returns: The result of a lexicographical comparison between t and u. The result is defined as:
+(bool)(get<0>(t) < get<0>(u)) || (!(bool)(get<0>(u) < get<0>(t)) && ttail < utail), where
+rtail for some tuple r is a tuple containing all but the first element of r. For any two zero-length tuples
+e and f, e < f returns false.
+template<class... TTypes, class... UTypes>
+bool operator!=(const tuple<TTypes...>& t, const tuple<UTypes...>& u);
+6 Returns: !(t == u).
+template<class... TTypes, class... UTypes>
+bool operator>(const tuple<TTypes...>& t, const tuple<UTypes...>& u);
+7 Returns: u < t.
+template<class... TTypes, class... UTypes>
+bool operator<=(const tuple<TTypes...>& t, const tuple<UTypes...>& u);
+8 Returns: !(u < t)
+template<class... TTypes, class... UTypes>
+bool operator>=(const tuple<TTypes...>& t, const tuple<UTypes...>& u);
+9 Returns: !(t < u)
+§ 20.4.2.7 512
+
+ c ISO/IEC N3242=11-0012
+10 [ Note: The above definitions for comparison operators do not require ttail (or utail) to be constructed. It may
+not even be possible, as t and u are not required to be copy constructible. Also, all comparison operators
+are short circuited; they do not perform element accesses beyond what is required to determine the result
+of the comparison. — end note ]
+20.4.2.8 Tuple traits [tuple.traits]
+template <class... Types, class Alloc>
+struct uses_allocator<tuple<Types...>, Alloc> : true_type { };
+Requires: Alloc shall be an Allocator (17.6.3.5).
+1 [ Note: Specialization of this trait informs other library components that tuple can be constructed
+with an allocator, even though it does not have a nested allocator_type. — end note ]
+20.4.2.9 Tuple specialized algorithms [tuple.special]
+template <class... Types>
+void swap(tuple<Types...>& x, tuple<Types...>& y) noexcept;
+1 Remark: The expression inside noexcept is equivalent to:
+noexcept(x.swap(y))
+2 Effects: x.swap(y)
+20.5 Class template bitset [template.bitset]
+Header <bitset> synopsis
+#include <string>
+#include <iosfwd> // for istream, ostream
+namespace std {
+template <size_t N> class bitset;
+// 20.5.4 bitset operators:
+template <size_t N>
+bitset<N> operator&(const bitset<N>&, const bitset<N>&) noexcept;
+template <size_t N>
+bitset<N> operator|(const bitset<N>&, const bitset<N>&) noexcept;
+template <size_t N>
+bitset<N> operator^(const bitset<N>&, const bitset<N>&) noexcept;
+template <class charT, class traits, size_t N>
+basic_istream<charT, traits>&
+operator>>(basic_istream<charT, traits>& is, bitset<N>& x);
+template <class charT, class traits, size_t N>
+basic_ostream<charT, traits>&
+operator<<(basic_ostream<charT, traits>& os, const bitset<N>& x);
+}
+1 The header <bitset> defines a class template and several related functions for representing and manipulating
+fixed-size sequences of bits.
+namespace std {
+template<size_t N> class bitset {
+§ 20.5 513
+
+ c ISO/IEC N3242=11-0012
+public:
+// bit reference:
+class reference {
+friend class bitset;
+reference() noexcept;
+public:
+~reference() noexcept;
+reference& operator=(bool x) noexcept; // for b[i] = x;
+reference& operator=(const reference&) noexcept; // for b[i] = b[j];
+bool operator~() const noexcept; // flips the bit
+operator bool() const noexcept; // for x = b[i];
+reference& flip() noexcept; // for b[i].flip();
+};
+// 20.5.1 constructors:
+constexpr bitset() noexcept;
+constexpr bitset(unsigned long long val) noexcept;
+template<class charT, class traits, class Allocator>
+explicit bitset(
+const basic_string<charT,traits,Allocator>& str,
+typename basic_string<charT,traits,Allocator>::size_type pos = 0,
+typename basic_string<charT,traits,Allocator>::size_type n =
+basic_string<charT,traits,Allocator>::npos,
+charT zero = charT(’0’), charT one = charT(’1’));
+template <class charT>
+explicit bitset(
+const charT* str,
+typename basic_string<charT>::size_type n = basic_string<charT>::npos,
+charT zero = charT(’0’), charT one = charT(’1’));
+// 20.5.2 bitset operations:
+bitset<N>& operator&=(const bitset<N>& rhs) noexcept;
+bitset<N>& operator|=(const bitset<N>& rhs) noexcept;
+bitset<N>& operator^=(const bitset<N>& rhs) noexcept;
+bitset<N>& operator<<=(size_t pos) noexcept;
+bitset<N>& operator>>=(size_t pos) noexcept;
+bitset<N>& set() noexcept;
+bitset<N>& set(size_t pos, bool val = true);
+bitset<N>& reset() noexcept;
+bitset<N>& reset(size_t pos);
+bitset<N> operator~() const noexcept;
+bitset<N>& flip() noexcept;
+bitset<N>& flip(size_t pos);
+// element access:
+constexpr bool operator[](size_t pos) const noexcept; // for b[i];
+reference operator[](size_t pos) noexcept; // for b[i];
+unsigned long to_ulong() const;
+unsigned long long to_ullong() const;
+template <class charT = char,
+class traits = char_traits<charT>,
+class Allocator = allocator<charT> >
+basic_string<charT, traits, Allocator>
+to_string(charT zero = charT(’0’), charT one = charT(’1’)) const;
+§ 20.5 514
+
+ c ISO/IEC N3242=11-0012
+size_t count() const noexcept;
+constexpr size_t size() noexcept;
+bool operator==(const bitset<N>& rhs) const noexcept;
+bool operator!=(const bitset<N>& rhs) const noexcept;
+bool test(size_t pos) const;
+bool all() const noexcept;
+bool any() const noexcept;
+bool none() const noexcept;
+bitset<N> operator<<(size_t pos) const noexcept;
+bitset<N> operator>>(size_t pos) const noexcept;
+};
+// 20.5.3 hash support
+template <class T> struct hash;
+template <size_t N> struct hash<bitset<N> >;
+}
+2 The class template bitset<N>describes an object that can store a sequence consisting of a fixed number of
+bits, N.
+3 Each bit represents either the value zero (reset) or one (set). To toggle a bit is to change the value zero to
+one, or the value one to zero. Each bit has a non-negative position pos. When converting between an object
+of class bitset<N> and a value of some integral type, bit position pos corresponds to the bit value 1 <<pos.
+The integral value corresponding to two or more bits is the sum of their bit values.
+4 The functions described in this subclause can report three kinds of errors, each associated with a distinct
+exception:
+— an invalid-argument error is associated with exceptions of type invalid_argument (19.2.3);
+— an out-of-range error is associated with exceptions of type out_of_range (19.2.5);
+— an overflow error is associated with exceptions of type overflow_error (19.2.8).
+20.5.1 bitset constructors [bitset.cons]
+constexpr bitset() noexcept;
+1 Effects: Constructs an object of class bitset<N>, initializing all bits to zero.
+constexpr bitset(unsigned long long val) noexcept;
+2 Effects: Constructs an object of class bitset<N>, initializing the first M bit positions to the corresponding bit values in val. M is the smaller of N and the number of bits in the value representation (3.9) of
+unsigned long long. If M < N, the remaining bit positions are initialized to zero.
+template <class charT, class traits, class Allocator>
+explicit
+bitset(const basic_string<charT, traits, Allocator>& str,
+typename basic_string<charT, traits, Allocator>::size_type pos = 0,
+typename basic_string<charT, traits, Allocator>::size_type n =
+basic_string<charT, traits, Allocator>::npos,
+charT zero = charT(’0’), charT one = charT(’1’));
+3 Requires: pos <= str.size().
+4 Throws: out_of_range if pos > str.size().
+§ 20.5.1 515
+
+ c ISO/IEC N3242=11-0012
+5 Effects: Determines the effective length rlen of the initializing string as the smaller of n and str.size()
+- pos.
+The function then throws invalid_argument if any of the rlen characters in str beginning at position
+pos is other than zero or one. The function uses traits::eq() to compare the character values.
+Otherwise, the function constructs an object of class bitset<N>, initializing the first M bit positions to
+values determined from the corresponding characters in the string str. M is the smaller of N and rlen.
+6 An element of the constructed string has value zero if the corresponding character in str, beginning
+at position pos, is 0 zero. Otherwise, the element has the value 1. Character position pos + M - 1
+corresponds to bit position zero. Subsequent decreasing character positions correspond to increasing
+bit positions.
+7 If M < N, remaining bit positions are initialized to zero.
+template <class charT>
+explicit bitset(
+const charT* str,
+typename basic_string<charT>::size_type n = basic_string<charT>::npos,
+charT zero = charT(’0’), charT one = charT(’1’));
+8 Effects: Constructs an object of class bitset<N> as if by
+bitset(
+n == basic_string<charT>::npos
+? basic_string<charT>(str)
+: basic_string<charT>(str, n),
+0, n, zero, one)
+20.5.2 bitset members [bitset.members]
+bitset<N>& operator&=(const bitset<N>& rhs) noexcept;
+1 Effects: Clears each bit in *this for which the corresponding bit in rhs is clear, and leaves all other
+bits unchanged.
+2 Returns: *this.
+bitset<N>& operator|=(const bitset<N>& rhs) noexcept;
+3 Effects: Sets each bit in *this for which the corresponding bit in rhs is set, and leaves all other bits
+unchanged.
+4 Returns: *this.
+bitset<N>& operator^=(const bitset<N>& rhs) noexcept;
+5 Effects: Toggles each bit in *this for which the corresponding bit in rhs is set, and leaves all other
+bits unchanged.
+6 Returns: *this.
+bitset<N>& operator<<=(size_t pos) noexcept;
+7 Effects: Replaces each bit at position I in *this with a value determined as follows:
+— If I < pos, the new value is zero;
+— If I >= pos, the new value is the previous value of the bit at position I - pos.
+§ 20.5.2 516
+
+ c ISO/IEC N3242=11-0012
+8 Returns: *this.
+bitset<N>& operator>>=(size_t pos) noexcept;
+9 Effects: Replaces each bit at position I in *this with a value determined as follows:
+— If pos >= N - I, the new value is zero;
+— If pos < N - I, the new value is the previous value of the bit at position I + pos.
+10 Returns: *this.
+bitset<N>& set() noexcept;
+11 Effects: Sets all bits in *this.
+12 Returns: *this.
+bitset<N>& set(size_t pos, bool val = true);
+13 Requires: pos is valid
+14 Throws: out_of_range if pos does not correspond to a valid bit position.
+15 Effects: Stores a new value in the bit at position pos in *this. If val is nonzero, the stored value is
+one, otherwise it is zero.
+16 Returns: *this.
+bitset<N>& reset() noexcept;
+17 Effects: Resets all bits in *this.
+18 Returns: *this.
+bitset<N>& reset(size_t pos);
+19 Requires: pos is valid
+20 Throws: out_of_range if pos does not correspond to a valid bit position.
+21 Effects: Resets the bit at position pos in *this.
+22 Returns: *this.
+bitset<N> operator~() const noexcept;
+23 Effects: Constructs an object x of class bitset<N> and initializes it with *this.
+24 Returns: x.flip().
+bitset<N>& flip() noexcept;
+25 Effects: Toggles all bits in *this.
+26 Returns: *this.
+bitset<N>& flip(size_t pos) noexcept;
+27 Requires: pos is valid
+28 Throws: out_of_range if pos does not correspond to a valid bit position.
+29 Effects: Toggles the bit at position pos in *this.
+§ 20.5.2 517
+
+ c ISO/IEC N3242=11-0012
+30 Returns: *this.
+unsigned long to_ulong() const;
+31 Throws: overflow_error if the integral value x corresponding to the bits in *this cannot be represented as type unsigned long.
+32 Returns: x.
+unsigned long long to_ullong() const;
+33 Throws: overflow_error if the integral value x corresponding to the bits in *this cannot be represented as type unsigned long long.
+34 Returns: x.
+template <class charT = char,
+class traits = char_traits<charT>,
+class Allocator = allocator<charT> >
+basic_string<charT, traits, Allocator>
+to_string(charT zero = charT(’0’), charT one = charT(’1’)) const;
+35 Effects: Constructs a string object of the appropriate type and initializes it to a string of length N
+characters. Each character is determined by the value of its corresponding bit position in *this.
+Character position N - 1 corresponds to bit position zero. Subsequent decreasing character positions
+correspond to increasing bit positions. Bit value zero becomes the character zero, bit value one
+becomes the character one.
+36 Returns: The created object.
+size_t count() const noexcept;
+37 Returns: A count of the number of bits set in *this.
+constexpr size_t size() noexcept;
+38 Returns: N.
+bool operator==(const bitset<N>& rhs) const noexcept;
+39 Returns: A nonzero value true if the value of each bit in *this equals the value of the corresponding
+bit in rhs.
+bool operator!=(const bitset<N>& rhs) const noexcept;
+40 Returns: A nonzero value true if !(*this == rhs).
+bool test(size_t pos) const;
+41 Requires: pos is valid
+42 Throws: out_of_range if pos does not correspond to a valid bit position.
+43 Returns: true if the bit at position pos in *this has the value one.
+bool all() const noexcept;
+44 Returns: count() == size()
+bool any() const noexcept;
+45 Returns: count() != 0
+§ 20.5.2 518
+
+ c ISO/IEC N3242=11-0012
+bool none() const noexcept;
+46 Returns: count() == 0
+bitset<N> operator<<(size_t pos) const noexcept;
+47 Returns: bitset<N>(*this) <<= pos.
+bitset<N> operator>>(size_t pos) const noexcept;
+48 Returns: bitset<N>(*this) >>= pos.
+constexpr bool operator[](size_t pos) noexcept;
+49 Requires: pos shall be valid.
+50 Returns: true if the bit at position pos in *this has the value one, otherwise false.
+bitset<N>::reference operator[](size_t pos) noexcept;
+51 Requires: pos shall be valid.
+52 Returns: An object of type bitset<N>::reference such that (*this)[pos] == this->test(pos),
+and such that (*this)[pos] = val is equivalent to this->set(pos, val).
+53 Remark: For the purpose of determining the presence of a data race (1.10), any access or update
+through the resulting reference potentially accesses or modifies, respectively, the entire underlying
+bitset.
+20.5.3 bitset hash support [bitset.hash]
+template <size_t N> struct hash<bitset<N> >;
+1 Requires: the template specialization shall meet the requirements of class template hash (20.8.12).
+20.5.4 bitset operators [bitset.operators]
+bitset<N> operator&(const bitset<N>& lhs, const bitset<N>& rhs) noexcept;
+1 Returns: bitset<N>(lhs) &= rhs.
+bitset<N> operator|(const bitset<N>& lhs, const bitset<N>& rhs) noexcept;
+2 Returns: bitset<N>(lhs) |= rhs.
+bitset<N> operator^(const bitset<N>& lhs, const bitset<N>& rhs) noexcept;
+3 Returns: bitset<N>(lhs) ˆ= rhs.
+template <class charT, class traits, size_t N>
+basic_istream<charT, traits>&
+operator>>(basic_istream<charT, traits>& is, bitset<N>& x);
+4 A formatted input function (27.7.2.2).
+5 Effects: Extracts up to N characters from is. Stores these characters in a temporary object str of type
+basic_string<charT, traits>, then evaluates the expression x = bitset<N>(str). Characters are
+extracted and stored until any of the following occurs:
+— N characters have been extracted and stored;
+§ 20.5.4 519
+
+ c ISO/IEC N3242=11-0012
+— end-of-file occurs on the input sequence;
+— the next input character is neither is.widen(’0’) nor is.widen(’1’) (in which case the input
+character is not extracted).
+6 If no characters are stored in str, calls is.setstate(ios_base::failbit) (which may throw ios_-
+base::failure (27.5.5.4)).
+7 Returns: is.
+template <class charT, class traits, size_t N>
+basic_ostream<charT, traits>&
+operator<<(basic_ostream<charT, traits>& os, const bitset<N>& x);
+8 Returns:
+os << x.template to_string<charT,traits,allocator<charT> >(
+use_facet<ctype<charT> >(os.getloc()).widen(’0’),
+use_facet<ctype<charT> >(os.getloc()).widen(’1’))
+(see 27.7.3.6).
+20.6 Memory [memory]
+20.6.1 In general [memory.general]
+1 This subclause describes the contents of the header <memory> (20.6.2) and some of the contents of the C
+headers <cstdlib> and cstring> (20.6.13).
+20.6.2 Header <memory> synopsis [memory.syn]
+1 The header <memory> defines several types and template functions that describe properties of pointers and
+pointer-like types, manage memory for containers and other template types, and construct multiple objects
+in unitialized memory buffers (20.6.3–20.6.12). The header also defines the templates unique_ptr, shared_-
+ptr, weak_ptr, and various template functions that operate on objects of these types (20.7).
+namespace std {
+// 20.6.3, pointer traits
+template <class Ptr> struct pointer_traits;
+template <class T> struct pointer_traits<T*>;
+// 20.6.4, pointer safety
+enum class pointer_safety { relaxed, preferred, strict };
+void declare_reachable(void *p);
+template <class T> T *undeclare_reachable(T *p) noexcept;
+void declare_no_pointers(char *p, size_t n) noexcept;
+void undeclare_no_pointers(char *p, size_t n) noexcept;
+pointer_safety get_pointer_safety() noexcept;
+// 20.6.5, pointer alignment function
+void *align(std::size_t alignment, std::size_t size,
+void *&ptr, std::size_t& space) noexcept;
+// 20.6.6, allocator argument tag
+struct allocator_arg_t { };
+constexpr allocator_arg_t allocator_arg = allocator_arg_t();
+§ 20.6.2 520
+
+ c ISO/IEC N3242=11-0012
+// 20.6.7, uses_allocator
+template <class T, class Alloc> struct uses_allocator;
+// 20.6.8, allocator traits
+template <class Alloc> struct allocator_traits;
+// 20.6.9, the default allocator:
+template <class T> class allocator;
+template <> class allocator<void>;
+template <class T, class U>
+bool operator==(const allocator<T>&, const allocator<U>&) noexcept;
+template <class T, class U>
+bool operator!=(const allocator<T>&, const allocator<U>&) noexcept;
+// 20.6.10, raw storage iterator:
+template <class OutputIterator, class T> class raw_storage_iterator;
+// 20.6.11, temporary buffers:
+template <class T>
+pair<T*,ptrdiff_t> get_temporary_buffer(ptrdiff_t n) noexcept;
+template <class T>
+void return_temporary_buffer(T* p) noexcept;
+// 20.6.12, specialized algorithms:
+template <class T> T* addressof(T& r) noexcept;
+template <class InputIterator, class ForwardIterator>
+ForwardIterator uninitialized_copy(InputIterator first, InputIterator last,
+ForwardIterator result);
+template <class InputIterator, class Size, class ForwardIterator>
+ForwardIterator uninitialized_copy_n(InputIterator first, Size n,
+ForwardIterator result);
+template <class ForwardIterator, class T>
+void uninitialized_fill(ForwardIterator first, ForwardIterator last,
+const T& x);
+template <class ForwardIterator, class Size, class T>
+ForwardIterator uninitialized_fill_n(ForwardIterator first, Size n, const T& x);
+// 20.7.1 class template unique_ptr:
+template <class T> class default_delete;
+template <class T> class default_delete<T[]>;
+template <class T, class D = default_delete<T>> class unique_ptr;
+template <class T, class D> class unique_ptr<T[], D>;
+template <class T1, class D1, class T2, class D2>
+bool operator==(const unique_ptr<T1, D1>& x, const unique_ptr<T2, D2>& y);
+template <class T1, class D1, class T2, class D2>
+bool operator!=(const unique_ptr<T1, D1>& x, const unique_ptr<T2, D2>& y);
+template <class T1, class D1, class T2, class D2>
+bool operator<(const unique_ptr<T1, D1>& x, const unique_ptr<T2, D2>& y);
+template <class T1, class D1, class T2, class D2>
+bool operator<=(const unique_ptr<T1, D1>& x, const unique_ptr<T2, D2>& y);
+template <class T1, class D1, class T2, class D2>
+bool operator>(const unique_ptr<T1, D1>& x, const unique_ptr<T2, D2>& y);
+template <class T1, class D1, class T2, class D2>
+bool operator>=(const unique_ptr<T1, D1>& x, const unique_ptr<T2, D2>& y);
+§ 20.6.2 521
+
+ c ISO/IEC N3242=11-0012
+// 20.7.2.1, class bad_weak_ptr:
+class bad_weak_ptr;
+// 20.7.2.2, class template shared_ptr:
+template<class T> class shared_ptr;
+// 20.7.2.2.7, shared_ptr comparisons:
+template<class T, class U>
+bool operator==(shared_ptr<T> const& a, shared_ptr<U> const& b);
+template<class T, class U>
+bool operator!=(shared_ptr<T> const& a, shared_ptr<U> const& b);
+template<class T, class U>
+bool operator<(shared_ptr<T> const& a, shared_ptr<U> const& b);
+template<class T, class U>
+bool operator>(shared_ptr<T> const& a, shared_ptr<U> const& b);
+template<class T, class U>
+bool operator<=(shared_ptr<T> const& a, shared_ptr<U> const& b);
+template<class T, class U>
+bool operator>=(shared_ptr<T> const& a, shared_ptr<U> const& b);
+// 20.7.2.2.8, shared_ptr specialized algorithms:
+template<class T> void swap(shared_ptr<T>& a, shared_ptr<T>& b);
+// 20.7.2.2.9, shared_ptr casts:
+template<class T, class U>
+shared_ptr<T> static_pointer_cast(shared_ptr<U> const& r) noexcept;
+template<class T, class U>
+shared_ptr<T> dynamic_pointer_cast(shared_ptr<U> const& r) noexcept;
+template<class T, class U>
+shared_ptr<T> const_pointer_cast(shared_ptr<U> const& r) noexcept;
+// 20.7.2.2.10, shared_ptr get_deleter:
+template<class D, class T> D* get_deleter(shared_ptr<T> const& p) noexcept;
+// 20.7.2.2.11, shared_ptr I/O:
+template<class E, class T, class Y>
+basic_ostream<E, T>& operator<< (basic_ostream<E, T>& os, shared_ptr<Y> const& p);
+// 20.7.2.3, class template weak_ptr:
+template<class T> class weak_ptr;
+// 20.7.2.3.6, weak_ptr specialized algorithms:
+template<class T> void swap(weak_ptr<T>& a, weak_ptr<T>& b) noexcept;
+// 20.7.2.3.7, class template owner_less:
+template<class T> class owner_less;
+// 20.7.2.4, class template enable_shared_from_this:
+template<class T> class enable_shared_from_this;
+// 20.7.2.5, shared_ptr atomic access:
+template<class T>
+bool atomic_is_lock_free(const shared_ptr<T>* p) noexcept;
+§ 20.6.2 522
+
+ c ISO/IEC N3242=11-0012
+template<class T>
+shared_ptr<T> atomic_load(const shared_ptr<T>* p) noexcept;
+template<class T>
+shared_ptr<T> atomic_load_explicit(const shared_ptr<T>* p, memory_order mo) noexcept;
+template<class T>
+void atomic_store(shared_ptr<T>* p, shared_ptr<T> r) noexcept;
+template<class T>
+void atomic_store_explicit(shared_ptr<T>* p, shared_ptr<T> r, memory_order mo) noexcept;
+template<class T>
+shared_ptr<T> atomic_exchange(shared_ptr<T>* p, shared_ptr<T> r) noexcept;
+template<class T>
+shared_ptr<T> atomic_exchange_explicit(shared_ptr<T>* p, shared_ptr<T> r,
+memory_order mo) noexcept;
+template<class T>
+bool atomic_compare_exchange_weak(
+shared_ptr<T>* p, shared_ptr<T>* v, shared_ptr<T> w) noexcept;
+template<class T>
+bool atomic_compare_exchange_strong(
+shared_ptr<T>* p, shared_ptr<T>* v, shared_ptr<T> w) noexcept;
+template<class T>
+bool atomic_compare_exchange_weak_explicit(
+shared_ptr<T>* p, shared_ptr<T>* v, shared_ptr<T> w,
+memory_order success, memory_order failure) noexcept;
+template<class T>
+bool atomic_compare_exchange_strong_explicit(
+shared_ptr<T>* p, shared_ptr<T>* v, shared_ptr<T> w,
+memory_order success, memory_order failure) noexcept;
+// 20.7.2.6 hash support
+template <class T> struct hash;
+template <class T, class D> struct hash<unique_ptr<T, D> >;
+template <class T> struct hash<shared_ptr<T> >;
+// D.10, auto_ptr (deprecated)
+template <class X> class auto_ptr;
+}
+20.6.3 Pointer traits [pointer.traits]
+1 The class template pointer_traits supplies a uniform interface to certain attributes of pointer-like types.
+namespace std {
+template <class Ptr> struct pointer_traits {
+typedef Ptr pointer;
+typedef see below element_type;
+typedef see below difference_type;
+template <class U> using rebind = see below;
+static pointer pointer_to(see below r);
+};
+template <class T> struct pointer_traits<T*> {
+§ 20.6.3 523
+
+ c ISO/IEC N3242=11-0012
+typedef T* pointer;
+typedef T element_type;
+typedef ptrdiff_t difference_type;
+template <class U> using rebind = U*;
+static pointer pointer_to(see below r);
+};
+}
+20.6.3.1 Pointer traits member types [pointer.traits.types]
+typedef see below element_type;
+1 Type: Ptr::element_type if such a type exists; otherwise, T if Ptr is a class template instantiation of the form SomePointer<T, Args>, where Args is zero or more type arguments; otherwise, the
+specialization is ill-formed.
+typedef see below difference_type;
+2 Type: Ptr::difference_type if such a type exists; otherwise, std::ptrdiff_t.
+template <class U> using rebind = see below;
+3 Alias template: Ptr::rebind<U> if such a type exists; otherwise, SomePointer<U, Args> if Ptr is
+a class template instantiation of the form SomePointer<T, Args>, where Args is zero or more type
+arguments; otherwise, the instantiation of rebind is ill-formed.
+20.6.3.2 Pointer traits member functions [pointer.traits.functions]
+static pointer pointer_traits::pointer_to(see below r);
+static pointer pointer_traits<T*>::pointer_to(see below r);
+Remark: if element_type is (possibly cv-qualified) void, the type of r is unspecified; otherwise, it is
+T&.
+Returns: The first template function returns a dereferenceable pointer to r obtained by calling
+Ptr::pointer_to(r); an instantiation of this function is ill-formed if Ptr does not have a matching pointer_to static member function. The second template function returns std::addressof(r).
+20.6.4 Pointer safety [util.dynamic.safety]
+1 A complete object is declared reachable while the number of calls to declare_reachable with an argument
+referencing the object exceeds the number of calls to undeclare_reachable with an argument referencing
+the object.
+void declare_reachable(void *p);
+2 Requires: p shall be a safely-derived pointer (3.7.4.3) or a null pointer value.
+3 Effects: If p is not null, the complete object referenced by p is subsequently declared reachable (3.7.4.3).
+4 Throws: May throw std::bad_alloc if the system cannot allocate additional memory that may be
+required to track objects declared reachable.
+template <class T> T *undeclare_reachable(T *p) noexcept;
+§ 20.6.4 524
+
+ c ISO/IEC N3242=11-0012
+5 Requires: If p is not null, the complete object referenced by p shall have been previously declared
+reachable, and shall be live (3.8) from the time of the call until the last undeclare_reachable(p) call
+on the object.
+6 Returns: A safely derived copy of p which shall compare equal to p.
+7 [ Note: It is expected that calls to declare_reachable(p) will consume a small amount of memory in
+addition to that occupied by the referenced object until the matching call to undeclare_reachable(p)
+is encountered. Long running programs should arrange that calls are matched. — end note ]
+void declare_no_pointers(char *p, size_t n) noexcept;
+8 Requires: No bytes in the specified range have been previously registered with declare_no_pointers().
+If the specified range is in an allocated object, then it must be entirely within a single allocated object. The object must be live until the corresponding undeclare_no_pointers() call. [ Note: In a
+garbage-collecting implementation, the fact that a region in an object is registered with declare_no_-
+pointers() should not prevent the object from being collected. — end note ]
+9 Effects: The n bytes starting at p no longer contain traceable pointer locations, independent of their
+type. Hence pointers located there may not be dereferenced if the object they point to was created
+by global operator new and not previously declared reachable. [ Note: This may be used to inform a
+garbage collector or leak detector that this region of memory need not be traced. — end note ]
+10 [ Note: Under some conditions implementations may need to allocate memory. However, the request
+can be ignored if memory allocation fails. — end note ]
+void undeclare_no_pointers(char *p, size_t n) noexcept;
+11 Requires: The same range must previously have been passed to declare_no_pointers().
+12 Effects: Unregisters a range registered with declare_no_pointers() for destruction. It must be called
+before the lifetime of the object ends.
+pointer_safety get_pointer_safety() noexcept;
+13 Returns: pointer_safety::strict if the implementation has strict pointer safety (3.7.4.3). It is implementation defined whether get_pointer_safety returns pointer_safety::relaxed or pointer_-
+safety::preferred if the implementation has relaxed pointer safety.227
+20.6.5 Align [ptr.align]
+void *align(std::size_t alignment, std::size_t size,
+void *&ptr, std::size_t& space) noexcept;
+1 Effects: If it is possible to fit size bytes of storage aligned by alignment into the buffer pointed to by
+ptr with length space, the function updates ptr to point to the first possible address of such storage
+and decreases space by the number of bytes used for alignment. Otherwise, the function does nothing.
+2 Requires:
+— alignment shall be a fundamental alignment value or an extended alignment value supported by
+the implementation in this context
+— ptr shall point to contiguous storage of at least space bytes
+227) pointer_safety::preferred might be returned to indicate that a leak detector is running so that the program can avoid
+spurious leak reports.
+§ 20.6.5 525
+
+ c ISO/IEC N3242=11-0012
+3 Returns: A null pointer if the requested aligned buffer would not fit into the available space, otherwise
+the adjusted value of ptr.
+4 [ Note: The function updates its ptr and space arguments so that it can be called repeatedly with
+possibly different alignment and size arguments for the same buffer.
+20.6.6 Allocator argument tag [allocator.tag]
+namespace std {
+struct allocator_arg_t { };
+constexpr allocator_arg_t allocator_arg = allocator_arg_t();
+}
+1 The allocator_arg_t struct is an empty structure type used as a unique type to disambiguate constructor
+and function overloading. Specifically, several types (see tuple 20.4) have constructors with allocator_-
+arg_t as the first argument, immediately followed by an argument of a type that satisfies the Allocator
+requirements (17.6.3.5).
+20.6.7 uses_allocator [allocator.uses]
+20.6.7.1 uses_allocator trait [allocator.uses.trait]
+template <class T, class Alloc> struct uses_allocator;
+1 Remark: automatically detects whether T has a nested allocator_type that is convertible from Alloc.
+Meets the BinaryTypeTrait requirements (20.9.1). The implementation shall provide a definition
+that is derived from true_type if a type T::allocator_type exists and is_convertible<Alloc,
+T::allocator_type>::value != false, otherwise it shall be derived from false_type. A program
+may specialize this template to derive from true_type for a user-defined type T that does not have a
+nested allocator_type but nonetheless can be constructed with an allocator where either:
+— the first argument of a constructor has type allocator_arg_t and the second argument has type
+Alloc or
+— the last argument of a constructor has type Alloc.
+20.6.7.2 uses-allocator construction [allocator.uses.construction]
+1 Uses-allocator construction with allocator Alloc refers to the construction of an object obj of type T, using
+constructor arguments v1, v2, ..., vN of types V1, V2, ..., VN, respectively, and an allocator alloc
+of type Alloc, according to the following rules:
+— if uses_allocator<T, Alloc>::value is false and is_constructible<T, V1, V2, ..., VN>::value
+is true, then obj is initialized as obj(v1, v2, ..., vN);
+— otherwise, if uses_allocator<T, Alloc>::value is true and is_constructible<T, allocator_-
+arg_t, Alloc, V1, V2, ..., VN>::value is true, then obj is initialized as obj(allocator_arg,
+alloc, v1, v2, ..., vN);
+— otherwise, if uses_allocator<T, Alloc>::value is true and is_constructible<T, V1, V2, ...,
+VN, Alloc>::value is true, then obj is initialized as obj(v1, v2, ..., vN, alloc);
+— otherwise, the request for uses-allocator construction is ill-formed. [ Note: An error will result if
+uses_allocator<T, Alloc>::value is true but the specific constructor does not take an allocator.
+This definition prevents a silent failure to pass the allocator to an element. — end note ]
+§ 20.6.7.2 526
+
+ c ISO/IEC N3242=11-0012
+20.6.8 Allocator traits [allocator.traits]
+1 The class template allocator_traits supplies a uniform interface to all allocator types. An allocator cannot
+be a non-class type, however, even if allocator_traits supplies the entire required interface. [ Note: Thus,
+it is always possible to create a derived class from an allocator. — end note ]
+namespace std {
+template <class Alloc> struct allocator_traits {
+typedef Alloc allocator_type;
+typedef typename Alloc::value_type value_type;
+typedef see below pointer;
+typedef see below const_pointer;
+typedef see below void_pointer;
+typedef see below const_void_pointer;
+typedef see below difference_type;
+typedef see below size_type;
+typedef see below propagate_on_container_copy_assignment;
+typedef see below propagate_on_container_move_assignment;
+typedef see below propagate_on_container_swap;
+template <class T> using rebind_alloc = see below;
+template <class T> using rebind_traits = allocator_traits<rebind_alloc<T> >;
+static pointer allocate(Alloc& a, size_type n);
+static pointer allocate(Alloc& a, size_type n, const_void_pointer hint);
+static void deallocate(Alloc& a, pointer p, size_type n) noexcept;
+template <class T, class... Args>
+static void construct(Alloc& a, T* p, Args&&... args);
+template <class T>
+static void destroy(Alloc& a, T* p);
+static size_type max_size(const Alloc& a);
+static Alloc select_on_container_copy_construction(const Alloc& rhs);
+};
+}
+20.6.8.1 Allocator traits member types [allocator.traits.types]
+typedef see below pointer;
+1 Type: Alloc::pointer if such a type exists; otherwise, value_type*.
+typedef see below const_pointer;
+2 Type: Alloc::const_pointer if such a type exists; otherwise, pointer_traits<pointer>::rebind<const
+value_type>.
+typedef see below void_pointer;
+§ 20.6.8.1 527
+
+ c ISO/IEC N3242=11-0012
+3 Type: Alloc::void_pointer if such a type exists; otherwise, pointer_traits<pointer>::rebind<void>.
+typedef see below const_void_pointer;
+4 Type: Alloc::const_void_pointer if such a type exists; otherwise, pointer_traits<pointer>::rebind<const
+void>.
+typedef see below difference_type;
+5 Type: Alloc::difference_type if such a type exists; otherwise, pointer_traits<pointer>::difference_-
+type.
+typedef see below size_type;
+6 Type: Alloc::size_type if such a type exists; otherwise, make_unsigned<difference_type>::type.
+typedef see below propagate_on_container_copy_assignment;
+7 Type: Alloc::propagate_on_container_copy_assignment if such a type exits, otherwise false_-
+type.
+typedef see below propagate_on_container_move_assignment;
+8 Type: Alloc::propagate_on_container_move_assignment if such a type exits, otherwise false_-
+type.
+typedef see below propagate_on_container_swap;
+9 Type: Alloc::propagate_on_container_swap if such a type exits, otherwise false_type.
+template <class T> using rebind_alloc = see below;
+10 Alias template: Alloc::rebind<T>::other if such a type exists; otherwise, Alloc<T, Args> if Alloc
+is a class template instantiation of the form Alloc<U, Args>, where Args is zero or more type arguments; otherwise, the instantiation of rebind_alloc is ill-formed.
+20.6.8.2 Allocator traits static member functions [allocator.traits.members]
+static pointer allocate(Alloc& a, size_type n);
+1 Returns: a.allocate(n).
+static pointer allocate(Alloc& a, size_type n, const_void_pointer hint);
+2 Returns: a.allocate(n, hint) if that expression is well-formed; otherwise, a.allocate(n).
+static void deallocate(Alloc& a, pointer p, size_type n) noexcept;
+3 Effects: calls a.deallocate(p, n).
+template <class T, class... Args>
+static void construct(Alloc& a, T* p, Args&&... args);
+4 Effects: calls a.construct(p, std::forward<Args>(args)...) if that call is well-formed; otherwise,
+invokes ::new (static_cast<void*>(p)) T(std::forward<Args>(args)...).
+template <class T>
+static void destroy(Alloc& a, T* p);
+5 Effects: calls a.destroy(p) if that call is well-formed; otherwise, invokes p->~T().
+§ 20.6.8.2 528
+
+ c ISO/IEC N3242=11-0012
+static size_type max_size(Alloc& a);
+6 Returns: a.max_size() if that expression is well-formed; otherwise, numeric_limits<size_type>::max().
+static Alloc select_on_container_copy_construction(const Alloc& rhs);
+7 Returns: rhs.select_on_container_copy_construction() if that expression is well-formed; otherwise, rhs.
+20.6.9 The default allocator [default.allocator]
+namespace std {
+template <class T> class allocator;
+// specialize for void:
+template <> class allocator<void> {
+public:
+typedef void* pointer;
+typedef const void* const_pointer;
+// reference-to-void members are impossible.
+typedef void value_type;
+template <class U> struct rebind { typedef allocator<U> other; };
+};
+template <class T> class allocator {
+public:
+typedef size_t size_type;
+typedef ptrdiff_t difference_type;
+typedef T* pointer;
+typedef const T* const_pointer;
+typedef T& reference;
+typedef const T& const_reference;
+typedef T value_type;
+template <class U> struct rebind { typedef allocator<U> other; };
+allocator() noexcept;
+allocator(const allocator&) noexcept;
+template <class U> allocator(const allocator<U>&) noexcept;
+~allocator();
+pointer address(reference x) const noexcept;
+const_pointer address(const_reference x) const noexcept;
+pointer allocate(
+size_type, allocator<void>::const_pointer hint = 0);
+void deallocate(pointer p, size_type n) noexcept;
+size_type max_size() const noexcept;
+template<class U, class... Args>
+void construct(U* p, Args&&... args);
+template <class U>
+void destroy(U* p);
+};
+}
+§ 20.6.9 529
+
+ c ISO/IEC N3242=11-0012
+20.6.9.1 allocator members [allocator.members]
+1 Except for the destructor, member functions of the default allocator shall not introduce data races (1.10)
+as a result of concurrent calls to those member functions from different threads. Calls to these functions
+that allocate or deallocate a particular unit of storage shall occur in a single total order, and each such
+deallocation call shall happen before the next allocation (if any) in this order.
+pointer address(reference x) const noexcept;
+2 Returns: The actual address of the object referenced by x, even in the presence of an overloaded
+operator&.
+const_pointer address(const_reference x) const noexcept;
+3 Returns: The actual address of the object referenced by x, even in the presence of an overloaded
+operator&.
+pointer allocate(size_type n, allocator<void>::const_pointer hint = 0) noexcept;
+4 [ Note: In a container member function, the address of an adjacent element is often a good choice to
+pass for the hint argument. — end note ]
+5 Returns: A pointer to the initial element of an array of storage of size n * sizeof(T), aligned appropriately for objects of type T. It is implementation-defined whether over-aligned types are supported (3.11).
+6 Remark: the storage is obtained by calling ::operator new(std::size_t) (18.6.1), but it is unspecified when or how often this function is called. The use of hint is unspecified, but intended as an aid
+to locality if an implementation so desires.
+7 Throws: bad_alloc if the storage cannot be obtained.
+void deallocate(pointer p, size_type n) noexcept;
+8 Requires: p shall be a pointer value obtained from allocate(). n shall equal the value passed as the
+first argument to the invocation of allocate which returned p.
+9 Effects: Deallocates the storage referenced by p .
+10 Remarks: Uses ::operator delete(void*) (18.6.1), but it is unspecified when this function is called.
+size_type max_size() const noexcept;
+11 Returns: The largest value N for which the call allocate(N,0) might succeed.
+template <class U, class... Args>
+void construct(U* p, Args&&... args);
+12 Effects: ::new((void *)p) U(std::forward<Args>(args)...)
+template <class U>
+void destroy(U* p);
+13 Effects: p->~U()
+20.6.9.2 allocator globals [allocator.globals]
+template <class T1, class T2>
+bool operator==(const allocator<T1>&, const allocator<T2>&) noexcept;
+1 Returns: true.
+§ 20.6.9.2 530
+
+ c ISO/IEC N3242=11-0012
+template <class T1, class T2>
+bool operator!=(const allocator<T1>&, const allocator<T2>&) noexcept;
+2 Returns: false.
+20.6.10 Raw storage iterator [storage.iterator]
+1 raw_storage_iterator is provided to enable algorithms to store their results into uninitialized memory.
+The formal template parameter OutputIterator is required to have its operator* return an object for
+which operator& is defined and returns a pointer to T, and is also required to satisfy the requirements of an
+output iterator (24.2.4).
+namespace std {
+template <class OutputIterator, class T>
+class raw_storage_iterator
+: public iterator<output_iterator_tag,void,void,void,void> {
+public:
+explicit raw_storage_iterator(OutputIterator x) noexcept;
+raw_storage_iterator<OutputIterator,T>& operator*() noexcept;
+raw_storage_iterator<OutputIterator,T>& operator=(const T& element);
+raw_storage_iterator<OutputIterator,T>& operator++() noexcept;
+raw_storage_iterator<OutputIterator,T> operator++(int) noexcept;
+};
+}
+explicit raw_storage_iterator(OutputIterator x) noexcept;
+2 Effects: Initializes the iterator to point to the same value to which x points.
+raw_storage_iterator<OutputIterator,T>& operator*() noexcept;
+3 Returns: *this
+raw_storage_iterator<OutputIterator,T>& operator=(const T& element);
+4 Effects: Constructs a value from element at the location to which the iterator points.
+5 Returns: A reference to the iterator.
+raw_storage_iterator<OutputIterator,T>& operator++() noexcept;
+6 Effects: Pre-increment: advances the iterator and returns a reference to the updated iterator.
+raw_storage_iterator<OutputIterator,T> operator++(int) noexcept;
+7 Effects: Post-increment: advances the iterator and returns the old value of the iterator.
+20.6.11 Temporary buffers [temporary.buffer]
+template <class T>
+pair<T*, ptrdiff_t> get_temporary_buffer(ptrdiff_t n) noexcept;
+1 Effects: Obtains a pointer to storage sufficient to store up to n adjacent T objects. It is implementationdefined whether over-aligned types are supported (3.11).
+2 Returns: A pair containing the buffer’s address and capacity (in the units of sizeof(T)), or a pair
+of 0 values if no storage can be obtained or if n <= 0.
+§ 20.6.11 531
+
+ c ISO/IEC N3242=11-0012
+template <class T> void return_temporary_buffer(T* p) noexcept;
+3 Effects: Deallocates the buffer to which p points.
+4 Requires: The buffer shall have been previously allocated by get_temporary_buffer.
+20.6.12 Specialized algorithms [specialized.algorithms]
+1 All the iterators that are used as formal template parameters in the following algorithms are required to
+have their operator* return an object for which operator& is defined and returns a pointer to T. In the
+algorithm uninitialized_copy, the formal template parameter InputIterator is required to satisfy the
+requirements of an input iterator (24.2.3). In all of the following algorithms, the formal template parameter
+ForwardIterator is required to satisfy the requirements of a forward iterator (24.2.5), and is required to
+have the property that no exceptions are thrown from increment, assignment, comparison, or dereference of
+valid iterators. In the following algorithms, if an exception is thrown there are no effects.
+20.6.12.1 addressof [specialized.addressof]
+template <class T> T* addressof(T& r) noexcept;
+1 Returns: The actual address of the object or function referenced by r, even in the presence of an
+overloaded operator&.
+20.6.12.2 uninitialized_copy [uninitialized.copy]
+template <class InputIterator, class ForwardIterator>
+ForwardIterator uninitialized_copy(InputIterator first, InputIterator last,
+ForwardIterator result);
+1 Effects:
+for (; first != last; ++result, ++first)
+::new (static_cast<void*>(&*result))
+typename iterator_traits<ForwardIterator>::value_type(*first);
+2 Returns: result
+template <class InputIterator, class Size, class ForwardIterator>
+ForwardIterator uninitialized_copy_n(InputIterator first, Size n,
+ForwardIterator result);
+3 Effects:
+for ( ; n > 0; ++result, ++first, --n) {
+::new (static_cast<void*>(&*result))
+typename iterator_traits<ForwardIterator>::value_type(*first);
+}
+4 Returns: result
+20.6.12.3 uninitialized_fill [uninitialized.fill]
+template <class ForwardIterator, class T>
+void uninitialized_fill(ForwardIterator first, ForwardIterator last,
+const T& x);
+§ 20.6.12.3 532
+
+ c ISO/IEC N3242=11-0012
+1 Effects:
+for (; first != last; ++first)
+::new (static_cast<void*>(&*first))
+typename iterator_traits<ForwardIterator>::value_type(x);
+20.6.12.4 uninitialized_fill_n [uninitialized.fill.n]
+template <class ForwardIterator, class Size, class T>
+ForwardIterator uninitialized_fill_n(ForwardIterator first, Size n, const T& x);
+1 Effects:
+for (; n--; ++first)
+::new (static_cast<void*>(&*first))
+typename iterator_traits<ForwardIterator>::value_type(x);
+return first;
+20.6.13 C library [c.malloc]
+1 Table 45 describes the header <cstdlib>.
+Table 45 — Header <cstdlib> synopsis
+Type Name(s)
+Functions: calloc malloc
+free realloc
+2 The contents are the same as the Standard C library header <stdlib.h>, with the following changes:
+3 The functions calloc(), malloc(), and realloc() do not attempt to allocate storage by calling ::operator
+new() (18.6).
+4 The function free() does not attempt to deallocate storage by calling ::operator delete().
+See also: ISO C Clause 7.11.2.
+5 Storage allocated directly with malloc(), calloc(), or realloc() is implicitly declared reachable (see 3.7.4.3)
+on allocation, ceases to be declared reachable on deallocation, and need not cease to be declared reachable as
+the result of an undeclare_reachable() call. [ Note: This allows existing C libraries to remain unaffected
+by restrictions on pointers that are not safely derived, at the expense of providing far fewer garbage collection and leak detection options for malloc()-allocated objects. It also allows malloc() to be implemented
+with a separate allocation arena, bypassing the normal declare_reachable() implementation. The above
+functions should never intentionally be used as a replacement for declare_reachable(), and newly written
+code is strongly encouraged to treat memory allocated with these functions as though it were allocated with
+operator new. — end note ]
+6 Table 46 describes the header <cstring>.
+7 The contents are the same as the Standard C library header <string.h>, with the change to memchr()
+specified in 21.7.
+See also: ISO C Clause 7.11.2.
+§ 20.6.13 533
+
+ c ISO/IEC N3242=11-0012
+Table 46 — Header <cstring> synopsis
+Type Name(s)
+Macro: NULL
+Type: size_t
+Functions: memchr memcmp
+memcpy memmove memset
+20.7 Smart pointers [smartptr]
+20.7.1 Class template unique_ptr [unique.ptr]
+1 A unique pointer is an object that owns another object and manages that other object through a pointer.
+More precisely, a unique pointer is an object u that stores a pointer to a second object p and will dispose of
+p when u is itself destroyed (e.g., when leaving block scope (6.7)). In this context, u is said to own p.
+2 The mechanism by which u disposes of p is known as p’s associated deleter, a function object whose correct
+invocation results in p’s appropriate disposition (typically its deletion).
+3 Let the notation u.p denote the pointer stored by u, and let u.d denote the associated deleter. Upon request,
+u can reset (replace) u.p and u.d with another pointer and deleter, but must properly dispose of its owned
+object via the associated deleter before such replacement is considered completed.
+4 Additionally, u can, upon request, transfer ownership to another unique pointer u2. Upon completion of
+such a transfer, the following postconditions hold:
+— u2.p is equal to the pre-transfer u.p,
+— u.p is equal to nullptr, and
+— if the pre-transfer u.d maintained state, such state has been transferred to u2.d.
+As in the case of a reset, u2 must properly dispose of its pre-transfer owned object via the pre-transfer
+associated deleter before the ownership transfer is considered complete. [ Note: A deleter’s state need never
+be copied, only moved or swapped as ownership is transferred. — end note ]
+5 Each object of a type U instantiated from the unique_ptr template specified in this subclause has the strict
+ownership semantics, specified above, of a unique pointer. In partial satisfaction of these semantics, each
+such U is MoveConstructible and MoveAssignable, but is not CopyConstructible nor CopyAssignable.
+The template parameter T of unique_ptr may be an incomplete type.
+6 [ Note: The uses of unique_ptr include providing exception safety for dynamically allocated memory, passing
+ownership of dynamically allocated memory to a function, and returning dynamically allocated memory from
+a function. — end note ]
+namespace std {
+template<class T> struct default_delete;
+template<class T> struct default_delete<T[]>;
+template<class T, class D = default_delete<T>> class unique_ptr;
+template<class T, class D> class unique_ptr<T[], D>;
+template<class T, class D> void swap(unique_ptr<T, D>& x, unique_ptr<T, D>& y) noexcept;
+template<class T1, class D1, class T2, class D2>
+bool operator==(const unique_ptr<T1, D1>& x, const unique_ptr<T2, D2>& y);
+§ 20.7.1 534
+
+ c ISO/IEC N3242=11-0012
+template<class T1, class D1, class T2, class D2>
+bool operator!=(const unique_ptr<T1, D1>& x, const unique_ptr<T2, D2>& y);
+template<class T1, class D1, class T2, class D2>
+bool operator<(const unique_ptr<T1, D1>& x, const unique_ptr<T2, D2>& y);
+template<class T1, class D1, class T2, class D2>
+bool operator<=(const unique_ptr<T1, D1>& x, const unique_ptr<T2, D2>& y);
+template<class T1, class D1, class T2, class D2>
+bool operator>(const unique_ptr<T1, D1>& x, const unique_ptr<T2, D2>& y);
+template<class T1, class D1, class T2, class D2>
+bool operator>=(const unique_ptr<T1, D1>& x, const unique_ptr<T2, D2>& y);
+}
+20.7.1.1 Default deleters [unique.ptr.dltr]
+20.7.1.1.1 In general [unique.ptr.dltr.general]
+1 The class template default_delete serves as the default deleter (destruction policy) for the class template
+unique_ptr.
+2 The template parameter T of default_delete may be an incomplete type.
+20.7.1.1.2 default_delete [unique.ptr.dltr.dflt]
+namespace std {
+template <class T> struct default_delete {
+constexpr default_delete() noexcept = default;
+template <class U> default_delete(const default_delete<U>&) noexcept;
+void operator()(T*) const;
+};
+}
+template <class U> default_delete(const default_delete<U>& other) noexcept;
+1 Effects: Constructs a default_delete object from another default_delete<U> object.
+2 Remarks: This constructor shall not participate in overload resolution unless U* is implicitly convertible
+to T*.
+void operator()(T *ptr) const;
+3 Effects: calls delete on ptr.
+4 Remarks: If T is an incomplete type, the program is ill-formed.
+20.7.1.1.3 default_delete<T[]> [unique.ptr.dltr.dflt1]
+namespace std {
+template <class T> struct default_delete<T[]> {
+constexpr default_delete() noexcept = default;
+void operator()(T*) const;
+template <class U> void operator()(U*) const = delete;
+};
+}
+void operator()(T* ptr) const;
+§ 20.7.1.1.3 535
+
+ c ISO/IEC N3242=11-0012
+1 Effects: calls delete[] on ptr.
+2 Remarks: If T is an incomplete type, the program is ill-formed.
+20.7.1.2 unique_ptr for single objects [unique.ptr.single]
+namespace std {
+template <class T, class D = default_delete<T>> class unique_ptr {
+public:
+typedef see below pointer;
+typedef T element_type;
+typedef D deleter_type;
+// 20.7.1.2.1, constructors
+constexpr unique_ptr() noexcept;
+explicit unique_ptr(pointer p) noexcept;
+unique_ptr(pointer p, see below d1) noexcept;
+unique_ptr(pointer p, see below d2) noexcept;
+unique_ptr(unique_ptr&& u) noexcept;
+constexpr unique_ptr(nullptr_t) : unique_ptr() { }
+template <class U, class E>
+unique_ptr(unique_ptr<U, E>&& u) noexcept;
+template <class U>
+unique_ptr(auto_ptr<U>&& u) noexcept;
+// 20.7.1.2.2, destructor
+~unique_ptr();
+// 20.7.1.2.3, assignment
+unique_ptr& operator=(unique_ptr&& u) noexcept;
+template <class U, class E> unique_ptr& operator=(unique_ptr<U, E>&& u) noexcept;
+unique_ptr& operator=(nullptr_t) noexcept;
+// 20.7.1.2.4, observers
+typename add_lvalue_reference<T>::type operator*() const;
+pointer operator->() const noexcept;
+pointer get() const noexcept;
+deleter_type& get_deleter() noexcept;
+const deleter_type& get_deleter() const noexcept;
+explicit operator bool() const noexcept;
+// 20.7.1.2.5 modifiers
+pointer release() noexcept;
+void reset(pointer p = pointer()) noexcept;
+void swap(unique_ptr& u) noexcept;
+// disable copy from lvalue
+unique_ptr(const unique_ptr&) = delete;
+unique_ptr& operator=(const unique_ptr&) = delete;
+};
+}
+1 The default type for the template parameter D is default_delete. A client-supplied template argument D
+shall be a function object type (20.8), lvalue-reference to function, or lvalue-reference to function object type
+§ 20.7.1.2 536
+
+ c ISO/IEC N3242=11-0012
+for which, given a value d of type D and a value ptr of type unique_ptr<T, D>::pointer, the expression
+d(ptr) is valid and has the effect of disposing of the pointer as appropriate for that deleter.
+2 If the deleter’s type D is not a reference type, D shall satisfy the requirements of Destructible (Table 24).
+3 If the type remove_reference<D>::type::pointer exists, then unique_ptr<T, D>::pointer shall be a
+synonym for remove_reference<D>::type::pointer. Otherwise unique_ptr<T, D>::pointer shall be a
+synonym for T*. The type unique_ptr<T, D>::pointer shall satisfy the requirements of NullablePointer (17.6.3.3).
+4 [ Example: Given an allocator type X (17.6.3.5) and letting A be a synonym for allocator_traits<X>, the
+types A::pointer, A::const_pointer, A::void_pointer, and A::const_void_pointer may be used as
+unique_ptr<T, D>::pointer. — end example ]
+20.7.1.2.1 unique_ptr constructors [unique.ptr.single.ctor]
+constexpr unique_ptr() noexcept;
+1 Requires: D shall satisfy the requirements of DefaultConstructible (Table 19), and that construction
+shall not throw an exception.
+2 Effects: Constructs a unique_ptr object that owns nothing, value-initializing the stored pointer and
+the stored deleter.
+3 Postconditions: get() == nullptr. get_deleter() returns a reference to the stored deleter.
+4 Remarks: If this constructor is instantiated with a pointer type or reference type for the template
+argument D, the program is ill-formed.
+explicit unique_ptr(pointer p) noexcept;
+5 Requires: D shall satisfy the requirements of DefaultConstructible (Table 19), and that construction
+shall not throw an exception.
+6 Effects: Constructs a unique_ptr which owns p, initializing the stored pointer with p and valueinitializing the stored deleter.
+7 Postconditions: get() == p. get_deleter() returns a reference to the stored deleter.
+8 Remarks: If this constructor is instantiated with a pointer type or reference type for the template
+argument D, the program is ill-formed.
+unique_ptr(pointer p, see below d1) noexcept;
+unique_ptr(pointer p, see below d2) noexcept;
+9 The signature of these constructors depends upon whether D is a reference type. If D is non-reference
+type A, then the signatures are:
+unique_ptr(pointer p, const A& d);
+unique_ptr(pointer p, A&& d);
+10 If D is an lvalue-reference type A&, then the signatures are:
+unique_ptr(pointer p, A& d);
+unique_ptr(pointer p, A&& d);
+11 If D is an lvalue-reference type const A&, then the signatures are:
+unique_ptr(pointer p, const A& d);
+unique_ptr(pointer p, const A&& d);
+§ 20.7.1.2.1 537
+
+ c ISO/IEC N3242=11-0012
+12 Requires:
+— If D is not an lvalue-reference type then
+— If d is an lvalue or const rvalue then the first constructor of this pair will be selected. D shall
+satisfy the requirements of CopyConstructible (Table 21), and the copy constructor of D
+shall not throw an exception. This unique_ptr will hold a copy of d.
+— Otherwise, d is a non-const rvalue and the second constructor of this pair will be selected. D
+shall satisfy the requirements of MoveConstructible (Table 20), and the move constructor
+of D shall not throw an exception. This unique_ptr will hold a value move constructed from
+d.
+— Otherwise D is an lvalue-reference type. d shall be reference-compatible with one of the constructors. If d is an rvalue, it will bind to the second constructor of this pair and the program
+is ill-formed. [ Note: The diagnostic could be implemented using a static_assert which assures that D is not a reference type. — end note ] Else d is an lvalue and will bind to the
+first constructor of this pair. The type which D references need not be CopyConstructible nor
+MoveConstructible. This unique_ptr will hold a D which refers to the lvalue d. [ Note: D may
+not be an rvalue-reference type. — end note ]
+13 Effects: Constructs a unique_ptr object which owns p, initializing the stored pointer with p and
+initializing the deleter as described above.
+14 Postconditions: get() == p. get_deleter() returns a reference to the stored deleter. If D is a
+reference type then get_deleter() returns a reference to the lvalue d.
+[ Example:
+D d;
+unique_ptr<int, D> p1(new int, D()); // D must be MoveConstructible
+unique_ptr<int, D> p2(new int, d); // D must be Copyconstructible
+unique_ptr<int, D&> p3(new int, d); // p3 holds a reference to d
+unique_ptr<int, const D&> p4(new int, D()); // error: rvalue deleter object combined
+// with reference deleter type
+— end example ]
+unique_ptr(unique_ptr&& u) noexcept;
+15 Requires: If D is not a reference type, D shall satisfy the requirements of MoveConstructible (Table 20).
+Construction of the deleter from an rvalue of type D shall not throw an exception.
+16 Effects: Constructs a unique_ptr by transferring ownership from u to *this. If D is a reference type,
+this deleter is copy constructed from u’s deleter; otherwise, this deleter is move constructed from u’s
+deleter. [ Note: The deleter constructor can be implemented with std::forward<D>. — end note ]
+17 Postconditions: get() yields the value u.get() yielded before the construction. get_deleter()
+returns a reference to the stored deleter that was constructed from u.get_deleter(). If D is a
+reference type then get_deleter() and u.get_deleter() both reference the same lvalue deleter.
+template <class U, class E> unique_ptr(unique_ptr<U, E>&& u) noexcept;
+18 Requires: If E is not a reference type, construction of the deleter from an rvalue of type E shall be
+well formed and shall not throw an exception. Otherwise, E is a reference type and construction of the
+deleter from an lvalue of type E shall be well formed and shall not throw an exception.
+19 Remarks: This constructor shall not participate in overload resolution unless:
+§ 20.7.1.2.1 538
+
+ c ISO/IEC N3242=11-0012
+— unique_ptr<U, E>::pointer is implicitly convertible to pointer,
+— U is not an array type, and
+— either D is a reference type and E is the same type as D, or D is not a reference type and E is
+implicitly convertible to D.
+20 Effects: Constructs a unique_ptr by transferring ownership from u to *this. If E is a reference type,
+this deleter is copy constructed from u’s deleter; otherwise, this deleter is move constructed from u’s
+deleter. [ Note: The deleter constructor can be implemented with std::forward<E>. — end note ]
+21 Postconditions: get() yields the value u.get() yielded before the construction. get_deleter()
+returns a reference to the stored deleter that was constructed from u.get_deleter().
+template <class U>
+unique_ptr(auto_ptr<U>&& u) noexcept;
+22 Effects: Constructs a unique_ptr object, initializing the stored pointer with u.release() and valueinitializing the stored deleter.
+23 Postconditions: get() yields the value u.get() yielded before the construction. u.get() == nullptr.
+get_deleter() returns a reference to the stored deleter.
+24 Remarks: This constructor shall not participate in overload resolution unless U* is implictly convertible
+to T* and D is the same type as default_delete<T>.
+20.7.1.2.2 unique_ptr destructor [unique.ptr.single.dtor]
+~unique_ptr();
+1 Requires: The expression get_deleter()(get()) shall be well formed, shall have well-defined behavior, and shall not throw exceptions. [ Note: The use of default_delete requires T to be a complete
+type. — end note ]
+2 Effects: If get() == nullptr there are no effects. Otherwise get_deleter()(get()).
+20.7.1.2.3 unique_ptr assignment [unique.ptr.single.asgn]
+unique_ptr& operator=(unique_ptr&& u) noexcept;
+1 Requires: If D is not a reference type, D shall satisfy the requirements of MoveAssignable (Table 22)
+and assignment of the deleter from an rvalue of type D shall not throw an execption. Otherwise, D
+is a reference type; remove_reference<D>::type shall satisfy the CopyAssignable requirements and
+assignment of the deleter from an lvalue of type D shall not throw an exception.
+2 Effects: Transfers ownership from u to *this as if by calling reset(u.release()) followed by an
+assignment from std::forward<D>(u.get_deleter()).
+3 Returns: *this.
+template <class U, class E> unique_ptr& operator=(unique_ptr<U, E>&& u) noexcept;
+4 Requires: If E is not a reference type, assignment of the deleter from an rvalue of type E shall be
+well-formed and shall not throw an exception. Otherwise, E is a reference type and assignment of the
+deleter from an lvalue of type E shall be well-formed and shall not throw an exception.
+5 Remarks: This operator shall not participate in overload resolution unless:
+— unique_ptr<U, E>::pointer is implicitly convertible to pointer and
+§ 20.7.1.2.3 539
+
+ c ISO/IEC N3242=11-0012
+— U is not an array type.
+6 Effects: Transfers ownership from u to *this as if by calling reset(u.release()) followed by an
+assignment from std::forward<D>(u.get_deleter()).
+7 Returns: *this.
+unique_ptr& operator=(nullptr_t) noexcept;
+8 Effects: reset().
+9 Postcondition: get() == nullptr
+10 Returns: *this.
+20.7.1.2.4 unique_ptr observers [unique.ptr.single.observers]
+typename add_lvalue_reference<T>::type operator*() const;
+1 Requires: get() != nullptr.
+2 Returns: *get().
+pointer operator->() const noexcept;
+3 Requires: get() != nullptr.
+4 Returns: get().
+5 Note: use typically requires that T be a complete type.
+pointer get() const noexcept;
+6 Returns: The stored pointer.
+deleter_type& get_deleter() noexcept;
+const deleter_type& get_deleter() const noexcept;
+7 Returns: A reference to the stored deleter.
+explicit operator bool() const noexcept;
+8 Returns: get() != nullptr.
+20.7.1.2.5 unique_ptr modifiers [unique.ptr.single.modifiers]
+pointer release() noexcept;
+1 Postcondition: get() == nullptr.
+2 Returns: The value get() had at the start of the call to release.
+void reset(pointer p = pointer()) noexcept;
+3 Requires: The expression get_deleter()(get()) shall be well formed, shall have well-defined behavior, and shall not throw exceptions.
+4 Effects: assigns p to the stored pointer, and then if the old value of the stored pointer, old_p, was not
+equal to nullptr, calls get_deleter()(old_p). [ Note: The order of these operations is significant
+because the call to get_deleter() may destroy *this. — end note ]
+§ 20.7.1.2.5 540
+
+ c ISO/IEC N3242=11-0012
+5 Postconditions: get() == p. [ Note: The postcondition does not hold if the call to get_deleter()
+destroys *this since this->get() is no longer a valid expression. — end note ]
+void swap(unique_ptr& u) noexcept;
+6 Requires: get_deleter() shall be swappable (17.6.3.2) and shall not throw an exception under swap.
+7 Effects: Invokes swap on the stored pointers and on the stored deleters of *this and u.
+20.7.1.3 unique_ptr for array objects with a runtime length [unique.ptr.runtime]
+namespace std {
+template <class T, class D> class unique_ptr<T[], D> {
+public:
+typedef see below pointer;
+typedef T element_type;
+typedef D deleter_type;
+// 20.7.1.3.1, constructors
+constexpr unique_ptr() noexcept;
+explicit unique_ptr(pointer p) noexcept;
+unique_ptr(pointer p, see below d) noexcept;
+unique_ptr(pointer p, see below d) noexcept;
+unique_ptr(unique_ptr&& u) noexcept;
+constexpr unique_ptr(nullptr_t) : unique_ptr() { }
+// destructor
+~unique_ptr();
+// assignment
+unique_ptr& operator=(unique_ptr&& u) noexcept;
+unique_ptr& operator=(nullptr_t) noexcept;
+// 20.7.1.3.2, observers
+T& operator[](size_t i) const;
+pointer get() const noexcept;
+deleter_type& get_deleter() noexcept;
+const deleter_type& get_deleter() const noexcept;
+explicit operator bool() const noexcept;
+// 20.7.1.3.3 modifiers
+pointer release() noexcept;
+void reset(pointer p = pointer()) noexcept;
+void reset(nullptr_t) noexcept;
+template <class U> void reset(U) = delete;
+void swap(unique_ptr& u) noexcept;
+// disable copy from lvalue
+unique_ptr(const unique_ptr&) = delete;
+unique_ptr& operator=(const unique_ptr&) = delete;
+};
+}
+1 A specialization for array types is provided with a slightly altered interface.
+§ 20.7.1.3 541
+
+ c ISO/IEC N3242=11-0012
+— Conversions between different types of unique_ptr<T[], D> or to or from the non-array forms of
+unique_ptr produce an ill-formed program.
+— Pointers to types derived from T are rejected by the constructors, and by reset.
+— The observers operator* and operator-> are not provided.
+— The indexing observer operator[] is provided.
+— The default deleter will call delete[].
+2 Descriptions are provided below only for member functions that have behavior different from the primary
+template.
+3 The template argument T shall be a complete type.
+20.7.1.3.1 unique_ptr constructors [unique.ptr.runtime.ctor]
+explicit unique_ptr(pointer p) noexcept;
+unique_ptr(pointer p, see below d) noexcept;
+unique_ptr(pointer p, see below d) noexcept;
+These constructors behave the same as in the primary template except that they do not accept pointer
+types which are convertible to pointer. [ Note: One implementation technique is to create private
+templated overloads of these members. — end note ]
+20.7.1.3.2 unique_ptr observers [unique.ptr.runtime.observers]
+T& operator[](size_t i) const;
+1 Requires: i < the size of the array number of elements in the array to which the stored pointer points.
+2 Returns: get()[i].
+20.7.1.3.3 unique_ptr modifiers [unique.ptr.runtime.modifiers]
+void reset(pointer p = pointer()) noexcept;
+void reset(nullptr_t p) noexcept;
+1 Effects: If get() == nullptr there are no effects. Otherwise get_deleter()(get()).
+2 Postcondition: get() == p.
+20.7.1.4 unique_ptr specialized algorithms [unique.ptr.special]
+template <class T, class D> void swap(unique_ptr<T, D>& x, unique_ptr<T, D>& y) noexcept;
+1 Effects: Calls x.swap(y).
+template <class T1, class D1, class T2, class D2>
+bool operator==(const unique_ptr<T1, D1>& x, const unique_ptr<T2, D2>& y);
+2 Returns: x.get() == y.get().
+template <class T1, class D1, class T2, class D2>
+bool operator!=(const unique_ptr<T1, D1>& x, const unique_ptr<T2, D2>& y);
+3 Returns: x.get() != y.get().
+§ 20.7.1.4 542
+
+ c ISO/IEC N3242=11-0012
+template <class T1, class D1, class T2, class D2>
+bool operator<(const unique_ptr<T1, D1>& x, const unique_ptr<T2, D2>& y);
+4 Returns: x.get() < y.get().
+template <class T1, class D1, class T2, class D2>
+bool operator<=(const unique_ptr<T1, D1>& x, const unique_ptr<T2, D2>& y);
+5 Returns: x.get() <= y.get().
+template <class T1, class D1, class T2, class D2>
+bool operator>(const unique_ptr<T1, D1>& x, const unique_ptr<T2, D2>& y);
+6 Returns: x.get() > y.get().
+template <class T1, class D1, class T2, class D2>
+bool operator>=(const unique_ptr<T1, D1>& x, const unique_ptr<T2, D2>& y);
+7 Returns: x.get() >= y.get().
+20.7.2 Shared-ownership pointers [util.smartptr]
+20.7.2.1 Class bad_weak_ptr [util.smartptr.weakptr]
+namespace std {
+class bad_weak_ptr: public std::exception {
+public:
+bad_weak_ptr() noexcept;
+};
+} // namespace std
+1 An exception of type bad_weak_ptr is thrown by the shared_ptr constructor taking a weak_ptr.
+bad_weak_ptr() noexcept;
+2 Postconditions: what() returns "bad_weak_ptr".
+20.7.2.2 Class template shared_ptr [util.smartptr.shared]
+1 The shared_ptr class template stores a pointer, usually obtained via new. shared_ptr implements semantics
+of shared ownership; the last remaining owner of the pointer is responsible for destroying the object, or
+otherwise releasing the resources associated with the stored pointer. A shared_ptr object is empty if it does
+not own a pointer.
+namespace std {
+template<class T> class shared_ptr {
+public:
+typedef T element_type;
+// 20.7.2.2.1, constructors:
+constexpr shared_ptr() noexcept;
+template<class Y> explicit shared_ptr(Y* p);
+template<class Y, class D> shared_ptr(Y* p, D d);
+template<class Y, class D, class A> shared_ptr(Y* p, D d, A a);
+template <class D> shared_ptr(nullptr_t p, D d)
+template <class D, class A> shared_ptr(nullptr_t p, D d, A a)
+template<class Y> shared_ptr(const shared_ptr<Y>& r, T *p) noexcept;
+§ 20.7.2.2 543
+
+ c ISO/IEC N3242=11-0012
+shared_ptr(const shared_ptr& r) noexcept;
+template<class Y> shared_ptr(const shared_ptr<Y>& r) noexcept;
+shared_ptr(shared_ptr&& r) noexcept;
+template<class Y> shared_ptr(shared_ptr<Y>&& r) noexcept;
+template<class Y> explicit shared_ptr(const weak_ptr<Y>& r);
+template<class Y> shared_ptr(auto_ptr<Y>&& r);
+template <class Y, class D> shared_ptr(unique_ptr<Y, D>&& r);
+constexpr shared_ptr(nullptr_t) : shared_ptr() { }
+// 20.7.2.2.2, destructor:
+~shared_ptr();
+// 20.7.2.2.3, assignment:
+shared_ptr& operator=(const shared_ptr& r) noexcept;
+template<class Y> shared_ptr& operator=(const shared_ptr<Y>& r) noexcept;
+shared_ptr& operator=(shared_ptr&& r) noexcept;
+template<class Y> shared_ptr& operator=(shared_ptr<Y>&& r) noexcept;
+template<class Y> shared_ptr& operator=(auto_ptr<Y>&& r);
+template <class Y, class D> shared_ptr& operator=(unique_ptr<Y, D>&& r);
+// 20.7.2.2.4, modifiers:
+void swap(shared_ptr& r) noexcept;
+void reset() noexcept;
+template<class Y> void reset(Y* p);
+template<class Y, class D> void reset(Y* p, D d);
+template<class Y, class D, class A> void reset(Y* p, D d, A a);
+// 20.7.2.2.5, observers:
+T* get() const noexcept;
+T& operator*() const noexcept;
+T* operator->() const noexcept;
+long use_count() const noexcept;
+bool unique() const noexcept;
+explicit operator bool() const noexcept;
+template<class U> bool owner_before(shared_ptr<U> const& b) const;
+template<class U> bool owner_before(weak_ptr<U> const& b) const;
+};
+// 20.7.2.2.6, shared_ptr creation
+template<class T, class... Args> shared_ptr<T> make_shared(Args&&... args);
+template<class T, class A, class... Args>
+shared_ptr<T> allocate_shared(const A& a, Args&&... args);
+// 20.7.2.2.7, shared_ptr comparisons:
+template<class T, class U>
+bool operator==(const shared_ptr<T>& a, const shared_ptr<U>& b) noexcept;
+template<class T, class U>
+bool operator!=(const shared_ptr<T>& a, const shared_ptr<U>& b) noexcept;
+template<class T, class U>
+bool operator<(const shared_ptr<T>& a, const shared_ptr<U>& b) noexcept;
+// 20.7.2.2.8, shared_ptr specialized algorithms:
+template<class T> void swap(shared_ptr<T>& a, shared_ptr<T>& b) noexcept;
+// 20.7.2.2.9, shared_ptr casts:
+§ 20.7.2.2 544
+
+ c ISO/IEC N3242=11-0012
+template<class T, class U>
+shared_ptr<T> static_pointer_cast(const shared_ptr<U>& r) noexcept;
+template<class T, class U>
+shared_ptr<T> dynamic_pointer_cast(const shared_ptr<U>& r) noexcept;
+template<class T, class U>
+shared_ptr<T> const_pointer_cast(const shared_ptr<U>& r) noexcept;
+// 20.7.2.2.10, shared_ptr get_deleter:
+template<class D, class T> D* get_deleter(const shared_ptr<T>& p) noexcept;
+// 20.7.2.2.11, shared_ptr I/O:
+template<class E, class T, class Y>
+basic_ostream<E, T>& operator<< (basic_ostream<E, T>& os, const shared_ptr<Y>& p);
+} // namespace std
+2 Specializations of shared_ptr shall be CopyConstructible, CopyAssignable, and LessThanComparable,
+allowing their use in standard containers. Specializations of shared_ptr shall be convertible to bool,
+allowing their use in boolean expressions and declarations in conditions. The template parameter T of
+shared_ptr may be an incomplete type.
+3 [ Example:
+if(shared_ptr<X> px = dynamic_pointer_cast<X>(py)) {
+// do something with px
+} —
+end example ]
+4 For purposes of determining the presence of a data race, member functions shall access and modify only the
+shared_ptr and weak_ptr objects themselves and not objects they refer to. Changes in use_count() do
+not reflect modifications that can introduce data races.
+20.7.2.2.1 shared_ptr constructors [util.smartptr.shared.const]
+constexpr shared_ptr() noexcept;
+1 Effects: Constructs an empty shared_ptr object.
+2 Postconditions: use_count() == 0 && get() == 0.
+template<class Y> explicit shared_ptr(Y* p);
+3 Requires: p shall be convertible to T*. Y shall be a complete type. The expression delete p shall be
+well formed, shall have well defined behavior, and shall not throw exceptions.
+4 Effects: Constructs a shared_ptr object that owns the pointer p.
+5 Postconditions: use_count() == 1 && get() == p.
+6 Throws: bad_alloc, or an implementation-defined exception when a resource other than memory
+could not be obtained.
+7 Exception safety: If an exception is thrown, delete p is called.
+template<class Y, class D> shared_ptr(Y* p, D d);
+template<class Y, class D, class A> shared_ptr(Y* p, D d, A a);
+template <class D> shared_ptr(nullptr_t p, D d);
+template <class D, class A> shared_ptr(nullptr_t p, D d, A a);
+§ 20.7.2.2.1 545
+
+ c ISO/IEC N3242=11-0012
+8 Requires: p shall be convertible to T*. D shall be CopyConstructible. The copy constructor and
+destructor of D shall not throw exceptions. The expression d(p) shall be well formed, shall have
+well defined behavior, and shall not throw exceptions. A shall be an allocator (17.6.3.5). The copy
+constructor and destructor of A shall not throw exceptions.
+9 Effects: Constructs a shared_ptr object that owns the object p and the deleter d. The second and
+fourth constructors shall use a copy of a to allocate memory for internal use.
+10 Postconditions: use_count() == 1 && get() == p.
+11 Throws: bad_alloc, or an implementation-defined exception when a resource other than memory
+could not be obtained.
+12 Exception safety: If an exception is thrown, d(p) is called.
+template<class Y> shared_ptr(const shared_ptr<Y>& r, T *p) noexcept;
+13 Effects: Constructs a shared_ptr instance that stores p and shares ownership with r.
+14 Postconditions: get() == p && use_count() == r.use_count()
+15 [ Note: To avoid the possibility of a dangling pointer, the user of this constructor must ensure that p
+remains valid at least until the ownership group of r is destroyed. — end note ]
+16 [ Note: This constructor allows creation of an empty shared_ptr instance with a non-NULL stored
+pointer. — end note ]
+shared_ptr(const shared_ptr& r) noexcept;
+template<class Y> shared_ptr(const shared_ptr<Y>& r) noexcept;
+17 Requires: The second constructor shall not participate in the overload resolution unless Y* is implicitly
+convertible to T*.
+18 Effects: If r is empty, constructs an empty shared_ptr object; otherwise, constructs a shared_ptr
+object that shares ownership with r.
+19 Postconditions: get() == r.get() && use_count() == r.use_count().
+shared_ptr(shared_ptr&& r) noexcept;
+template<class Y> shared_ptr(shared_ptr<Y>&& r) noexcept;
+20 Remark: The second constructor shall not participate in overload resolution unless Y* is convertible
+to T*.
+21 Effects: Move-constructs a shared_ptr instance from r.
+22 Postconditions: *this shall contain the old value of r. r shall be empty. r.get() == 0.
+template<class Y> explicit shared_ptr(const weak_ptr<Y>& r);
+23 Requires: Y* shall be convertible to T*.
+24 Effects: Constructs a shared_ptr object that shares ownership with r and stores a copy of the pointer
+stored in r.
+25 Postconditions: use_count() == r.use_count().
+26 Throws: bad_weak_ptr when r.expired().
+27 Exception safety: If an exception is thrown, the constructor has no effect.
+template<class Y> shared_ptr(auto_ptr<Y>&& r);
+§ 20.7.2.2.1 546
+
+ c ISO/IEC N3242=11-0012
+28 Requires: r.release() shall be convertible to T*. Y shall be a complete type. The expression delete
+r.release() shall be well formed, shall have well defined behavior, and shall not throw exceptions.
+29 Effects: Constructs a shared_ptr object that stores and owns r.release().
+30 Postconditions: use_count() == 1 && r.get() == 0.
+31 Throws: bad_alloc, or an implementation-defined exception when a resource other than memory
+could not be obtained.
+32 Exception safety: If an exception is thrown, the constructor has no effect.
+template <class Y, class D> shared_ptr(unique_ptr<Y, D>&&r);
+33 Effects: Equivalent to shared_ptr(r.release(), r.get_deleter()) when D is not a reference type,
+otherwise shared_ptr(r.release(), ref(r.get_deleter())).
+34 Exception safety: If an exception is thrown, the constructor has no effect.
+20.7.2.2.2 shared_ptr destructor [util.smartptr.shared.dest]
+~shared_ptr();
+1 Effects:
+— If *this is empty or shares ownership with another shared_ptr instance (use_count() > 1),
+there are no side effects.
+— Otherwise, if *this owns an object p and a deleter d, d(p) is called.
+— Otherwise, *this owns a pointer p, and delete p is called.
+2 [ Note: Since the destruction of *this decreases the number of instances that share ownership with *this
+by one, after *this has been destroyed all shared_ptr instances that shared ownership with *this will
+report a use_count() that is one less than its previous value. — end note ]
+20.7.2.2.3 shared_ptr assignment [util.smartptr.shared.assign]
+shared_ptr& operator=(const shared_ptr& r) noexcept;
+template<class Y> shared_ptr& operator=(const shared_ptr<Y>& r) noexcept;
+template<class Y> shared_ptr& operator=(auto_ptr<Y>&& r);
+1 Effects: Equivalent to shared_ptr(r).swap(*this).
+2 Returns: *this.
+3 [ Note: The use count updates caused by the temporary object construction and destruction are not
+observable side effects, so the implementation may meet the effects (and the implied guarantees) via
+different means, without creating a temporary. In particular, in the example:
+shared_ptr<int> p(new int);
+shared_ptr<void> q(p);
+p = p;
+q = p;
+both assignments may be no-ops. — end note ]
+shared_ptr& operator=(shared_ptr&& r) noexcept;
+template<class Y> shared_ptr& operator=(shared_ptr<Y>&& r) noexcept;
+§ 20.7.2.2.3 547
+
+ c ISO/IEC N3242=11-0012
+4 Effects: Equivalent to shared_ptr(std::move(r)).swap(*this).
+5 Returns: *this.
+template <class Y, class D> shared_ptr& operator=(unique_ptr<Y, D>&& r);
+6 Effects: Equivalent to shared_ptr(std::move(r)).swap(*this).
+7 Returns: *this
+20.7.2.2.4 shared_ptr modifiers [util.smartptr.shared.mod]
+void swap(shared_ptr& r) noexcept;
+1 Effects: Exchanges the contents of *this and r.
+void reset() noexcept;
+2 Effects: Equivalent to shared_ptr().swap(*this).
+template<class Y> void reset(Y* p);
+3 Effects: Equivalent to shared_ptr(p).swap(*this).
+template<class Y, class D> void reset(Y* p, D d);
+4 Effects: Equivalent to shared_ptr(p, d).swap(*this).
+template<class Y, class D, class A> void reset(Y* p, D d, A a);
+5 Effects: Equivalent to shared_ptr(p, d, a).swap(*this).
+20.7.2.2.5 shared_ptr observers [util.smartptr.shared.obs]
+T* get() const noexcept;
+1 Returns: the stored pointer.
+T& operator*() const noexcept;
+2 Requires: get() != 0.
+3 Returns: *get().
+4 Remarks: When T is void, it is unspecified whether this member function is declared. If it is declared,
+it is unspecified what its return type is, except that the declaration (although not necessarily the
+definition) of the function shall be well formed.
+T* operator->() const noexcept;
+5 Requires: get() != 0.
+6 Returns: get().
+long use_count() const noexcept;
+7 Returns: the number of shared_ptr objects, *this included, that share ownership with *this, or 0
+when *this is empty.
+8 [ Note: use_count() is not necessarily efficient. — end note ]
+bool unique() const noexcept;
+§ 20.7.2.2.5 548
+
+ c ISO/IEC N3242=11-0012
+9 Returns: use_count() == 1.
+10 [ Note: unique() may be faster than use_count(). If you are using unique() to implement copy on
+write, do not rely on a specific value when get() == 0. — end note ]
+explicit operator bool() const noexcept;
+11 Returns: get() != 0.
+template<class U> bool owner_before(shared_ptr<U> const& b) const;
+template<class U> bool owner_before(weak_ptr<U> const& b) const;
+12 Returns: An unspecified value such that
+— x.owner_before(y) defines a strict weak ordering as defined in 25.4;
+— under the equivalence relation defined by owner_before, !a.owner_before(b) && !b.owner_-
+before(a), two shared_ptr or weak_ptr instances are equivalent if and only if they share ownership or are both empty.
+20.7.2.2.6 shared_ptr creation [util.smartptr.shared.create]
+template<class T, class... Args> shared_ptr<T> make_shared(Args&&... args);
+template<class T, class A, class... Args>
+shared_ptr<T> allocate_shared(const A& a, Args&&... args);
+1 Requires: The expression ::new (pv) T(std::forward<Args>(args)...), where pv has type void*
+and points to storage suitable to hold an object of type T, shall be well formed. A shall be an allocator (17.6.3.5). The copy constructor and destructor of A shall not throw exceptions.
+2 Effects: Allocates memory suitable for an object of type T and constructs an object in that memory
+via the placement new expression ::new (pv) T(std::forward<Args>(args)...). The template
+allocate_shared uses a copy of a to allocate memory. If an exception is thrown, the functions have
+no effect.
+3 Returns: A shared_ptr instance that stores and owns the address of the newly constructed object of
+type T.
+4 Postconditions: get() != 0 && use_count() == 1
+5 Throws: bad_alloc, or an exception thrown from A::allocate or from the constructor of T.
+6 Remarks: Implementations are encouraged, but not required, to perform no more than one memory
+allocation. [ Note: This provides efficiency equivalent to an intrusive smart pointer. — end note ]
+7 [ Note: These functions will typically allocate more memory than sizeof(T) to allow for internal
+bookkeeping structures such as the reference counts. — end note ]
+20.7.2.2.7 shared_ptr comparison [util.smartptr.shared.cmp]
+template<class T, class U> bool operator==(const shared_ptr<T>& a, const shared_ptr<U>& b) noexcept;
+1 Returns: a.get() == b.get().
+template<class T, class U> bool operator<(const shared_ptr<T>& a, const shared_ptr<U>& b) noexcept;
+2 Returns: less<V>()(a.get(), b.get()), where V is the composite pointer type (5.9) of T* and U*.
+§ 20.7.2.2.7 549
+
+ c ISO/IEC N3242=11-0012
+3 [ Note: Defining a comparison operator allows shared_ptr objects to be used as keys in associative
+containers. — end note ]
+20.7.2.2.8 shared_ptr specialized algorithms [util.smartptr.shared.spec]
+template<class T> void swap(shared_ptr<T>& a, shared_ptr<T>& b) noexcept;
+1 Effects: Equivalent to a.swap(b).
+20.7.2.2.9 shared_ptr casts [util.smartptr.shared.cast]
+template<class T, class U> shared_ptr<T> static_pointer_cast(const shared_ptr<U>& r) noexcept;
+1 Requires: The expression static_cast<T*>(r.get()) shall be well formed.
+2 Returns: If r is empty, an empty shared_ptr<T>; otherwise, a shared_ptr<T> object that stores
+static_cast<T*>(r.get()) and shares ownership with r.
+3 Postconditions: w.get() == static_cast<T*>(r.get()) and w.use_count() == r.use_count(),
+where w is the return value.
+4 [ Note: The seemingly equivalent expression shared_ptr<T>(static_cast<T*>(r.get())) will eventually result in undefined behavior, attempting to delete the same object twice. — end note ]
+template<class T, class U> shared_ptr<T> dynamic_pointer_cast(const shared_ptr<U>& r) noexcept;
+5 Requires: The expression dynamic_cast<T*>(r.get()) shall be well formed and shall have well defined
+behavior.
+6 Returns:
+— When dynamic_cast<T*>(r.get()) returns a nonzero value, a shared_ptr<T> object that stores
+a copy of it and shares ownership with r;
+— Otherwise, an empty shared_ptr<T> object.
+7 Postcondition: w.get() == dynamic_cast<T*>(r.get()), where w is the return value.
+8 [ Note: The seemingly equivalent expression shared_ptr<T>(dynamic_cast<T*>(r.get())) will eventually result in undefined behavior, attempting to delete the same object twice. — end note ]
+template<class T, class U> shared_ptr<T> const_pointer_cast(const shared_ptr<U>& r) noexcept;
+9 Requires: The expression const_cast<T*>(r.get()) shall be well formed.
+10 Returns: If r is empty, an empty shared_ptr<T>; otherwise, a shared_ptr<T> object that stores
+const_cast<T*>(r.get()) and shares ownership with r.
+11 Postconditions: w.get() == const_cast<T*>(r.get()) and w.use_count() == r.use_count(), where
+w is the return value.
+12 [ Note: The seemingly equivalent expression shared_ptr<T>(const_cast<T*>(r.get())) will eventually result in undefined behavior, attempting to delete the same object twice. — end note ]
+20.7.2.2.10 get_deleter [util.smartptr.getdeleter]
+template<class D, class T> D* get_deleter(const shared_ptr<T>& p) noexcept;
+§ 20.7.2.2.10 550
+
+ c ISO/IEC N3242=11-0012
+1 Returns: If p owns a deleter d of type cv-unqualified D, returns &d; otherwise returns 0. The returned
+pointer remains valid as long as there exists a shared_ptr instance that owns d. [ Note: It is unspecified
+whether the pointer remains valid longer than that. This can happen if the implementation doesn’t
+destroy the deleter until all weak_ptr instances that share ownership with p have been destroyed.
+— end note ]
+20.7.2.2.11 shared_ptr I/O [util.smartptr.shared.io]
+template<class E, class T, class Y>
+basic_ostream<E, T>& operator<< (basic_ostream<E, T>& os, shared_ptr<Y> const& p);
+1 Effects: os << p.get();.
+2 Returns: os.
+20.7.2.3 Class template weak_ptr [util.smartptr.weak]
+1 The weak_ptr class template stores a weak reference to an object that is already managed by a shared_ptr.
+To access the object, a weak_ptr can be converted to a shared_ptr using the member function lock.
+namespace std {
+template<class T> class weak_ptr {
+public:
+typedef T element_type;
+// 20.7.2.3.1, constructors
+constexpr weak_ptr() noexcept;
+template<class Y> weak_ptr(shared_ptr<Y> const& r) noexcept;
+weak_ptr(weak_ptr const& r) noexcept;
+template<class Y> weak_ptr(weak_ptr<Y> const& r) noexcept;
+// 20.7.2.3.2, destructor
+~weak_ptr();
+// 20.7.2.3.3, assignment
+weak_ptr& operator=(weak_ptr const& r) noexcept;
+template<class Y> weak_ptr& operator=(weak_ptr<Y> const& r) noexcept;
+template<class Y> weak_ptr& operator=(shared_ptr<Y> const& r) noexcept;
+// 20.7.2.3.4, modifiers
+void swap(weak_ptr& r) noexcept;
+void reset() noexcept;
+// 20.7.2.3.5, observers
+long use_count() const noexcept;
+bool expired() const noexcept;
+shared_ptr<T> lock() const noexcept;
+template<class U> bool owner_before(shared_ptr<U> const& b);
+template<class U> bool owner_before(weak_ptr<U> const& b);
+};
+// 20.7.2.3.6, specialized algorithms
+template<class T> void swap(weak_ptr<T>& a, weak_ptr<T>& b) noexcept;
+} // namespace std
+§ 20.7.2.3 551
+
+ c ISO/IEC N3242=11-0012
+2 Specializations of weak_ptr shall be CopyConstructible and CopyAssignable, allowing their use in standard containers. The template parameter T of weak_ptr may be an incomplete type.
+20.7.2.3.1 weak_ptr constructors [util.smartptr.weak.const]
+constexpr weak_ptr() noexcept;
+1 Effects: Constructs an empty weak_ptr object.
+2 Postconditions: use_count() == 0.
+weak_ptr(const weak_ptr& r) noexcept;
+template<class Y> weak_ptr(const weak_ptr<Y>& r) noexcept;
+template<class Y> weak_ptr(const shared_ptr<Y>& r) noexcept;
+3 Requires: The second and third constructors shall not participate in the overload resolution unless Y*
+is implicitly convertible to T*.
+4 Effects: If r is empty, constructs an empty weak_ptr object; otherwise, constructs a weak_ptr object
+that shares ownership with r and stores a copy of the pointer stored in r.
+5 Postconditions: use_count() == r.use_count().
+20.7.2.3.2 weak_ptr destructor [util.smartptr.weak.dest]
+~weak_ptr();
+1 Effects: Destroys this weak_ptr object but has no effect on the object its stored pointer points to.
+20.7.2.3.3 weak_ptr assignment [util.smartptr.weak.assign]
+weak_ptr& operator=(const weak_ptr& r) noexcept;
+template<class Y> weak_ptr& operator=(const weak_ptr<Y>& r) noexcept;
+template<class Y> weak_ptr& operator=(const shared_ptr<Y>& r) noexcept;
+1 Effects: Equivalent to weak_ptr(r).swap(*this).
+2 Remarks: The implementation may meet the effects (and the implied guarantees) via different means,
+without creating a temporary.
+20.7.2.3.4 weak_ptr modifiers [util.smartptr.weak.mod]
+void swap(weak_ptr& r) noexcept;
+1 Effects: Exchanges the contents of *this and r.
+void reset() noexcept;
+2 Effects: Equivalent to weak_ptr().swap(*this).
+20.7.2.3.5 weak_ptr observers [util.smartptr.weak.obs]
+long use_count() const noexcept;
+1 Returns: 0 if *this is empty; otherwise, the number of shared_ptr instances that share ownership
+with *this.
+2 [ Note: use_count() is not necessarily efficient. — end note ]
+§ 20.7.2.3.5 552
+
+ c ISO/IEC N3242=11-0012
+bool expired() const noexcept;
+3 Returns: use_count() == 0.
+4 [ Note: expired() may be faster than use_count(). — end note ]
+shared_ptr<T> lock() const noexcept;
+5 Returns: expired() ? shared_ptr<T>() : shared_ptr<T>(*this).
+template<class U> bool owner_before(shared_ptr<U> const& b);
+template<class U> bool owner_before(weak_ptr<U> const& b);
+6 Returns: An unspecified value such that
+— x.owner_before(y) defines a strict weak ordering as defined in 25.4;
+— under the equivalence relation defined by owner_before, !a.owner_before(b) && !b.owner_-
+before(a), two shared_ptr or weak_ptr instances are equivalent if and only if they share ownership or are both empty.
+20.7.2.3.6 weak_ptr specialized algorithms [util.smartptr.weak.spec]
+template<class T> void swap(weak_ptr<T>& a, weak_ptr<T>& b) noexcept;
+1 Effects: Equivalent to a.swap(b).
+20.7.2.3.7 Class template owner_less [util.smartptr.ownerless]
+1 The class template owner_less allows ownership-based mixed comparisons of shared and weak pointers.
+namespace std {
+template<class T> struct owner_less;
+template<class T> struct owner_less<shared_ptr<T> > {
+typedef bool result_type;
+typedef shared_ptr<T> first_argument_type;
+typedef shared_ptr<T> second_argument_type;
+bool operator()(shared_ptr<T> const&, shared_ptr<T> const&) const;
+bool operator()(shared_ptr<T> const&, weak_ptr<T> const&) const;
+bool operator()(weak_ptr<T> const&, shared_ptr<T> const&) const;
+};
+template<class T> struct owner_less<weak_ptr<T> > {
+typedef bool result_type;
+typedef weak_ptr<T> first_argument_type;
+typedef weak_ptr<T> second_argument_type;
+bool operator()(weak_ptr<T> const&, weak_ptr<T> const&) const;
+bool operator()(shared_ptr<T> const&, weak_ptr<T> const&) const;
+bool operator()(weak_ptr<T> const&, shared_ptr<T> const&) const;
+};
+}
+2 operator()(x,y) shall return x.owner_before(y). [ Note: Note that
+— operator() defines a strict weak ordering as defined in 25.4;
+§ 20.7.2.3.7 553
+
+ c ISO/IEC N3242=11-0012
+— under the equivalence relation defined by operator(), !operator()(a, b) && !operator()(b, a),
+two shared_ptr or weak_ptr instances are equivalent if and only if they share ownership or are both
+empty.
+20.7.2.4 Class template enable_shared_from_this [util.smartptr.enab]
+1 A class T can inherit from enable_shared_from_this<T> to inherit the shared_from_this member functions that obtain a shared_ptr instance pointing to *this.
+2 [ Example:
+struct X: public enable_shared_from_this<X> {
+};
+int main() {
+shared_ptr<X> p(new X);
+shared_ptr<X> q = p->shared_from_this();
+assert(p == q);
+assert(!(p < q ) && !(q < p)); // p and q share ownership
+} —
+end example ]
+namespace std {
+template<class T> class enable_shared_from_this {
+protected:
+constexpr enable_shared_from_this() noexcept;
+enable_shared_from_this(enable_shared_from_this const&) noexcept;
+enable_shared_from_this& operator=(enable_shared_from_this const&) noexcept;
+~enable_shared_from_this();
+public:
+shared_ptr<T> shared_from_this();
+shared_ptr<T const> shared_from_this() const;
+};
+} // namespace std
+3 The template parameter T of enable_shared_from_this may be an incomplete type.
+constexpr enable_shared_from_this() noexcept;
+enable_shared_from_this(const enable_shared_from_this<T>&) noexcept;
+4 Effects: Constructs an enable_shared_from_this<T> object.
+enable_shared_from_this<T>& operator=(const enable_shared_from_this<T>&) noexcept;
+5 Returns: *this.
+~enable_shared_from_this();
+6 Effects: Destroys *this.
+shared_ptr<T> shared_from_this();
+shared_ptr<T const> shared_from_this() const;
+7 Requires: enable_shared_from_this<T> shall be an accessible base class of T. *this shall be a
+subobject of an object t of type T. There shall be at least one shared_ptr instance p that owns &t.
+8 Returns: A shared_ptr<T> object r that shares ownership with p.
+§ 20.7.2.4 554
+
+ c ISO/IEC N3242=11-0012
+9 Postconditions: r.get() == this.
+10 [ Note: A possible implementation is shown below:
+template<class T> class enable_shared_from_this {
+private:
+weak_ptr<T> __weak_this;
+protected:
+constexpr enable_shared_from_this() : __weak_this() { }
+enable_shared_from_this(enable_shared_from_this const &) { }
+enable_shared_from_this& operator=(enable_shared_from_this const &) { return *this; }
+~enable_shared_from_this() { }
+public:
+shared_ptr<T> shared_from_this() { return shared_ptr<T>(__weak_this); }
+shared_ptr<T const> shared_from_this() const { return shared_ptr<T const>(__weak_this); }
+};
+11 The shared_ptr constructors that create unique pointers can detect the presence of an enable_shared_-
+from_this base and assign the newly created shared_ptr to its __weak_this member. — end note ]
+20.7.2.5 shared_ptr atomic access [util.smartptr.shared.atomic]
+1 Concurrent access to a shared_ptr object from multiple threads does not introduce a data race if the access
+is done exclusively via the functions in this section and the instance is passed as their first argument.
+2 The meaning of the arguments of type memory_order is explained in 29.3.
+template<class T>
+bool atomic_is_lock_free(const shared_ptr<T>* p) noexcept;
+3 Requires: p shall not be null.
+4 Returns: true if atomic access to *p is lock-free, false otherwise.
+template<class T>
+shared_ptr<T> atomic_load(const shared_ptr<T>* p) noexcept;
+5 Requires: p shall not be null.
+6 Returns: atomic_load_explicit(p, memory_order_seq_cst).
+template<class T>
+shared_ptr<T> atomic_load_explicit(const shared_ptr<T>* p, memory_order mo) noexcept;
+7 Requires: p shall not be null.
+8 Requires: mo shall not be memory_order_release or memory_order_acq_rel.
+9 Returns: *p.
+template<class T>
+void atomic_store(shared_ptr<T>* p, shared_ptr<T> r) noexcept;
+10 Requires: p shall not be null.
+11 Effects: atomic_store_explicit(p, r, memory_order_seq_cst).
+template<class T>
+void atomic_store_explicit(shared_ptr<T>* p, shared_ptr<T> r, memory_order mo) noexcept;
+§ 20.7.2.5 555
+
+ c ISO/IEC N3242=11-0012
+12 Requires: p shall not be null.
+13 Requires: mo shall not be memory_order_acquire or memory_order_acq_rel.
+14 Effects: p->swap(r).
+template<class T>
+shared_ptr<T> atomic_exchange(shared_ptr<T>* p, shared_ptr<T> r) noexcept;
+15 Requires: p shall not be null.
+16 Returns: atomic_exchange_explicit(p, r, memory_order_seq_cst).
+template<class T>
+shared_ptr<T> atomic_exchange_explicit(shared_ptr<T>* p, shared_ptr<T> r,
+memory_order mo) noexcept;
+17 Requires: p shall not be null.
+18 Effects: p->swap(r).
+19 Returns: The previous value of *p.
+template<class T>
+bool atomic_compare_exchange_weak(
+shared_ptr<T>* p, shared_ptr<T>* v, shared_ptr<T> w) noexcept;
+20 Requires: p shall not be null.
+21 Returns: atomic_compare_exchange_weak_explicit(p, v, w, memory_order_seq_cst, memory_-
+order_seq_cst).
+template<class T>
+bool atomic_compare_exchange_strong(
+shared_ptr<T>* p, shared_ptr<T>* v, shared_ptr<T> w) noexcept;
+22 Returns: atomic_compare_exchange_strong_explicit(p, v, w, memory_order_seq_cst, memory_-
+order_seq_cst).
+template<class T>
+bool atomic_compare_exchange_weak_explicit(
+shared_ptr<T>* p, shared_ptr<T>* v, shared_ptr<T> w,
+memory_order success, memory_order failure) noexcept;
+template<class T>
+bool atomic_compare_exchange_strong_explicit(
+shared_ptr<T>* p, shared_ptr<T>* v, shared_ptr<T> w,
+memory_order success, memory_order failure) noexcept;
+23 Requires: p shall not be null.
+24 Requires: failure shall not be memory_order_release, memory_order_acq_rel, or stronger than
+success.
+25 Effects: If *p is equivalent to *v, assigns w to *p and has synchronization semantics corresponding to
+the value of success, otherwise assigns *p to *v and has synchronization semantics corresponding to
+the value of failure.
+26 Returns: true if *p was equivalent to *v, false otherwise.
+Throws: nothing.
+§ 20.7.2.5 556
+
+ c ISO/IEC N3242=11-0012
+27 Remarks: two shared_ptr objects are equivalent if they store the same pointer value and share
+ownership.
+28 Remarks: the weak forms may fail spuriously. See 29.6.
+20.7.2.6 Smart pointer hash support [util.smartptr.hash]
+template <class T, class D> struct hash<unique_ptr<T, D> >;
+1 Requires: The template specialization shall meet the requirements of class template hash (20.8.12). For
+an object p of type UP, where UP is unique_ptr<T, D>, hash<UP>()(p) shall evaluate to the same value
+as hash<typename UP::pointer>()(p.get()). The specialization hash<typename UP::pointer>
+shall be well-formed.
+template <class T> struct hash<shared_ptr<T> >;
+2 Requires: The template specialization shall meet the requirements of class template hash (20.8.12).
+For an object p of type shared_ptr<T>, hash<shared_ptr<T> >()(p) shall evaluate to the same value
+as hash<T*>()(p.get()).
+20.8 Function objects [function.objects]
+1 A function object type is an object type (3.9) that can be the type of the postfix-expression in a function call
+(5.2.2, 13.3.1.1).228 A function object is an object of a function object type. In the places where one would
+expect to pass a pointer to a function to an algorithmic template (Clause 25), the interface is specified to
+accept a function object. This not only makes algorithmic templates work with pointers to functions, but
+also enables them to work with arbitrary function objects.
+2 Header <functional> synopsis
+namespace std {
+// D.8.1, base (deprecated):
+template <class Arg, class Result> struct unary_function;
+template <class Arg1, class Arg2, class Result> struct binary_function;
+// 20.8.3, reference_wrapper:
+template <class T> class reference_wrapper;
+template <class T> reference_wrapper<T> ref(T&) noexcept;
+template <class T> reference_wrapper<const T> cref(const T&) noexcept;
+template <class T> void ref(const T&&) = delete;
+template <class T> void cref(const T&&) = delete;
+template <class T> reference_wrapper<T> ref(reference_wrapper<T>) noexcept;
+template <class T> reference_wrapper<const T> cref(reference_wrapper<T>) noexcept;
+// 20.8.4, arithmetic operations:
+template <class T> struct plus;
+template <class T> struct minus;
+template <class T> struct multiplies;
+template <class T> struct divides;
+template <class T> struct modulus;
+template <class T> struct negate;
+228) Such a type is a function pointer or a class type which has a member operator() or a class type which has a conversion
+to a pointer to function.
+§ 20.8 557
+
+ c ISO/IEC N3242=11-0012
+// 20.8.5, comparisons:
+template <class T> struct equal_to;
+template <class T> struct not_equal_to;
+template <class T> struct greater;
+template <class T> struct less;
+template <class T> struct greater_equal;
+template <class T> struct less_equal;
+// 20.8.6, logical operations:
+template <class T> struct logical_and;
+template <class T> struct logical_or;
+template <class T> struct logical_not;
+// 20.8.7, bitwise operations:
+template <class T> struct bit_and;
+template <class T> struct bit_or;
+template <class T> struct bit_xor;
+// 20.8.8, negators:
+template <class Predicate> class unary_negate;
+template <class Predicate>
+unary_negate<Predicate> not1(const Predicate&);
+template <class Predicate> class binary_negate;
+template <class Predicate>
+binary_negate<Predicate> not2(const Predicate&);
+// 20.8.9, bind:
+template<class T> struct is_bind_expression;
+template<class T> struct is_placeholder;
+template<class F, class... BoundArgs>
+unspecified bind(F&&, BoundArgs&&...);
+template<class R, class F, class... BoundArgs>
+unspecified bind(F&&, BoundArgs&&...);
+namespace placeholders {
+// M is the implementation-defined number of placeholders
+extern unspecified _1;
+extern unspecified _2;
+...
+extern unspecified _M;
+}
+// D.9, binders (deprecated):
+template <class Fn> class binder1st;
+template <class Fn, class T>
+binder1st<Fn> bind1st(const Fn&, const T&);
+template <class Fn> class binder2nd;
+template <class Fn, class T>
+binder2nd<Fn> bind2nd(const Fn&, const T&);
+// D.8.2.1, adaptors (deprecated):
+§ 20.8 558
+
+ c ISO/IEC N3242=11-0012
+template <class Arg, class Result> class pointer_to_unary_function;
+template <class Arg, class Result>
+pointer_to_unary_function<Arg,Result> ptr_fun(Result (*)(Arg));
+template <class Arg1, class Arg2, class Result>
+class pointer_to_binary_function;
+template <class Arg1, class Arg2, class Result>
+pointer_to_binary_function<Arg1,Arg2,Result>
+ptr_fun(Result (*)(Arg1,Arg2));
+// D.8.2.2, adaptors (deprecated):
+template<class S, class T> class mem_fun_t;
+template<class S, class T, class A> class mem_fun1_t;
+template<class S, class T>
+mem_fun_t<S,T> mem_fun(S (T::*f)());
+template<class S, class T, class A>
+mem_fun1_t<S,T,A> mem_fun(S (T::*f)(A));
+template<class S, class T> class mem_fun_ref_t;
+template<class S, class T, class A> class mem_fun1_ref_t;
+template<class S, class T>
+mem_fun_ref_t<S,T> mem_fun_ref(S (T::*f)());
+template<class S, class T, class A>
+mem_fun1_ref_t<S,T,A> mem_fun_ref(S (T::*f)(A));
+template <class S, class T> class const_mem_fun_t;
+template <class S, class T, class A> class const_mem_fun1_t;
+template <class S, class T>
+const_mem_fun_t<S,T> mem_fun(S (T::*f)() const);
+template <class S, class T, class A>
+const_mem_fun1_t<S,T,A> mem_fun(S (T::*f)(A) const);
+template <class S, class T> class const_mem_fun_ref_t;
+template <class S, class T, class A> class const_mem_fun1_ref_t;
+template <class S, class T>
+const_mem_fun_ref_t<S,T> mem_fun_ref(S (T::*f)() const);
+template <class S, class T, class A>
+const_mem_fun1_ref_t<S,T,A> mem_fun_ref(S (T::*f)(A) const);
+// 20.8.10, member function adaptors:
+template<class R, class T> unspecified mem_fn(R T::*) noexcept;
+template<class R, class T, class... Args>
+unspecified mem_fn(R (T::*)(Args...)) noexcept;
+template<class R, class T, class... Args>
+unspecified mem_fn(R (T::*)(Args...) const) noexcept;
+template<class R, class T, class... Args>
+unspecified mem_fn(R (T::*)(Args...) volatile) noexcept;
+template<class R, class T, class... Args>
+unspecified mem_fn(R (T::*)(Args...) const volatile) noexcept;
+template<class R, class T, class... Args>
+unspecified mem_fn(R (T::*)(Args...) &) noexcept;
+template<class R, class T, class... Args>
+unspecified mem_fn(R (T::*)(Args...) const &) noexcept;
+template<class R, class T, class... Args>
+unspecified mem_fn(R (T::*)(Args...) volatile &) noexcept;
+template<class R, class T, class... Args>
+unspecified mem_fn(R (T::*)(Args...) const volatile &) noexcept;
+template<class R, class T, class... Args>
+§ 20.8 559

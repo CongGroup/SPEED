@@ -36,6 +36,18 @@ typedef struct ms_ocall_print_string_t {
 	char* ms_str;
 } ms_ocall_print_string_t;
 
+typedef struct ms_ocall_load_text_file_t {
+	char* ms_filename;
+	char* ms_buffer;
+	int ms_buffer_size;
+	int* ms_filesize;
+} ms_ocall_load_text_file_t;
+
+typedef struct ms_ocall_get_time_t {
+	long int* ms_second;
+	long int* ms_nanosecond;
+} ms_ocall_get_time_t;
+
 static sgx_status_t SGX_CDECL sgx_ecall_cache_get(void* pms)
 {
 	ms_ecall_cache_get_t* ms = SGX_CAST(ms_ecall_cache_get_t*, pms);
@@ -44,7 +56,7 @@ static sgx_status_t SGX_CDECL sgx_ecall_cache_get(void* pms)
 	size_t _len_tag = 32;
 	uint8_t* _in_tag = NULL;
 	uint8_t* _tmp_meta = ms->ms_meta;
-	size_t _len_meta = 48;
+	size_t _len_meta = 64;
 	uint8_t* _in_meta = NULL;
 	uint8_t* _tmp_rlt = ms->ms_rlt;
 	int _tmp_expt_size = ms->ms_expt_size;
@@ -120,7 +132,7 @@ static sgx_status_t SGX_CDECL sgx_ecall_cache_put(void* pms)
 	size_t _len_tag = 32;
 	uint8_t* _in_tag = NULL;
 	uint8_t* _tmp_meta = ms->ms_meta;
-	size_t _len_meta = 48;
+	size_t _len_meta = 64;
 	uint8_t* _in_meta = NULL;
 	uint8_t* _tmp_rlt = ms->ms_rlt;
 	int _tmp_rlt_size = ms->ms_rlt_size;
@@ -181,10 +193,12 @@ SGX_EXTERNC const struct {
 
 SGX_EXTERNC const struct {
 	size_t nr_ocall;
-	uint8_t entry_table[1][2];
+	uint8_t entry_table[3][2];
 } g_dyn_entry_table = {
-	1,
+	3,
 	{
+		{0, 0, },
+		{0, 0, },
 		{0, 0, },
 	}
 };
@@ -222,6 +236,124 @@ sgx_status_t SGX_CDECL ocall_print_string(const char* str)
 	
 	status = sgx_ocall(0, ms);
 
+
+	sgx_ocfree();
+	return status;
+}
+
+sgx_status_t SGX_CDECL ocall_load_text_file(const char* filename, char* buffer, int buffer_size, int* filesize)
+{
+	sgx_status_t status = SGX_SUCCESS;
+	size_t _len_filename = filename ? strlen(filename) + 1 : 0;
+	size_t _len_buffer = buffer_size;
+	size_t _len_filesize = 4;
+
+	ms_ocall_load_text_file_t* ms = NULL;
+	size_t ocalloc_size = sizeof(ms_ocall_load_text_file_t);
+	void *__tmp = NULL;
+
+	ocalloc_size += (filename != NULL && sgx_is_within_enclave(filename, _len_filename)) ? _len_filename : 0;
+	ocalloc_size += (buffer != NULL && sgx_is_within_enclave(buffer, _len_buffer)) ? _len_buffer : 0;
+	ocalloc_size += (filesize != NULL && sgx_is_within_enclave(filesize, _len_filesize)) ? _len_filesize : 0;
+
+	__tmp = sgx_ocalloc(ocalloc_size);
+	if (__tmp == NULL) {
+		sgx_ocfree();
+		return SGX_ERROR_UNEXPECTED;
+	}
+	ms = (ms_ocall_load_text_file_t*)__tmp;
+	__tmp = (void *)((size_t)__tmp + sizeof(ms_ocall_load_text_file_t));
+
+	if (filename != NULL && sgx_is_within_enclave(filename, _len_filename)) {
+		ms->ms_filename = (char*)__tmp;
+		__tmp = (void *)((size_t)__tmp + _len_filename);
+		memcpy((void*)ms->ms_filename, filename, _len_filename);
+	} else if (filename == NULL) {
+		ms->ms_filename = NULL;
+	} else {
+		sgx_ocfree();
+		return SGX_ERROR_INVALID_PARAMETER;
+	}
+	
+	if (buffer != NULL && sgx_is_within_enclave(buffer, _len_buffer)) {
+		ms->ms_buffer = (char*)__tmp;
+		__tmp = (void *)((size_t)__tmp + _len_buffer);
+		memset(ms->ms_buffer, 0, _len_buffer);
+	} else if (buffer == NULL) {
+		ms->ms_buffer = NULL;
+	} else {
+		sgx_ocfree();
+		return SGX_ERROR_INVALID_PARAMETER;
+	}
+	
+	ms->ms_buffer_size = buffer_size;
+	if (filesize != NULL && sgx_is_within_enclave(filesize, _len_filesize)) {
+		ms->ms_filesize = (int*)__tmp;
+		__tmp = (void *)((size_t)__tmp + _len_filesize);
+		memset(ms->ms_filesize, 0, _len_filesize);
+	} else if (filesize == NULL) {
+		ms->ms_filesize = NULL;
+	} else {
+		sgx_ocfree();
+		return SGX_ERROR_INVALID_PARAMETER;
+	}
+	
+	status = sgx_ocall(1, ms);
+
+	if (buffer) memcpy((void*)buffer, ms->ms_buffer, _len_buffer);
+	if (filesize) memcpy((void*)filesize, ms->ms_filesize, _len_filesize);
+
+	sgx_ocfree();
+	return status;
+}
+
+sgx_status_t SGX_CDECL ocall_get_time(long int* second, long int* nanosecond)
+{
+	sgx_status_t status = SGX_SUCCESS;
+	size_t _len_second = 4;
+	size_t _len_nanosecond = 4;
+
+	ms_ocall_get_time_t* ms = NULL;
+	size_t ocalloc_size = sizeof(ms_ocall_get_time_t);
+	void *__tmp = NULL;
+
+	ocalloc_size += (second != NULL && sgx_is_within_enclave(second, _len_second)) ? _len_second : 0;
+	ocalloc_size += (nanosecond != NULL && sgx_is_within_enclave(nanosecond, _len_nanosecond)) ? _len_nanosecond : 0;
+
+	__tmp = sgx_ocalloc(ocalloc_size);
+	if (__tmp == NULL) {
+		sgx_ocfree();
+		return SGX_ERROR_UNEXPECTED;
+	}
+	ms = (ms_ocall_get_time_t*)__tmp;
+	__tmp = (void *)((size_t)__tmp + sizeof(ms_ocall_get_time_t));
+
+	if (second != NULL && sgx_is_within_enclave(second, _len_second)) {
+		ms->ms_second = (long int*)__tmp;
+		__tmp = (void *)((size_t)__tmp + _len_second);
+		memset(ms->ms_second, 0, _len_second);
+	} else if (second == NULL) {
+		ms->ms_second = NULL;
+	} else {
+		sgx_ocfree();
+		return SGX_ERROR_INVALID_PARAMETER;
+	}
+	
+	if (nanosecond != NULL && sgx_is_within_enclave(nanosecond, _len_nanosecond)) {
+		ms->ms_nanosecond = (long int*)__tmp;
+		__tmp = (void *)((size_t)__tmp + _len_nanosecond);
+		memset(ms->ms_nanosecond, 0, _len_nanosecond);
+	} else if (nanosecond == NULL) {
+		ms->ms_nanosecond = NULL;
+	} else {
+		sgx_ocfree();
+		return SGX_ERROR_INVALID_PARAMETER;
+	}
+	
+	status = sgx_ocall(2, ms);
+
+	if (second) memcpy((void*)second, ms->ms_second, _len_second);
+	if (nanosecond) memcpy((void*)nanosecond, ms->ms_nanosecond, _len_nanosecond);
 
 	sgx_ocfree();
 	return status;

@@ -16,13 +16,13 @@ typedef struct metadata_t {
 
 // timing
 typedef struct hrtime_t {
-    long second;
-    long nanosecond;
+    int second;
+    int nanosecond;
 } hrtime;
 
 inline long time_elapsed_in_us(const hrtime *start, const hrtime *end) {
-    return (end->second - start->second) * 1000000.0 +
-        (end->nanosecond - start->nanosecond) / 1000.0;
+	return (end->second - start->second) * 1000000.0 +
+		(end->nanosecond - start->nanosecond) / 1000.0;
 }
 
 #endif

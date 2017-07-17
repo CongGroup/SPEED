@@ -46,42 +46,71 @@ inline void byte_or(const byte *ina, const byte *inb,
 
 void dedup(Function *func)
 {
-    eprintf("[*] < %s - %d > ", func->get_name(), func->get_id());
+	hrtime time_tag_1, time_tag_2, time_tag_3,
+		time_tag_4, time_tag_5, time_tag_6, time_tag_7,
+		time_tag_8, time_tag_9, time_tag_10, time_tag_11, time_tag_12;
+
+    eprintf("[*] < %s - %d > \n", func->get_name(), func->get_id());
 
     int true_size = 0;
     metadata meta;
 
-    ocall_request_find(func->get_tag(),
+	get_time(&time_tag_1);
+
+	const byte* func_tag = func->get_tag();
+
+	get_time(&time_tag_2);
+
+	eprintf("Time for compute tag is [%d us]\n", time_elapsed_in_us(&time_tag_1, &time_tag_2));
+
+	get_time(&time_tag_2);
+
+    ocall_request_find(func_tag,
                        RAW(&meta),
                        func->output(), func->expt_output_size(),
                        &true_size);
+
+	get_time(&time_tag_3);
+
+	eprintf("Time for find tag with server is [%d us]\n", time_elapsed_in_us(&time_tag_2, &time_tag_3));
 
     // hit
     if (true_size > 0) {
         assert(true_size <= func->expt_output_size());
 
-        eprintf("--> fetched ");
+        eprintf("--> fetched \n");
 
         byte *h = rand_hash(meta.r, func);
 
         byte k[ENC_KEY_SIZE];
         
         byte_or(meta.enc_key, h, ENC_KEY_SIZE, k);
-
-        if (veri_dec(k, ENC_KEY_SIZE,
-                     func->output(), true_size, 
-                     func->output(), meta.mac)) {
-            eprintf("--> verified and decrypted!\n");
-        }
-        else {
-            eprintf("--> unverified, the data may have been corrupted at the caching server!\n");
-        }
+		get_time(&time_tag_4);
+		int decRes = veri_dec(k, ENC_KEY_SIZE,
+			func->output(), true_size,
+			func->output(), meta.mac);
+		get_time(&time_tag_5);
+		eprintf("Time for dec res is [%d us]\n", time_elapsed_in_us(&time_tag_4, &time_tag_5));
+		if (decRes) {
+			eprintf("--> verified and decrypted!\n");
+		}
+		else {
+			eprintf("--> unverified, the data may have been corrupted at the caching server!\n");
+		}
     }
     // miss
     else {
-        eprintf("--> missed ");
+        eprintf("--> missed \n");
         
+		get_time(&time_tag_4);
+
         func->process();
+
+		get_time(&time_tag_5);
+
+		eprintf("Time for process result is [%d us]\n", time_elapsed_in_us(&time_tag_4, &time_tag_5));
+
+		get_time(&time_tag_5);
 
         draw_rand(meta.r, RAND_SIZE);
 
@@ -89,17 +118,33 @@ void dedup(Function *func)
 
         byte *k = rand_key();
 
+		byte_or(k, h, ENC_KEY_SIZE, meta.enc_key);
+
+		get_time(&time_tag_6);
+
+		eprintf("Time for gen key is [%d us]\n", time_elapsed_in_us(&time_tag_5, &time_tag_6));
+
+		get_time(&time_tag_6);
+
         auth_enc(k, ENC_KEY_SIZE,
                  func->output(), func->expt_output_size(), 
                  func->output(), meta.mac);
 
-        byte_or(k, h, ENC_KEY_SIZE, meta.enc_key);
+		get_time(&time_tag_7);
 
-        eprintf("--> locally processed ");
+		eprintf("Time for enc res is [%d us]\n", time_elapsed_in_us(&time_tag_6, &time_tag_7));
+
+        eprintf("--> locally processed \n");
+
+		get_time(&time_tag_7);
 
         ocall_request_put(func->get_tag(),
                           RAW(&meta),
                           func->output(), func->expt_output_size());
+
+		get_time(&time_tag_8);
+
+		eprintf("Time for put to cache is [%d us]\n", time_elapsed_in_us(&time_tag_7, &time_tag_8));
         
         // TODO check put response
         eprintf("--> remotely cached!\n");

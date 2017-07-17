@@ -17,6 +17,13 @@ enclave {
      */
     untrusted {
         void ocall_print_string([in, string] const char *str);
+
+		void ocall_load_text_file([in, string] const char *filename,
+							      [out, size=buffer_size] char *buffer, int buffer_size,
+								  [out, size=4] int *filesize);
+
+		void ocall_get_time([out, size=4] int *second,
+							[out, size=4] int *nanosecond);
     };
 
 };

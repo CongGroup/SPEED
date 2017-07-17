@@ -14,6 +14,11 @@ void eprintf(const char *fmt, ...)
     ocall_print_string(buf);
 }
 
+void get_time(hrtime *time)
+{
+	ocall_get_time(&time->second, &time->nanosecond);
+}
+
 void load_text_file(const char *filename,
                     char **textfile, int *filesize)
 {
@@ -24,7 +29,3 @@ void load_text_file(const char *filename,
     *textfile = buffer;
 }
 
-void get_time(hrtime *time)
-{
-    ocall_get_time(&time->second, &time->nanosecond);
-}

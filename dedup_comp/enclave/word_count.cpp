@@ -27,7 +27,7 @@ WordCount::WordCount(int id, const char *textfile, int filesize)
 const byte *WordCount::get_tag()
 {
     // slightly deviate from the paper specification for ease of implmentation
-    hash((byte *)((m_name + m_input).data()), m_name.size() + m_input.size(), m_tag);
+    hash((byte *)((m_input).data()), m_input.size(), m_tag);
     return m_tag;
 }
 

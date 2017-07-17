@@ -14,7 +14,7 @@ void ocall_print_string(const char *str)
     printf("%s", str);
 }
 
-void ocall_get_time(long *second, long *nanosecond)
+void ocall_get_time(int *second, int *nanosecond)
 {
     timespec wall_clock;
     clock_gettime(CLOCK_REALTIME, &wall_clock);

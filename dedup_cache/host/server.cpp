@@ -101,7 +101,8 @@ void run_server() {
         req.reset(responser->recv_request());
 
         if (req.get()) {
-            switch (req->get_type()) {
+            switch (req->get_type()) 
+			{
                 case 1: //Request::Get:
                     printf("[*] Get request received --> ");
                     resp.reset(parse_request_get(req.get()));

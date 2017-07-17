@@ -20,6 +20,18 @@ typedef struct ms_ocall_print_string_t {
 	char* ms_str;
 } ms_ocall_print_string_t;
 
+typedef struct ms_ocall_load_text_file_t {
+	char* ms_filename;
+	char* ms_buffer;
+	int ms_buffer_size;
+	int* ms_filesize;
+} ms_ocall_load_text_file_t;
+
+typedef struct ms_ocall_get_time_t {
+	long int* ms_second;
+	long int* ms_nanosecond;
+} ms_ocall_get_time_t;
+
 static sgx_status_t SGX_CDECL Enclave_ocall_print_string(void* pms)
 {
 	ms_ocall_print_string_t* ms = SGX_CAST(ms_ocall_print_string_t*, pms);
@@ -28,13 +40,31 @@ static sgx_status_t SGX_CDECL Enclave_ocall_print_string(void* pms)
 	return SGX_SUCCESS;
 }
 
+static sgx_status_t SGX_CDECL Enclave_ocall_load_text_file(void* pms)
+{
+	ms_ocall_load_text_file_t* ms = SGX_CAST(ms_ocall_load_text_file_t*, pms);
+	ocall_load_text_file((const char*)ms->ms_filename, ms->ms_buffer, ms->ms_buffer_size, ms->ms_filesize);
+
+	return SGX_SUCCESS;
+}
+
+static sgx_status_t SGX_CDECL Enclave_ocall_get_time(void* pms)
+{
+	ms_ocall_get_time_t* ms = SGX_CAST(ms_ocall_get_time_t*, pms);
+	ocall_get_time(ms->ms_second, ms->ms_nanosecond);
+
+	return SGX_SUCCESS;
+}
+
 static const struct {
 	size_t nr_ocall;
-	void * table[1];
+	void * table[3];
 } ocall_table_Enclave = {
-	1,
+	3,
 	{
 		(void*)Enclave_ocall_print_string,
+		(void*)Enclave_ocall_load_text_file,
+		(void*)Enclave_ocall_get_time,
 	}
 };
 sgx_status_t ecall_cache_get(sgx_enclave_id_t eid, const uint8_t* tag, uint8_t* meta, uint8_t* rlt, int expt_size, int* true_size)

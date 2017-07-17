@@ -1,0 +1,184 @@
+1.2 Normative references [intro.refs]
+1 The following referenced documents are indispensable for the application of this document. For dated references, only the edition cited applies. For undated references, the latest edition of the referenced document
+(including any amendments) applies.
+— Ecma International, ECMAScript Language Specification, Standard Ecma-262, third edition, 1999.
+— ISO/IEC 2382 (all parts), Information technology — Vocabulary
+— ISO/IEC 9899:1999, Programming languages — C
+— ISO/IEC 9899:1999/Cor.1:2001(E), Programming languages — C, Technical Corrigendum 1
+— ISO/IEC 9899:1999/Cor.2:2004(E), Programming languages — C, Technical Corrigendum 2
+— ISO/IEC 9899:1999/Cor.3:2007(E), Programming languages — C, Technical Corrigendum 3
+— ISO/IEC 9945:2003, Information Technology — Portable Operating System Interface (POSIX)
+— ISO/IEC 10646-1:1993, Information technology — Universal Multiple-Octet Coded Character Set (UCS)
+— Part 1: Architecture and Basic Multilingual Plane
+— ISO/IEC TR 19769:2004, Information technology — Programming languages, their environments and
+system software interfaces — Extensions for the programming language C to support new character
+data types
+2 The library described in Clause 7 of ISO/IEC 9899:1999 and Clause 7 of ISO/IEC 9899:1999/Cor.1:2001
+and Clause 7 of ISO/IEC 9899:1999/Cor.2:2003 is hereinafter called the C standard library.1
+3 The library described in ISO/IEC TR 19769:2004 is hereinafter called the C Unicode TR.
+4 The operating system interface described in ISO/IEC 9945:2003 is hereinafter called POSIX.
+5 The ECMAScript Language Specification described in Standard Ecma-262 is hereinafter called ECMA-262.
+1) With the qualifications noted in Clauses 18 through 30 and in C.2, the C standard library is a subset of the C++ standard
+library.
+§ 1.2 1
+
+ c ISO/IEC N3242=11-0012
+1.3 Terms and definitions [intro.defs]
+1 For the purposes of this document, the following definitions apply.
+2 17.3 defines additional terms that are used only in Clauses 17 through 30 and Annex D.
+3 Terms that are used only in a small portion of this International Standard are defined where they are used
+and italicized where they are defined.
+1.3.1 [defns.argument]
+argument
+actual argument
+actual parameter
+<function call expression> expression in the comma-separated list bounded by the parentheses
+1.3.2 [defns.argument.macro]
+argument
+actual argument
+actual parameter
+<function-like macro> sequence of preprocessing tokens in the comma-separated list bounded by the parentheses
+1.3.3 [defns.argument.throw]
+argument
+actual argument
+actual parameter
+<throw expression> the operand of throw
+1.3.4 [defns.argument.templ]
+argument
+actual argument
+actual parameter
+<template instantiation> expression, type-id or template-name in the comma-separated list bounded by the
+angle brackets
+1.3.5 [defns.cond.supp]
+conditionally-supported
+program construct that an implementation is not required to support
+[ Note: Each implementation documents all conditionally-supported constructs that it does not support. —
+end note ]
+1.3.6 [defns.diagnostic]
+diagnostic message
+message belonging to an implementation-defined subset of the implementation’s output messages
+1.3.7 [defns.dynamic.type]
+dynamic type
+<glvalue> type of the most derived object (1.8) to which the glvalue denoted by a glvalue expression refers
+§ 1.3 2
+
+ c ISO/IEC N3242=11-0012
+[ Example: if a pointer (8.3.1) p whose static type is “pointer to class B” is pointing to an object of class
+D, derived from B (Clause 10), the dynamic type of the expression *p is “D.” References (8.3.2) are treated
+similarly. — end example ]
+1.3.8 [defns.dynamic.type.prvalue]
+dynamic type
+<prvalue> static type of the prvalue expression
+1.3.9 [defns.ill.formed]
+ill-formed program
+program that is not well formed
+1.3.10 [defns.impl.defined]
+implementation-defined behavior
+behavior, for a well-formed program construct and correct data, that depends on the implementation and
+that each implementation documents
+1.3.11 [defns.impl.limits]
+implementation limits
+restrictions imposed upon programs by the implementation
+1.3.12 [defns.locale.specific]
+locale-specific behavior
+behavior that depends on local conventions of nationality, culture, and language that each implementation
+documents
+1.3.13 [defns.multibyte]
+multibyte character
+sequence of one or more bytes representing a member of the extended character set of either the source or
+the execution environment
+[ Note: The extended character set is a superset of the basic character set (2.3). — end note ]
+1.3.14 [defns.parameter]
+parameter
+formal argument
+formal parameter
+<function or catch clause> object or reference declared as part of a function declaration or definition or in
+the catch clause of an exception handler that acquires a value on entry to the function or handler
+1.3.15 [defns.parameter.macro]
+parameter
+formal argument
+formal parameter
+<function-like macro> identifier from the comma-separated list bounded by the parentheses immediately
+following the macro name
+§ 1.3 3
+
+ c ISO/IEC N3242=11-0012
+1.3.16 [defns.parameter.templ]
+parameter
+formal argument
+formal parameter
+<template> template-parameter
+1.3.17 [defns.signature]
+signature
+<function> name, parameter type list (8.3.5), and enclosing namespace (if any)
+[ Note: Signatures are used as a basis for name mangling and linking. — end note ]
+1.3.18 [defns.signature.templ]
+signature
+<function template> name, parameter type list (8.3.5), enclosing namespace (if any), return type, and
+template parameter list
+1.3.19 [defns.signature.spec]
+signature
+<function template specialization> signature of the template of which it is a specialization and its template
+arguments (whether explicitly specified or deduced)
+1.3.20 [defns.signature.member]
+signature
+<class member function> name, parameter type list (8.3.5), class of which the function is a member, cvqualifiers (if any), and ref-qualifier (if any)
+1.3.21 [defns.signature.member.templ]
+signature
+<class member function template> name, parameter type list (8.3.5), class of which the function is a member,
+cv-qualifiers (if any), ref-qualifier (if any), return type, and template parameter list
+1.3.22 [defns.signature.member.spec]
+signature
+<class member function template specialization> signature of the template member function template of
+which it is a specialization and its template arguments (whether explicitly specified or deduced)
+1.3.23 [defns.static.type]
+static type
+type of an expression (3.9) resulting from analysis of the program without considering execution semantics
+[ Note: The static type of an expression depends only on the form of the program in which the expression
+appears, and does not change while the program is executing. — end note ]
+1.3.24 [defns.undefined]
+undefined behavior
+behavior for which this International Standard imposes no requirements
+[ Note: Undefined behavior may be expected when this International Standard omits any explicit definition of
+§ 1.3 4
+
+ c ISO/IEC N3242=11-0012
+behavior or when a program uses an erroneous construct or erroneous data. Permissible undefined behavior
+ranges from ignoring the situation completely with unpredictable results, to behaving during translation or
+program execution in a documented manner characteristic of the environment (with or without the issuance of
+a diagnostic message), to terminating a translation or execution (with the issuance of a diagnostic message).
+Many erroneous program constructs do not engender undefined behavior; they are required to be diagnosed.
+— end note ]
+1.3.25 [defns.unspecified]
+unspecified behavior
+behavior, for a well-formed program construct and correct data, that depends on the implementation
+[ Note: The implementation is not required to document which behavior occurs. The range of possible
+behaviors is usually delineated by this International Standard. — end note ]
+1.3.26 [defns.well.formed]
+well-formed program
+C++ program constructed according to the syntax rules, diagnosable semantic rules, and the One Definition
+Rule (3.2).
+1.4 Implementation compliance [intro.compliance]
+1 The set of diagnosable rules consists of all syntactic and semantic rules in this International Standard except
+for those rules containing an explicit notation that “no diagnostic is required” or which are described as
+resulting in “undefined behavior.”
+2 Although this International Standard states only requirements on C++ implementations, those requirements
+are often easier to understand if they are phrased as requirements on programs, parts of programs, or
+execution of programs. Such requirements have the following meaning:
+— If a program contains no violations of the rules in this International Standard, a conforming implementation shall, within its resource limits, accept and correctly execute2 that program.
+— If a program contains a violation of any diagnosable rule or an occurrence of a construct described in
+this Standard as “conditionally-supported” when the implementation does not support that construct,
+a conforming implementation shall issue at least one diagnostic message.
+— If a program contains a violation of a rule for which no diagnostic is required, this International
+Standard places no requirement on implementations with respect to that program.
+3 For classes and class templates, the library Clauses specify partial definitions. Private members (Clause 11)
+are not specified, but each implementation shall supply them to complete the definitions according to the
+description in the library Clauses.
+4 For functions, function templates, objects, and values, the library Clauses specify declarations. Implementations shall supply definitions consistent with the descriptions in the library Clauses.
+5 The names defined in the library have namespace scope (7.3). A C++ translation unit (2.2) obtains access
+to these names by including the appropriate standard library header (16.2).
+6 The templates, classes, functions, and objects in the library have external linkage (3.5). The implementation
+provides definitions for standard library entities, as necessary, while combining translation units to form a
+complete C++ program (2.2).
+
+

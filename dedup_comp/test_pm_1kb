@@ -1,0 +1,28 @@
+Document Number: N3242=11-0012
+Date: 2011-02-28
+Revises: N3225
+Reply to: Pete Becker
+Roundhouse Consulting, Ltd.
+pete@versatilecoding.com
+Working Draft, Standard for Programming
+Language C++
+Note: this is an early draft. It’s known to be incomplet and incorrekt, and it has lots of bad
+formatting.
+
+ c ISO/IEC N3242=11-0012
+Contents
+Contents ii
+List of Tables x
+List of Figures xiv
+
+
+ c ISO/IEC N3242=11-0012
+1 General [intro]
+1.1 Scope [intro.scope]
+1 This International Standard specifies requirements for implementations of the C++ programming language.
+The first such requirement is that they implement the language, and so this International Standard also
+defines C++. Other requirements and relaxations of the first requirement appear at various places within
+this International Standard.
+2 C++ is a general purpose programming language based on the C programming language as described in
+ISO/IEC 9899:1999 Programming languages — C (hereinafter referred to as the C standard). In addition to
+the facilities provided
