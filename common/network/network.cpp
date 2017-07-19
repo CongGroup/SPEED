@@ -99,7 +99,13 @@ int Network::send_msg(int sockfd, const byte *data, int data_size)
 {
     int size = data_size;
 	send(sockfd, &size, sizeof(int), SEND_FLAG);
-	send(sockfd, data, size, SEND_FLAG);
+	int complete_size = 0;
+	while (size>0)
+	{
+		complete_size = send(sockfd, data + (data_size-size), size, SEND_FLAG);
+		size -= complete_size;
+	}
+
 	return 0;
 }
 
@@ -107,10 +113,16 @@ int Network::recv_msg(int sockfd)
 {
     int recv_size = 0;
     recv(sockfd, &recv_size, sizeof(int), RECV_FLAG);
+	//printf("resv msg size , size is %d \n",recv_size);
     if (recv_size > 0) {
-        recv_size = recv(sockfd, m_recv_buffer, recv_size, RECV_FLAG);
-        if (recv_size > 0)
-            return recv_size;
+		int msg_size = recv_size;
+		int complete_size = 0;
+		while (msg_size > 0)
+		{
+			complete_size = recv(sockfd, m_recv_buffer+recv_size-msg_size, msg_size, RECV_FLAG);
+			msg_size -= complete_size;
+		}
+		return recv_size;
     }
     return 0;
 }

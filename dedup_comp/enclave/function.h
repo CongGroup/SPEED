@@ -35,6 +35,7 @@ protected:
     int             m_id;
     int             m_type;
     std::string     m_name;
+
     byte            m_tag[TAG_SIZE];
 
     // for OCALL memory allocation

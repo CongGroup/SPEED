@@ -20,9 +20,9 @@ void shutdown(int sig) {
 
     sgx_destroy_enclave(global_eid);
 
-
-
     responser.release();
+
+	abort();
 
     // Do whatever tear-down
 }
@@ -125,5 +125,10 @@ void run_server() {
                 responser->send_response(resp.get());
             }
         }
+		else
+		{
+			printf("Null request,exit. \n");
+			break;
+		}
     }
 }

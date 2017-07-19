@@ -11,6 +11,9 @@ enclave {
 							      [out, size=buffer_size] char *buffer, int buffer_size,
 								  [out, size=4] int *filesize);
 
+		void ocall_write_text_file([in, string] const char *filename,
+							      [out, size=buffer_size] char *buffer, int buffer_size);
+
 		void ocall_get_time([out, size=4] int *second,
 							[out, size=4] int *nanosecond);
 		

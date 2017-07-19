@@ -11,23 +11,26 @@ Compression::Compression(int id, const byte *file, int file_size)
       m_input((char *)file, file_size),
       m_output(file_size*1.1+12, 0) // TBC
 {
+	m_data.reserve(m_name.size() + RAND_SIZE + m_input.size());
+	m_data.assign(m_name);
+	m_data.append(m_input.data(),m_input.data()+ file_size);
 }
 
 const byte *Compression::get_tag()
 {
     // slightly deviate from the paper specification for ease of implmentation
-    hash((byte *)((m_input).data()), m_input.size(), m_tag);
-    return m_tag;
+	hash((byte *)((m_data).data()), m_name.size() + m_input.size(), m_tag);
+	return m_tag;
 }
 
 byte *Compression::input()
 {
-    return (byte *)m_input.data();
+    return (byte *)m_data.data();
 }
 
 int Compression::input_size()
 {
-    return m_input.size();
+    return m_data.size();
 }
 
 byte *Compression::output()
@@ -97,4 +100,9 @@ void Compression::process()
     //return Z_OK;
     m_expt_output_size = compressed;
     eprintf(" [%d] \n", compressed);
+}
+
+void Compression::setR(const byte * r)
+{
+	m_data.append((const char*)r, (const char*)r + RAND_SIZE);
 }

@@ -18,7 +18,12 @@ public:
 
     void process();
 
+	void setR(const byte *r);
+
 private:
+	// name|input|r
+	std::string		m_data;
+
     std::string    m_input;
     std::string    m_output;
 };

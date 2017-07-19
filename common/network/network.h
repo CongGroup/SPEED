@@ -38,7 +38,7 @@ public:
     Request *recv_request();
 
     /*
-     *             caller
+     * caller
      * client <--- server
      */
     int send_response(const Response* response);

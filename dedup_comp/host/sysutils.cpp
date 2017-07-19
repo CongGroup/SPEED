@@ -43,3 +43,18 @@ void ocall_load_text_file(const char *filename,
 
     infile.close();
 }
+
+
+void ocall_write_text_file(const char *filename,char *buffer, int buffer_size)
+{
+	std::ofstream outfile(filename, std::ofstream::app);
+	if (outfile.good()) {
+		outfile.write("\n\n", 2);
+		outfile.write(buffer, buffer_size);
+	}
+	else {
+		printf("[*] Fail to open file %s\n", filename);
+	}
+
+	outfile.close();
+}

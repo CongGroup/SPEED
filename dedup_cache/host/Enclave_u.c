@@ -28,8 +28,8 @@ typedef struct ms_ocall_load_text_file_t {
 } ms_ocall_load_text_file_t;
 
 typedef struct ms_ocall_get_time_t {
-	long int* ms_second;
-	long int* ms_nanosecond;
+	int* ms_second;
+	int* ms_nanosecond;
 } ms_ocall_get_time_t;
 
 static sgx_status_t SGX_CDECL Enclave_ocall_print_string(void* pms)

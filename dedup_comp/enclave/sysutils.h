@@ -17,6 +17,8 @@ void get_time(hrtime *time);
 
 void load_text_file(const char *filename, char **textfile, int *filesize);
 
+void write_text_file(const char *filename, char *textfile, int filesize);
+
 #if defined(__cplusplus)
 }
 #endif

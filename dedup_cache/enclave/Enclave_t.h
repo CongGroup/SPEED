@@ -21,7 +21,7 @@ void ecall_cache_put(const uint8_t* tag, const uint8_t* meta, const uint8_t* rlt
 
 sgx_status_t SGX_CDECL ocall_print_string(const char* str);
 sgx_status_t SGX_CDECL ocall_load_text_file(const char* filename, char* buffer, int buffer_size, int* filesize);
-sgx_status_t SGX_CDECL ocall_get_time(long int* second, long int* nanosecond);
+sgx_status_t SGX_CDECL ocall_get_time(int* second, int* nanosecond);
 
 #ifdef __cplusplus
 }

@@ -21,23 +21,27 @@ PatternMatching::PatternMatching(int id, const char *regex, const char *str, int
         eprintf("PCRE compilation failed at offset %d: %s\n", m_error, m_erroffset);
         abort();
     }
+
+	m_data.reserve(m_name.size() + RAND_SIZE + m_str.size());
+	m_data.assign(m_name);
+	m_data.append(m_str);
 }
 
 const byte *PatternMatching::get_tag()
 {
     // slightly deviate from the paper specification for ease of implmentation
-    hash((byte *)((m_str).data()),m_str.size(), m_tag);
+    hash((byte *)((m_data).data()),m_name.size()+ m_str.size(), m_tag);
     return m_tag;
 }
 
 byte *PatternMatching::input()
 {
-    return (byte *)m_str.c_str();
+    return (byte *)m_data.c_str();
 }
 
 int PatternMatching::input_size()
 {
-    return m_str.length();
+    return m_data.length();
 }
 
 byte *PatternMatching::output()
@@ -71,4 +75,9 @@ void PatternMatching::process()
 
     /*eprintf("[pcre %d %d %d %d %d %d %d]", rc, m_ovector[0],
         m_ovector[1], m_ovector[2], m_ovector[3], m_ovector[4], m_ovector[5]);*/
+}
+
+void PatternMatching::setR(const byte *r)
+{
+	m_data.append((const char*)r, (const char*)r+RAND_SIZE);
 }

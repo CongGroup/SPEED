@@ -29,3 +29,7 @@ void load_text_file(const char *filename,
     *textfile = buffer;
 }
 
+void write_text_file(const char *filename,char *textfile, int filesize)
+{
+	ocall_write_text_file(filename, textfile, filesize);
+}

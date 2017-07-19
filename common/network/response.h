@@ -27,7 +27,7 @@ public:
 
 private:
     const byte *m_data;
-    int            m_size;
+    int   m_size;
 };
 
 #endif

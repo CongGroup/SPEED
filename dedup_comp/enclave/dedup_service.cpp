@@ -17,15 +17,17 @@
 inline byte *rand_hash(const byte *r, Function *func) {
     static byte h[HASH_SIZE];
     
-    int type_id = func->get_type();
-    int h_in_size = RAND_SIZE + sizeof(int) + func->input_size();
-    byte *h_in = new byte[h_in_size];
-    memcpy(h_in, r, RAND_SIZE);
-    memcpy(h_in + RAND_SIZE, &type_id, sizeof(int));
-    memcpy(h_in + RAND_SIZE + sizeof(int), func->input(), func->input_size());
-    
-    hash(h_in, h_in_size, h);
-    delete h_in;
+	//int type_id = func->get_type();
+	//int h_in_size = RAND_SIZE + sizeof(int) + func->input_size();
+    //byte *h_in = new byte[h_in_size];
+    //memcpy(h_in, r, RAND_SIZE);
+    //memcpy(h_in + RAND_SIZE, &type_id, sizeof(int));
+    //memcpy(h_in + RAND_SIZE + sizeof(int), func->input(), func->input_size());
+    //
+    //hash(h_in, h_in_size, h);
+    //delete h_in;
+
+	hash(func->input(), func->input_size(), h);
 
     return h;
 }
@@ -97,6 +99,11 @@ void dedup(Function *func)
 		else {
 			eprintf("--> unverified, the data may have been corrupted at the caching server!\n");
 		}
+		get_time(&time_tag_6);
+		veri_dec(k, ENC_KEY_SIZE,func->input(), func->input_size(), func->input(), meta.mac);
+		get_time(&time_tag_7);
+		eprintf("Time for dec on File Size is [%d us]\n", time_elapsed_in_us(&time_tag_6, &time_tag_7));
+
     }
     // miss
     else {
@@ -146,6 +153,13 @@ void dedup(Function *func)
 
 		eprintf("Time for put to cache is [%d us]\n", time_elapsed_in_us(&time_tag_7, &time_tag_8));
         
+
+		get_time(&time_tag_9);
+		auth_enc(k, ENC_KEY_SIZE,func->input(), func->input_size(), func->input(), meta.mac);
+		get_time(&time_tag_10);
+		eprintf("Time for enc on File Size is [%d us]\n", time_elapsed_in_us(&time_tag_9, &time_tag_10));
+
+
         // TODO check put response
         eprintf("--> remotely cached!\n");
     }

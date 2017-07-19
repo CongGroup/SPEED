@@ -21,6 +21,7 @@ void shutdown(int sig) {
     requester.release();
 
     // Do whatever tear-down
+	abort();
 }
 
 void init_server() {
@@ -36,6 +37,7 @@ void init_server() {
     requester.reset(new Network(SERV_IP));
 
     printf("[*] Initialization is finished!\n");
+
 }
 
 void run_server() {

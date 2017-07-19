@@ -44,8 +44,8 @@ typedef struct ms_ocall_load_text_file_t {
 } ms_ocall_load_text_file_t;
 
 typedef struct ms_ocall_get_time_t {
-	long int* ms_second;
-	long int* ms_nanosecond;
+	int* ms_second;
+	int* ms_nanosecond;
 } ms_ocall_get_time_t;
 
 static sgx_status_t SGX_CDECL sgx_ecall_cache_get(void* pms)
@@ -307,7 +307,7 @@ sgx_status_t SGX_CDECL ocall_load_text_file(const char* filename, char* buffer, 
 	return status;
 }
 
-sgx_status_t SGX_CDECL ocall_get_time(long int* second, long int* nanosecond)
+sgx_status_t SGX_CDECL ocall_get_time(int* second, int* nanosecond)
 {
 	sgx_status_t status = SGX_SUCCESS;
 	size_t _len_second = 4;
@@ -329,7 +329,7 @@ sgx_status_t SGX_CDECL ocall_get_time(long int* second, long int* nanosecond)
 	__tmp = (void *)((size_t)__tmp + sizeof(ms_ocall_get_time_t));
 
 	if (second != NULL && sgx_is_within_enclave(second, _len_second)) {
-		ms->ms_second = (long int*)__tmp;
+		ms->ms_second = (int*)__tmp;
 		__tmp = (void *)((size_t)__tmp + _len_second);
 		memset(ms->ms_second, 0, _len_second);
 	} else if (second == NULL) {
@@ -340,7 +340,7 @@ sgx_status_t SGX_CDECL ocall_get_time(long int* second, long int* nanosecond)
 	}
 	
 	if (nanosecond != NULL && sgx_is_within_enclave(nanosecond, _len_nanosecond)) {
-		ms->ms_nanosecond = (long int*)__tmp;
+		ms->ms_nanosecond = (int*)__tmp;
 		__tmp = (void *)((size_t)__tmp + _len_nanosecond);
 		memset(ms->ms_nanosecond, 0, _len_nanosecond);
 	} else if (nanosecond == NULL) {

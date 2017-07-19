@@ -15,12 +15,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{D5D34B
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "network", "network", "{C80951EC-02CE-44AC-BEE0-6720A69E1E48}"
 	ProjectSection(SolutionItems) = preProject
+		..\common\network\client.cpp = ..\common\network\client.cpp
+		..\common\network\Makefile = ..\common\network\Makefile
 		..\common\network\network.cpp = ..\common\network\network.cpp
 		..\common\network\network.h = ..\common\network\network.h
 		..\common\network\request.cpp = ..\common\network\request.cpp
 		..\common\network\request.h = ..\common\network\request.h
 		..\common\network\response.cpp = ..\common\network\response.cpp
 		..\common\network\response.h = ..\common\network\response.h
+		..\common\network\server.cpp = ..\common\network\server.cpp
 	EndProjectSection
 EndProject
 Global
