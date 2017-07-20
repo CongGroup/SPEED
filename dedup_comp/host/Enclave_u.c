@@ -13,6 +13,12 @@ typedef struct ms_ocall_load_text_file_t {
 	int* ms_filesize;
 } ms_ocall_load_text_file_t;
 
+typedef struct ms_ocall_write_text_file_t {
+	char* ms_filename;
+	char* ms_buffer;
+	int ms_buffer_size;
+} ms_ocall_write_text_file_t;
+
 typedef struct ms_ocall_get_time_t {
 	int* ms_second;
 	int* ms_nanosecond;
@@ -49,6 +55,14 @@ static sgx_status_t SGX_CDECL Enclave_ocall_load_text_file(void* pms)
 	return SGX_SUCCESS;
 }
 
+static sgx_status_t SGX_CDECL Enclave_ocall_write_text_file(void* pms)
+{
+	ms_ocall_write_text_file_t* ms = SGX_CAST(ms_ocall_write_text_file_t*, pms);
+	ocall_write_text_file((const char*)ms->ms_filename, ms->ms_buffer, ms->ms_buffer_size);
+
+	return SGX_SUCCESS;
+}
+
 static sgx_status_t SGX_CDECL Enclave_ocall_get_time(void* pms)
 {
 	ms_ocall_get_time_t* ms = SGX_CAST(ms_ocall_get_time_t*, pms);
@@ -75,12 +89,13 @@ static sgx_status_t SGX_CDECL Enclave_ocall_request_put(void* pms)
 
 static const struct {
 	size_t nr_ocall;
-	void * table[5];
+	void * table[6];
 } ocall_table_Enclave = {
-	5,
+	6,
 	{
 		(void*)Enclave_ocall_print_string,
 		(void*)Enclave_ocall_load_text_file,
+		(void*)Enclave_ocall_write_text_file,
 		(void*)Enclave_ocall_get_time,
 		(void*)Enclave_ocall_request_find,
 		(void*)Enclave_ocall_request_put,

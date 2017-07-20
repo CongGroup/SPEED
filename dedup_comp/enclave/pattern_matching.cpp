@@ -24,7 +24,7 @@ PatternMatching::PatternMatching(int id, const char *regex, const char *str, int
 
 	m_data.reserve(m_name.size() + RAND_SIZE + m_str.size());
 	m_data.assign(m_name);
-	m_data.append(m_str);
+	m_data.append(m_str.data(),m_str.data()+m_str.size());
 }
 
 const byte *PatternMatching::get_tag()

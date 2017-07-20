@@ -1,6 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#undef TEST_PUT_AND_GET
+
 #include <stdint.h>
 
 // all in bytes

@@ -20,6 +20,16 @@ typedef std::map<binary, entry_t> cache_t;
 
 cache_t cache;
 
+//void printBlock(const void* src, int size)
+//{
+//	for (int i = 0; i < size; ++i)
+//	{
+//		eprintf("%.2X ", *((const unsigned char*)src + i));
+//		if (i % 16 == 15 || i == size - 1)
+//			eprintf("\n");
+//	}
+//}
+
 void ecall_cache_get(const uint8_t *tag,
                      uint8_t *meta,
                      uint8_t *rlt, int expt_size,
@@ -27,13 +37,16 @@ void ecall_cache_get(const uint8_t *tag,
 {
 	hrtime start_time, end_time;
 
-	get_time(&start_time);
+	//printBlock(tag, TAG_SIZE);
 
+	get_time(&start_time);
 
     binary key(TAG_SIZE, 0);
     memcpy(&key[0], tag, TAG_SIZE);
 
     cache_t::const_iterator it = cache.find(key);
+
+#ifndef TEST_PUT_AND_GET
     // cache miss
     if (it == cache.end()) {
         *true_size = 0;
@@ -50,9 +63,16 @@ void ecall_cache_get(const uint8_t *tag,
         memcpy(rlt, &entry.second[0], std::min(*true_size, expt_size));
     }
 
+#endif
+
 	get_time(&end_time);
 
+#ifndef TEST_PUT_AND_GET
 	eprintf(" %d us, and ", time_elapsed_in_us(&start_time, &end_time));
+#endif
+ 
+
+	
 
 	//eprintf("In get_cache the Map size is %d\n", cache.size());
 
@@ -65,8 +85,11 @@ void ecall_cache_put(const uint8_t *tag,
 
 	hrtime start_time, end_time;
 
-	get_time(&start_time);
+	//PUT
+	//eprintf("\n In the Put ", time_elapsed_in_us(&start_time, &end_time));
+	//printBlock(tag, TAG_SIZE);
 
+	get_time(&start_time);
 
     binary key(TAG_SIZE, 0);
     memcpy(&key[0], tag, TAG_SIZE);
@@ -74,14 +97,21 @@ void ecall_cache_put(const uint8_t *tag,
     binary entry_meta(sizeof(metadata), 0);
     memcpy(&entry_meta[0], meta, sizeof(metadata));
 
+#ifndef TEST_PUT_AND_GET
     binary entry_rlt(rlt_size, 0);
     memcpy(&entry_rlt[0], rlt, rlt_size);
+	cache[key] = entry_t(entry_meta, entry_rlt);
+#else
+	cache[key] = entry_t(entry_meta, entry_meta);
+#endif
 
-    cache[key] = entry_t(entry_meta, entry_rlt);
+   
 
 	get_time(&end_time);
 
+#ifndef TEST_PUT_AND_GET
 	eprintf(" %d us, and ", time_elapsed_in_us(&start_time, &end_time));
+#endif
 
 	//eprintf("In get_cache the Map size is %d\n", cache.size());
 

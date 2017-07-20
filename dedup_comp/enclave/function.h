@@ -25,6 +25,8 @@ public:
 
     virtual byte *output() = 0;
 
+	virtual void setR(const byte *r) = 0;
+
     int expt_output_size();
 
     // All main logic go here, including customized serialization (Do NOT use boost).

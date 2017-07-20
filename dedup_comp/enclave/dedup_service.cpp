@@ -27,6 +27,8 @@ inline byte *rand_hash(const byte *r, Function *func) {
     //hash(h_in, h_in_size, h);
     //delete h_in;
 
+	//eprintf("&&&DEBUG RAND_HASH input size is %d \n", func->input_size());
+
 	hash(func->input(), func->input_size(), h);
 
     return h;
@@ -44,6 +46,16 @@ inline void byte_or(const byte *ina, const byte *inb,
                     int len, byte *out) {
     for (int i = 0; i < len; ++i)
         out[i] = ina[i] ^ inb[i];
+}
+
+void printBlock(const void* src, int size)
+{
+	for (int i = 0; i < size; ++i)
+	{
+		eprintf("%.2X ", *((const unsigned char*)src + i));
+		if (i % 16 == 15 || i == size - 1)
+			eprintf("\n");
+	}
 }
 
 void dedup(Function *func)
@@ -65,6 +77,8 @@ void dedup(Function *func)
 
 	eprintf("Time for compute tag is [%d us]\n", time_elapsed_in_us(&time_tag_1, &time_tag_2));
 
+	//printBlock(func->get_tag(), TAG_SIZE);
+
 	get_time(&time_tag_2);
 
     ocall_request_find(func_tag,
@@ -76,18 +90,30 @@ void dedup(Function *func)
 
 	eprintf("Time for find tag with server is [%d us]\n", time_elapsed_in_us(&time_tag_2, &time_tag_3));
 
+	//printBlock(func->get_tag(), TAG_SIZE);
+
     // hit
     if (true_size > 0) {
         assert(true_size <= func->expt_output_size());
 
         eprintf("--> fetched \n");
 
-        byte *h = rand_hash(meta.r, func);
+		byte k[ENC_KEY_SIZE];
 
-        byte k[ENC_KEY_SIZE];
+		get_time(&time_tag_3);
+
+		func->setR(meta.r);
+
+        byte *h = rand_hash(meta.r, func);
         
         byte_or(meta.enc_key, h, ENC_KEY_SIZE, k);
+
 		get_time(&time_tag_4);
+
+		eprintf("Time for recover key is [%d us]\n", time_elapsed_in_us(&time_tag_3, &time_tag_4));
+
+		get_time(&time_tag_4);
+
 		int decRes = veri_dec(k, ENC_KEY_SIZE,
 			func->output(), true_size,
 			func->output(), meta.mac);
@@ -121,15 +147,20 @@ void dedup(Function *func)
 
         draw_rand(meta.r, RAND_SIZE);
 
-        byte *h = rand_hash(meta.r, func);
-
-        byte *k = rand_key();
-
-		byte_or(k, h, ENC_KEY_SIZE, meta.enc_key);
+		byte *k = rand_key();
 
 		get_time(&time_tag_6);
 
-		eprintf("Time for gen key is [%d us]\n", time_elapsed_in_us(&time_tag_5, &time_tag_6));
+		func->setR(meta.r);
+
+        byte *h = rand_hash(meta.r, func);
+
+		byte_or(k, h, ENC_KEY_SIZE, meta.enc_key);
+
+		get_time(&time_tag_7);
+
+		eprintf("Time for gen key is [%d us]\n", time_elapsed_in_us(&time_tag_5, &time_tag_7));
+		eprintf("Time for recover key is [%d us]\n", time_elapsed_in_us(&time_tag_6, &time_tag_7));
 
 		get_time(&time_tag_6);
 
@@ -145,9 +176,13 @@ void dedup(Function *func)
 
 		get_time(&time_tag_7);
 
-        ocall_request_put(func->get_tag(),
+		func_tag = func->get_tag();
+
+        ocall_request_put(func_tag,
                           RAW(&meta),
                           func->output(), func->expt_output_size());
+
+		//printBlock(func_tag, TAG_SIZE);
 
 		get_time(&time_tag_8);
 

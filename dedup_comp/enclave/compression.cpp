@@ -13,13 +13,14 @@ Compression::Compression(int id, const byte *file, int file_size)
 {
 	m_data.reserve(m_name.size() + RAND_SIZE + m_input.size());
 	m_data.assign(m_name);
-	m_data.append(m_input.data(),m_input.data()+ file_size);
+	m_data.append(m_input.data(),m_input.data()+ m_input.size());
 }
 
 const byte *Compression::get_tag()
 {
     // slightly deviate from the paper specification for ease of implmentation
-	hash((byte *)((m_data).data()), m_name.size() + m_input.size(), m_tag);
+	// TODO When CP 1kb put after 1024kb CP data and data+size is empty
+	hash((byte *)(m_data.data()), m_name.size() + m_input.size(), m_tag);
 	return m_tag;
 }
 

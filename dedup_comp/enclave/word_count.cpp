@@ -87,3 +87,8 @@ void WordCount::process()
     //if (m_output.size() > m_exp_size)
     m_expt_output_size = m_output.size();
 }
+
+void WordCount::setR(const byte *r)
+{
+	//TODO setR
+}

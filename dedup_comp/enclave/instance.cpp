@@ -105,7 +105,7 @@ void ecall_entrance()
 {
     hrtime start_time, end_time;
 
-	dedupCase(1, "test_wc");
+	//dedupCase(1, "test_wc");
 
 	get_time(&start_time);
 	get_time(&end_time);
@@ -115,20 +115,39 @@ void ecall_entrance()
     
 	char* fileName;
 
+	//fileName = "3M";
+	//dedupCase(3, fileName);
+	//fileName = "1kb";
+	//dedupCase(3, fileName);
+
 	//PM
-	fileName = "64kb";
+	fileName = "0.5K";
 	dedupCase(2, fileName);
-	fileName = "1kb";
+	fileName = "1K";
 	dedupCase(2, fileName);
+	fileName = "1.5K";
+	dedupCase(2, fileName);
+	fileName = "10K";
+	dedupCase(2, fileName);
+	fileName = "32K";
+	dedupCase(2, fileName);
+	fileName = "64K";
+	dedupCase(2, fileName);
+	fileName = "100kb";
+	dedupCase(2, fileName);
+	fileName = "1024kb";
+	dedupCase(3, fileName);
+	
 
 	//CP
-	//TODO 1KB file have a bug that miss twice
+	//fileName = "1kb";
+	//dedupCase(3, fileName);
 	fileName = "1M";
 	dedupCase(3, fileName);
 	fileName = "2M";
 	dedupCase(3, fileName);
 	fileName = "3M";
 	dedupCase(3, fileName);
-
+	
 
 }
