@@ -1,4 +1,4 @@
-# ComDedup
+# SPEED
 Secure Computation deduplication for SGX-assisted applications
 
 # Development workflow
