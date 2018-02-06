@@ -5,3 +5,6 @@ Secure Computation deduplication for SGX-assisted applications
 Coding with VS, building at Linux
 ## Code synchronization
 bash sync.sh
+
+---
+*More description will be provided.*
