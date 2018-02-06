@@ -78,6 +78,7 @@
     <ClCompile Include="function.cpp" />
     <ClCompile Include="instance.cpp" />
     <ClCompile Include="pattern_matching.cpp" />
+    <ClCompile Include="sift_function.cpp" />
     <ClCompile Include="sysutils.cpp" />
     <ClCompile Include="word_count.cpp" />
   </ItemGroup>
@@ -93,6 +94,7 @@
     <ClInclude Include="Enclave_t.h" />
     <ClInclude Include="function.h" />
     <ClInclude Include="pattern_matching.h" />
+    <ClInclude Include="sift_function.h" />
     <ClInclude Include="sysutils.h" />
     <ClInclude Include="word_count.h" />
   </ItemGroup>

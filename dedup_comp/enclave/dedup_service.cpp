@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <cstring>
 
+
 #define RAW(data) ((byte*)(data))
 
 // VERY specific to the scheme, not intended for any other usage
@@ -81,7 +82,7 @@ void dedup(Function *func)
 
 	get_time(&time_tag_2);
 
-    ocall_request_find(func_tag,
+	ecall_cache_get(func_tag,
                        RAW(&meta),
                        func->output(), func->expt_output_size(),
                        &true_size);
@@ -118,7 +119,7 @@ void dedup(Function *func)
 			func->output(), true_size,
 			func->output(), meta.mac);
 		get_time(&time_tag_5);
-		eprintf("Time for dec res is [%d us]\n", time_elapsed_in_us(&time_tag_4, &time_tag_5));
+		eprintf("Time for dec res is [%d us], true_size is %d\n", time_elapsed_in_us(&time_tag_4, &time_tag_5), true_size);
 		if (decRes) {
 			eprintf("--> verified and decrypted!\n");
 		}
@@ -141,7 +142,7 @@ void dedup(Function *func)
 
 		get_time(&time_tag_5);
 
-		eprintf("Time for process result is [%d us]\n", time_elapsed_in_us(&time_tag_4, &time_tag_5));
+		eprintf("Time for process result is [%d us], res size is %d \n", time_elapsed_in_us(&time_tag_4, &time_tag_5), func->expt_output_size());
 
 		get_time(&time_tag_5);
 
@@ -178,7 +179,7 @@ void dedup(Function *func)
 
 		func_tag = func->get_tag();
 
-        ocall_request_put(func_tag,
+		ecall_cache_put(func_tag,
                           RAW(&meta),
                           func->output(), func->expt_output_size());
 
@@ -192,10 +193,100 @@ void dedup(Function *func)
 		get_time(&time_tag_9);
 		auth_enc(k, ENC_KEY_SIZE,func->input(), func->input_size(), func->input(), meta.mac);
 		get_time(&time_tag_10);
-		eprintf("Time for enc on File Size is [%d us]\n", time_elapsed_in_us(&time_tag_9, &time_tag_10));
+		eprintf("Time for enc on File Size %d, use [%d us]\n", func->input_size(),time_elapsed_in_us(&time_tag_9, &time_tag_10));
 
 
         // TODO check put response
         eprintf("--> remotely cached!\n");
     }
+}
+
+cache_t cache;
+
+void ecall_cache_get(const uint8_t *tag,
+	uint8_t *meta,
+	uint8_t *rlt, int expt_size,
+	int *true_size)
+{
+	hrtime start_time, end_time;
+
+	//printBlock(tag, TAG_SIZE);
+
+	get_time(&start_time);
+
+	binary key(TAG_SIZE, 0);
+	memcpy(&key[0], tag, TAG_SIZE);
+
+	cache_t::const_iterator it = cache.find(key);
+
+#ifndef TEST_PUT_AND_GET
+	// cache miss
+	if (it == cache.end()) {
+		*true_size = 0;
+	}
+	// cache hit
+	else {
+		const entry_t &entry = it->second;
+
+		// copy meta data
+		memcpy(meta, &entry.first[0], entry.first.size());
+
+		// copy computation result
+		*true_size = entry.second.size();
+		memcpy(rlt, &entry.second[0], std::min(*true_size, expt_size));
+	}
+
+#endif
+
+	get_time(&end_time);
+
+#ifndef TEST_PUT_AND_GET
+	eprintf("Get cache use %d us \n ", time_elapsed_in_us(&start_time, &end_time));
+#endif
+
+
+
+
+	//eprintf("In get_cache the Map size is %d\n", cache.size());
+
+}
+
+void ecall_cache_put(const uint8_t *tag,
+	const uint8_t *meta,
+	const uint8_t *rlt, int rlt_size)
+{
+
+	hrtime start_time, end_time;
+
+	//PUT
+	//eprintf("\n In the Put ", time_elapsed_in_us(&start_time, &end_time));
+	//printBlock(tag, TAG_SIZE);
+
+	get_time(&start_time);
+
+	binary key(TAG_SIZE, 0);
+	memcpy(&key[0], tag, TAG_SIZE);
+
+	binary entry_meta(sizeof(metadata), 0);
+	memcpy(&entry_meta[0], meta, sizeof(metadata));
+
+#ifndef TEST_PUT_AND_GET
+	binary entry_rlt(rlt_size, 0);
+	memcpy(&entry_rlt[0], rlt, rlt_size);
+	cache[key] = entry_t(entry_meta, entry_rlt);
+#else
+	cache[key] = entry_t(entry_meta, entry_meta);
+#endif
+
+
+
+	get_time(&end_time);
+
+#ifndef TEST_PUT_AND_GET
+	eprintf("put cache use %d us \n", time_elapsed_in_us(&start_time, &end_time));
+#endif
+
+	//eprintf("In get_cache the Map size is %d\n", cache.size());
+
+
 }

@@ -3,6 +3,7 @@
 
 #include "sysutils.h"
 #include "Enclave_t.h"
+#include "string.h"
 
 void eprintf(const char *fmt, ...)
 {
@@ -22,8 +23,12 @@ void get_time(hrtime *time)
 void load_text_file(const char *filename,
                     char **textfile, int *filesize)
 {
-    static char buffer[FILE_BUFFER_SIZE];
-    ocall_load_text_file(filename, buffer, FILE_BUFFER_SIZE, filesize);
+    static char* buffer = new char[FILE_BUFFER_SIZE];
+	char* out_buffer;
+    ocall_load_text_file(filename, &out_buffer, FILE_BUFFER_SIZE, filesize);
+
+	memcpy(buffer, out_buffer, *filesize);
+
     if (*filesize == 0)
         abort();
     *textfile = buffer;

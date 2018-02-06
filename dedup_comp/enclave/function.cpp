@@ -27,3 +27,4 @@ int Function::expt_output_size()
 {
     return m_expt_output_size;
 }
+

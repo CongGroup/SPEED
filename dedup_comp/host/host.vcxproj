@@ -61,6 +61,7 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
+    <ClCompile Include="pgm_tool.cpp" />
     <ClCompile Include="server.cpp" />
     <ClCompile Include="enclave_management.cpp" />
     <ClCompile Include="Enclave_u.c" />
@@ -70,6 +71,7 @@
   <ItemGroup>
     <ClInclude Include="enclave_management.h" />
     <ClInclude Include="Enclave_u.h" />
+    <ClInclude Include="pgm_tool.h" />
     <ClInclude Include="server.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">

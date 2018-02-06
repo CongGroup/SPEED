@@ -8,8 +8,8 @@ enclave {
         void ocall_print_string([in, string] const char *str);
 
 		void ocall_load_text_file([in, string] const char *filename,
-							      [out, size=buffer_size] char *buffer, int buffer_size,
-								  [out, size=4] int *filesize);
+							      [out, size=8] char **buffer, int buffer_size,
+								  [out, size=8] int *filesize);
 
 		void ocall_write_text_file([in, string] const char *filename,
 							      [out, size=buffer_size] char *buffer, int buffer_size);
@@ -26,6 +26,7 @@ enclave {
 		void ocall_request_put([in, size=32] const uint8_t *tag,
 							   [in, size=64] const uint8_t *meta,
 							   [in, size=rlt_size] const uint8_t *rlt, int rlt_size);
+
     };
 
 };

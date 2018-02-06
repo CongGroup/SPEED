@@ -5,7 +5,6 @@
     <ClCompile Include="Enclave_t.c" />
     <ClCompile Include="instance.cpp" />
     <ClCompile Include="sysutils.cpp" />
-    <ClCompile Include="word_count.cpp" />
     <ClCompile Include="..\..\common\network\network.cpp">
       <Filter>common\network</Filter>
     </ClCompile>
@@ -16,16 +15,26 @@
       <Filter>common\network</Filter>
     </ClCompile>
     <ClCompile Include="dedup_service.cpp" />
-    <ClCompile Include="pattern_matching.cpp" />
-    <ClCompile Include="function.cpp" />
-    <ClCompile Include="compression.cpp" />
+    <ClCompile Include="compression.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="sift_function.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="word_count.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="pattern_matching.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="function.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="crypto.h" />
     <ClInclude Include="Enclave_t.h" />
-    <ClInclude Include="function.h" />
     <ClInclude Include="sysutils.h" />
-    <ClInclude Include="word_count.h" />
     <ClInclude Include="..\..\common\config.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -42,8 +51,21 @@
       <Filter>common\network</Filter>
     </ClInclude>
     <ClInclude Include="dedup_service.h" />
-    <ClInclude Include="pattern_matching.h" />
-    <ClInclude Include="compression.h" />
+    <ClInclude Include="compression.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="sift_function.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="word_count.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="pattern_matching.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="function.h">
+      <Filter>functions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="Enclave.config.xml" />
@@ -58,6 +80,9 @@
     </Filter>
     <Filter Include="common\network">
       <UniqueIdentifier>{9c2e5c19-1c46-4e12-a62a-f413a59b78c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="functions">
+      <UniqueIdentifier>{64d54c1a-c23d-485b-9193-eda6b70b28c6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

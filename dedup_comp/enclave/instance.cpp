@@ -7,38 +7,40 @@
 #include "pattern_matching.h"
 #include "sysutils.h"
 #include "word_count.h"
-
+#include "sift_function.h"
+#include "string.h"
 
 void dedupCase(int type, char* fileName)
 {
 	static int fid = 0;
 	static hrtime start_time, end_time;
 
-	// loakfile
+	// loadfile
 	char *textfile;
 	int filesize;
 	load_text_file(fileName, &textfile, &filesize);
 	eprintf("File %s size is %d\n", fileName, filesize);
 
 	// pattern matching
-	const char regex[] = "(Twain)|\
-(^[^ ]*?Twain)|\
-([[:alpha:]]+ing)|\
-(Huck[[:alpha:]]+)|\
-([a-z]shing)|\
-(\b\w+nn\b)|\
-([a-q][^u-z]{13}x)|\
-((?i)Tom|Sawyer|Huckleberry|Finn)|\
-(.{0,2}(Tom|Sawyer|Huckleberry|Finn))|\
-(.{2,4}(Tom|Sawyer|Huckleberry|Finn))|\
-([a-zA-Z]+ing)|\
-(\s[a-zA-Z]{0,12}ing\s)|\
-(([A-Za-z]awyer|[A-Za-z]inn)\s)|\
-([d-hx-z])|\
-((?:a|b)aa(?:aa|bb)cc(?:a|b))|\
-((?:a|b)aa(?:aa|bb)cc(?:a|b)abcabcabd)|\
-((2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(2[0-4]\d|25[0-5]|[01]?\d\d?)";
-
+	const char regex[] ="nil";
+//	const char regex[] = "(Twain)|\
+//(^[^ ]*?Twain)|\
+//([[:alpha:]]+ing)|\
+//(Huck[[:alpha:]]+)|\
+//([a-z]shing)|\
+//(\b\w+nn\b)|\
+//([a-q][^u-z]{13}x)|\
+//((?i)Tom|Sawyer|Huckleberry|Finn)|\
+//(.{0,2}(Tom|Sawyer|Huckleberry|Finn))|\
+//(.{2,4}(Tom|Sawyer|Huckleberry|Finn))|\
+//([a-zA-Z]+ing)|\
+//(\s[a-zA-Z]{0,12}ing\s)|\
+//(([A-Za-z]awyer|[A-Za-z]inn)\s)|\
+//([d-hx-z])|\
+//((?:a|b)aa(?:aa|bb)cc(?:a|b))|\
+//((?:a|b)aa(?:aa|bb)cc(?:a|b)abcabcabd)|\
+//((2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(2[0-4]\d|25[0-5]|[01]?\d\d?)";
+//
 
 	switch (type)
 	{
@@ -94,9 +96,40 @@ void dedupCase(int type, char* fileName)
 		delete cp2;
 		break;
 	}
-	}
+case 4:
+	{
+	Function *sf1 = 0, *sf2 = 0;
 
-}
+	int width;
+	int height;
+
+	byte* pic_Data = (byte *)textfile;
+
+	memcpy(&width, pic_Data, sizeof(int));
+	pic_Data += sizeof(int);
+	memcpy(&height, pic_Data, sizeof(int));
+	pic_Data += sizeof(int);
+
+	sf1 = new sift_function(fid++, pic_Data, width, height);
+	get_time(&start_time);
+	dedup(sf1);
+	get_time(&end_time);
+	eprintf("##SF cache miss total use [%d us]\n", time_elapsed_in_us(&start_time, &end_time));
+	delete sf1;
+	
+
+	sf2 = new sift_function(fid++, pic_Data, width, height);
+	get_time(&start_time);
+	dedup(sf2);
+	get_time(&end_time);
+	eprintf("##SF cache hit total use[%d us]\n\n", time_elapsed_in_us(&start_time, &end_time));
+	delete sf2;
+
+	break;
+	}//end case 
+	}//end switch
+
+}//end function
 
 
 
@@ -115,7 +148,7 @@ void ecall_entrance()
     
 	char* fileName;
 
-	//fileName = "3M";
+	//fileName = "linux-3.12.tag";
 	//dedupCase(3, fileName);
 	//fileName = "1kb";
 	//dedupCase(3, fileName);
@@ -127,17 +160,17 @@ void ecall_entrance()
 	dedupCase(2, fileName);
 	fileName = "1.5K";
 	dedupCase(2, fileName);
-	fileName = "10K";
-	dedupCase(2, fileName);
-	fileName = "32K";
-	dedupCase(2, fileName);
-	fileName = "64K";
-	dedupCase(2, fileName);
-	fileName = "100kb";
-	dedupCase(2, fileName);
-	fileName = "1024kb";
-	dedupCase(3, fileName);
-	
+	//fileName = "10K";
+	//dedupCase(2, fileName);
+	//fileName = "32K";
+	//dedupCase(2, fileName);
+	//fileName = "64K";
+	//dedupCase(2, fileName);
+	//fileName = "100kb";
+	//dedupCase(2, fileName);
+	//fileName = "1024kb";
+	//dedupCase(3, fileName);
+
 
 	//CP
 	//fileName = "1kb";
@@ -148,6 +181,15 @@ void ecall_entrance()
 	dedupCase(3, fileName);
 	fileName = "3M";
 	dedupCase(3, fileName);
-	
 
+	//SF
+	//fileName = "500K.pgm";
+	//dedupCase(4, fileName);
+	//fileName = "1000K.pgm";
+	//dedupCase(4, fileName);
+	//fileName = "2000K.pgm";
+	//dedupCase(4, fileName);
+	
+	int _sigma0;
+	int _sigmaO;
 }

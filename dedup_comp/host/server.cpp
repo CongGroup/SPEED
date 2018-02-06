@@ -8,6 +8,7 @@
 #include <memory>
 #include <signal.h>
 #include <stdio.h>
+#include <sstream>
 
 extern sgx_enclave_id_t global_eid;
 
@@ -104,3 +105,5 @@ void ocall_request_put(const uint8_t *tag,
         printf("[*] The put request is oversized!\n");
     }
 };
+
+

@@ -9,4 +9,4 @@ remote_dir=comdedup/
 remote_A=192.168.1.2
 remote_B=192.168.1.5
 
-rsync "$flags" "${filter[@]}" conggroup@"$remote_A":"$remote_dir" "$local_dir"
+rsync "$flags" "${filter[@]}" conggroup@"$remote_B":"$remote_dir" "$local_dir"

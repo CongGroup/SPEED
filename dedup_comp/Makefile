@@ -48,8 +48,8 @@ else
 	Urts_Library_Name := sgx_urts
 endif
 
-App_Cpp_Files := $(wildcard host/*.cpp) $(wildcard ../common/network/*.cpp)
-App_Include_Paths := -Ihost -I$(SGX_SDK)/include
+App_Cpp_Files := $(wildcard host/*.cpp) $(wildcard ../common/network/*.cpp) 
+App_Include_Paths := -Ihost -I$(SGX_SDK)/include 
 
 App_C_Flags := $(SGX_COMMON_CFLAGS) -fPIC -Wno-attributes $(App_Include_Paths)
 
@@ -89,11 +89,13 @@ else
 endif
 Crypto_Library_Name := sgx_tcrypto
 
-Enclave_Cpp_Files := $(wildcard enclave/*.cpp)
-Enclave_Include_Paths := -Ienclave -I$(SGX_SDK)/include -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/include/stlport -I/usr/include -I/usr/local/include
+SIFT_PATH := siftpp_sgx
+
+Enclave_Cpp_Files := $(wildcard enclave/*.cpp) $(wildcard siftpp_sgx/*.cpp)
+Enclave_Include_Paths := -Ienclave -I$(SGX_SDK)/include -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/include/stlport -I/usr/include -I/usr/local/include -I$(SIFT_PATH)
 
 Enclave_C_Flags := $(SGX_COMMON_CFLAGS) -nostdinc -fvisibility=hidden -fpie -fstack-protector $(Enclave_Include_Paths)
-Enclave_Cpp_Flags := $(Enclave_C_Flags) -nostdinc++
+Enclave_Cpp_Flags := $(Enclave_C_Flags) -nostdinc++ -Wwrite-strings
 
 # To generate a proper enclave, it is recommended to follow below guideline to link the trusted libraries:
 #    1. Link sgx_trts with the `--whole-archive' and `--no-whole-archive' options,
@@ -103,7 +105,7 @@ Enclave_Cpp_Flags := $(Enclave_C_Flags) -nostdinc++
 # Do NOT move the libraries linked with `--start-group' and `--end-group' within `--whole-archive' and `--no-whole-archive' options.
 # Otherwise, you may get some undesirable errors.
 Enclave_Link_Flags := $(SGX_COMMON_CFLAGS) -Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles -L$(SGX_LIBRARY_PATH) \
-	-Wl,--whole-archive -l$(Trts_Library_Name) -Wl,--no-whole-archive \
+	-Wl,--whole-archive -l$(Trts_Library_Name) -L$(SIFT_PATH) -Wl,--no-whole-archive \
 	-Wl,--start-group -lsgx_tstdc -lsgx_tstdcxx -l$(Crypto_Library_Name) -l$(Service_Library_Name) ./lib/libpcre.a ./lib/libz.a -Wl,--end-group \
 	-Wl,-Bstatic -Wl,-Bsymbolic -Wl,--no-undefined \
 	-Wl,-pie,-eenclave_entry -Wl,--export-dynamic  \
@@ -199,6 +201,10 @@ enclave/Enclave_t.o: enclave/Enclave_t.c
 	@echo "CC   <=  $<"
 
 enclave/%.o: enclave/%.cpp
+	@$(CXX) $(Enclave_Cpp_Flags) -c $< -o $@
+	@echo "CXX  <=  $<"
+
+siftpp_sgx/%.o: siftpp_sgx/%.cpp
 	@$(CXX) $(Enclave_Cpp_Flags) -c $< -o $@
 	@echo "CXX  <=  $<"
 

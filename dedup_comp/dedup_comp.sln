@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "enclave", "enclave\enclave.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "host", "host\host.vcxproj", "{09283E8F-167A-4C03-A7CB-9002C4667F6B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sift", "siftpp_sgx\sift.vcxproj", "{DBC35FEA-A234-4F83-808D-BC2CEA9F9776}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
@@ -41,6 +43,16 @@ Global
 		{09283E8F-167A-4C03-A7CB-9002C4667F6B}.Release|x64.Build.0 = Release|x64
 		{09283E8F-167A-4C03-A7CB-9002C4667F6B}.Release|x86.ActiveCfg = Release|x86
 		{09283E8F-167A-4C03-A7CB-9002C4667F6B}.Release|x86.Build.0 = Release|x86
+		{DBC35FEA-A234-4F83-808D-BC2CEA9F9776}.Debug|ARM.ActiveCfg = Debug|Win32
+		{DBC35FEA-A234-4F83-808D-BC2CEA9F9776}.Debug|x64.ActiveCfg = Debug|x64
+		{DBC35FEA-A234-4F83-808D-BC2CEA9F9776}.Debug|x64.Build.0 = Debug|x64
+		{DBC35FEA-A234-4F83-808D-BC2CEA9F9776}.Debug|x86.ActiveCfg = Debug|Win32
+		{DBC35FEA-A234-4F83-808D-BC2CEA9F9776}.Debug|x86.Build.0 = Debug|Win32
+		{DBC35FEA-A234-4F83-808D-BC2CEA9F9776}.Release|ARM.ActiveCfg = Release|Win32
+		{DBC35FEA-A234-4F83-808D-BC2CEA9F9776}.Release|x64.ActiveCfg = Release|x64
+		{DBC35FEA-A234-4F83-808D-BC2CEA9F9776}.Release|x64.Build.0 = Release|x64
+		{DBC35FEA-A234-4F83-808D-BC2CEA9F9776}.Release|x86.ActiveCfg = Release|Win32
+		{DBC35FEA-A234-4F83-808D-BC2CEA9F9776}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
