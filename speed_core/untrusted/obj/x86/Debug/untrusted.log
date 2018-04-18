@@ -1,0 +1,2 @@
+﻿  Cleaning remote project directory
+D:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Application Type\Linux\1.0\Linux.targets(132,6): error : There are not remote machines configured for remote builds. Please configure a machine using Tools | Options | Cross Platform | Connection Manager.
