@@ -1,4 +1,4 @@
-# SPEED: Secure Computation deduplication
+# SPEED
 
  * Introduction
  * Publication
@@ -31,14 +31,14 @@ This software requires the following libraries:
 
 # INSTALLATION
 
-Environment setup:
+* Environment setup:
 
 ```shell
  * sudo apt-get update
  * sudo apt-get install -y lrzsz gcc g++ libssl-dev libgmp-dev subversion make cmake libboost-dev libboost-test-dev libboost-program-options-dev libboost-system-dev libboost-filesystem-dev libevent-dev automake libtool flex bison pkg-config ssh openssh-server rsync python-software-properties libglib2.0-dev git libmsgpack-dev libboost-thread-dev libboost-date-time-dev libhiredis-dev build-essential libboost-regex-dev gdb
 ```
 
-Crypto++ installation:
+* Crypto++ installation:
 
 You can find the [version 5.6.5](https://www.cryptopp.com/cryptopp565.zip) on crypto++ website.
 
@@ -50,14 +50,14 @@ make libcryptopp.a libcryptopp.so
 sudo make install PREFIX=/usr/local
 ```
 
-SGX installation:
+* SGX installation:
 
 You need to enable SGX follow the [Intel_SGX_Installation_Guide_Linux](https://download.01.org/intel-sgx/linux-2.1/docs/Intel_SGX_Installation_Guide_Linux_2.1_Open_Source.pdf)
 
 
 # CONFIGURATION
 
- * Configure the environment
+ Configure the environment
 
 	Add the libraries paths to $LD_LIBRARY_PATH.
 
