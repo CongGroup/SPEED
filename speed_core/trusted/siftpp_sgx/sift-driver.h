@@ -4,8 +4,9 @@
 #include "sift.hpp"
 #include <string.h>
 
+extern std::string __inner_sift_test(int a, int b, double c);
 
-std::string computeSift(const float* _im_pt, int _width, int _height,
+extern std::string computeSift(const float* _im_pt, int _width, int _height,
 	float _sigman,
 	float _sigma0,
 	int _O, int _S,

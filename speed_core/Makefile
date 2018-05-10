@@ -49,8 +49,7 @@ else
 endif
 
 
-Sift_Cpp_Files := $(wildcard siftpp_sgx/*.cpp)
-Sift_Object_Files := $(Sift_Cpp_Files:.cpp=.o)
+
 
 App_Cpp_Files := $(wildcard untrusted/*.cpp)
 App_Include_Paths := -Ihost -I$(SGX_SDK)/include 
@@ -113,7 +112,7 @@ Enclave_Cpp_Flags := $(Enclave_C_Flags) -nostdinc++ -Wwrite-strings -std=c++11
 # Otherwise, you may get some undesirable errors.
 Enclave_Link_Flags := $(SGX_COMMON_CFLAGS) -Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles -L$(SGX_LIBRARY_PATH) \
 	-Wl,--whole-archive -l$(Trts_Library_Name) -Wl,--no-whole-archive \
-	-Wl,--start-group -lsgx_tstdc -lsgx_tstdcxx -l$(Crypto_Library_Name) -l$(Service_Library_Name)\
+	-Wl,--start-group -lsgx_tstdc -lsgx_tstdcxx -lsgx_tcxx -l$(Crypto_Library_Name) -l$(Service_Library_Name)\
 	./trusted/lib/libpcre.a ./trusted/lib/libz.a ./trusted/lib/libsiftpp.a -Wl,--end-group \
 	-Wl,-Bstatic -Wl,-Bsymbolic -Wl,--no-undefined \
 	-Wl,-pie,-eenclave_entry -Wl,--export-dynamic  \
@@ -230,13 +229,17 @@ $(Signed_Enclave_Name): $(Enclave_Name)
 ######## Library Objects #######
 
 lib: $(App_Library_Name) $(Enclave_Library_Name)
+sift: libsiftpp.a
+
+Sift_Cpp_Files := $(wildcard siftpp_sgx/*.cpp)
+Sift_Object_Files := $(Sift_Cpp_Files:.cpp=.o)
 
 siftpp_sgx/%.o: siftpp_sgx/%.cpp
 	@$(CXX) $(Enclave_Cpp_Flags) -c $< -o $@
 	@echo "CXX  <=  $<"
 	
-siftpp_sgx/libsiftpp.a : $(Sift_Object_Files)
-	ar -crs siftpp_sgx/libsiftpp.a $^
+libsiftpp.a : $(Sift_Object_Files)
+	ar -crs libsiftpp.a $^
 	
 $(App_Library_Name): untrusted/Enclave_u.o $(App_Cpp_Objects)
 	ar -rcs $(App_Library_Name) untrusted/Enclave_u.o $(App_Cpp_Objects)

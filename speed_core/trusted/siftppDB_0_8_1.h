@@ -40,7 +40,7 @@ public:
 	std::string computeSift(const float* _im_pt, int _width, int _height,
 		float _sigman, float _sigma0, int _O, int _S, int _omin, int _smin, int _smax)
 	{
-		byte func_tag[HASH_SIZE];
+		byte func_tag[HASH_SIZE]= { 0 };
 		metadata meta;
 
 		byte* input_with_r_buffer = 0;
@@ -50,8 +50,8 @@ public:
 		int output_buffer_size = 0;
 		int output_true_size = 0;
 
-		byte enc_key[ENC_KEY_SIZE];
-		byte hashr[HASH_SIZE];
+		byte enc_key[ENC_KEY_SIZE] = { 0 };
+		byte hashr[HASH_SIZE] = { 0 };
 
 		// 1. gen input tag for this function
 		input_with_r_buffer_size = _width * _height * sizeof(float) + sizeof(float) * 2 + sizeof(int) * 7 + HASH_SIZE;
@@ -94,8 +94,12 @@ public:
 		{
 			// if miss cache
 			// 3. do function
+			std::string res = ::__inner_sift_test(2, 5, 7);
 			//std::string res = ::computeSift(_im_pt, _width, _height, _sigman, _sigma0, _O, _S, _omin, _smin, _smax);
-			std::string  res = "hello world";
+			//if (res.size() < 10 || res.size()>100000)
+			//{
+			//	res = "hello world";
+			//}
 			output_true_size = res.size();
 			memcpy(output_buffer, res.data(), output_true_size);
 			//memcpy(output_buffer, output_buffer, 100);
@@ -112,8 +116,16 @@ public:
 				meta.enc_key[i] = enc_key[i] ^ hashr[i];
 			::ocall_request_put(func_tag, (byte*)(&meta), output_buffer, output_true_size);
 		}
-
-		std::string res((char*)output_buffer, output_true_size);
+		std::string res;
+		if (output_true_size > 0)
+		{
+			res.assign((char*)output_buffer, output_true_size);
+		}
+		else
+		{
+			res = "";
+		}
+		
 		delete[] input_with_r_buffer;
 		delete[] output_buffer;
 		return res;

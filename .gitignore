@@ -3,3 +3,5 @@
 ################################################################################
 
 /speed_core/.vs/speed_core/v15
+/speed_core/trusted/bin/ARM/Debug
+/speed_core/untrusted/bin/ARM/Debug

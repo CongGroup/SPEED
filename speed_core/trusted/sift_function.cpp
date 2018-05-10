@@ -36,7 +36,7 @@ static void sift_printBlock(byte* p, size_t size)
 
 void sift_function::process()
 {
-	sift_printBlock((byte*)m_pgmBuffer.data, 128);
+	//sift_printBlock((byte*)m_pgmBuffer.data, 128);
 
 	const int   O = -1;
 	const int   S = 3;

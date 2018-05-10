@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -124,12 +124,17 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\speed_core\trusted\pcre_sgx\pcre.h" />
+    <ClInclude Include="..\speed_core\trusted\siftpp_sgx\sift-driver.h" />
+    <ClInclude Include="..\speed_core\trusted\siftpp_sgx\sift.hpp" />
+    <ClInclude Include="..\speed_core\trusted\zlib_sgx\zlib.h" />
     <ClInclude Include="App\App.h" />
     <ClInclude Include="App\Enclave_u.h" />
     <ClInclude Include="Enclave\Enclave.h" />
     <ClInclude Include="Enclave\Enclave_t.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\speed_core\trusted\siftpp_sgx\sift.ipp" />
     <None Include="Enclave\Enclave.edl" />
     <None Include="Makefile" />
   </ItemGroup>

@@ -18,20 +18,21 @@ public:
 };
 
 
-#define DEDUP_FUNCTION_INIT 	byte func_tag[HASH_SIZE] = 0;\
+#define DEDUP_FUNCTION_INIT 	byte func_tag[HASH_SIZE] = {0};\
 metadata meta;\
-RETURNTYPE res;\
+bool doDedup = false;\
 byte* input_with_r_buffer = 0;\
 int input_with_r_buffer_size = 0;\
 byte* output_buffer = 0;\
 int output_buffer_size = 0;\
 int output_true_size = 0;\
-byte enc_key[ENC_KEY_SIZE] = 0;\
-byte hashr[HASH_SIZE] = 0;
+byte enc_key[ENC_KEY_SIZE] = {0};\
+byte hashr[HASH_SIZE] = {0};
 
 #define DEDUP_FUNCTION_QUERY 	::hash(input_with_r_buffer, input_with_r_buffer_size - RAND_SIZE, func_tag);\
 ::ocall_request_find(func_tag, (byte*)(&meta), output_buffer, output_buffer_size, &output_true_size);\
 if (output_true_size > 0){\
+doDedup = true;\
 memcpy(input_with_r_buffer + input_with_r_buffer_size - RAND_SIZE, meta.r, RAND_SIZE);\
 ::hash(input_with_r_buffer, input_with_r_buffer_size, hashr);\
 for (int i = 0; i < ENC_KEY_SIZE; ++i)\
@@ -51,23 +52,49 @@ meta.enc_key[i] = enc_key[i] ^ hashr[i];\
 #define COPY_OBJECT(pointer, obj) ::memcpy((pointer), &(obj), sizeof(obj));\
 (pointer) += sizeof(obj);
 
+#define READ_OBJECT(pointer, obj) ::memcpy(&(obj), (pointer), sizeof(obj));\
+(pointer) += sizeof(obj);
+
 
 
 
 /*dedup function template with Macros
 ReturnType FunctionName(Args...)
 {
-DEDUP_FUNCTION_INIT
+DEDUP_FUNCTION_INIT;
 // TODO: init input buffer and size
 //		 init output buffer and size
 //		 set intput value
-memcpy(input_with_r_buffer, Args..., sizeof...(Args))
-DEDUP_FUNCTION_QUERY
+ReturnType returnValue;
+byte* pb;
+input_with_r_buffer_size = inputSize + HASH_SIZE;
+input_with_r_buffer = new byte[input_with_r_buffer_size];
+memset(input_with_r_buffer, 0, input_with_r_buffer_size);
+output_buffer_size = outputSize;
+output_buffer = new byte[output_buffer_size];
+memset(output_buffer, 0, output_buffer_size);
+pb = input_with_r_buffer;
+COPY_OBJECT(pb, object);
+memcpy(pb, Args..., sizeof...(Args));
+
+DEDUP_FUNCTION_QUERY;
 // TODO: compute output
-//		 set output value
-memcpy(output_buffer, Args..., output_true_size)
-DEDUP_FUNCTION_UPDATE
-return RETURNTYPE(output_buffer, output_true_size);
+//		 set output value and size
+returnValue = doFunction();
+output_true_size = Size;
+pb = output_buffer;
+COPY_OBJECT(pb, object);
+memcpy(pb, Output, OutputSize);
+
+DEDUP_FUNCTION_UPDATE;
+//TODO build return value
+if(doDedup){
+	pb = output_buffer;
+	READ_OBJECT(pb, returnValue);
+	memcpy(returnValue, pb, object);}
+delete[] input_with_r_buffer;
+delete[] output_buffer;
+return returnValue;
 }
 */
 
