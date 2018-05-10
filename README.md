@@ -110,8 +110,8 @@ You can extend speed to support other library, just three steps.
 
 For example, there is a library "SomeLib" have a function "LongTimeCall".
 
-1. You need to create c++ class extend FunctionDB.
-2. You need to implement "LongTimeCall" of the new library.
+1. You need to create a new class extend class "FunctionDB".
+2. You need to implement "LongTimeCall" of the new class.
  * 2.1 Use marco DEDUP_FUNCTION_INIT, then write function input to input_buffer.
  * 2.2 Use marco DEDUP_FUNCTION_QUERY, then write function output to output_buffer.
  * 2.3 Use marco DEDUP_FUNCTION_UPDATE, then return the function.
