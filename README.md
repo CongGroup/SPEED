@@ -1,4 +1,4 @@
-# SPEED: Secure Computation deduplication for SGX-assisted applications
+# SPEED: Secure Computation deduplication
 
  * Introduction
  * Publication
@@ -11,6 +11,7 @@
 
 # INTRODUCTION
 
+SPEED is a secure computation deduplication library for SGX-assisted applications.
 To be continued.
 
 # PUBLICATION
@@ -33,16 +34,15 @@ This software requires the following libraries:
 Environment setup:
 
 ```shell
- * apt-get update
- * apt-get install gcc g++ make cmake automake git
+ * sudo apt-get update
+ * sudo apt-get install -y lrzsz gcc g++ libssl-dev libgmp-dev subversion make cmake libboost-dev libboost-test-dev libboost-program-options-dev libboost-system-dev libboost-filesystem-dev libevent-dev automake libtool flex bison pkg-config ssh openssh-server rsync python-software-properties libglib2.0-dev git libmsgpack-dev libboost-thread-dev libboost-date-time-dev libhiredis-dev build-essential libboost-regex-dev gdb
 ```
 
 Crypto++ installation:
 
-You can find the latest version 5.6.5 on https://www.cryptopp.com/cryptopp565.zip
+You can find the [version 5.6.5](https://www.cryptopp.com/cryptopp565.zip) on crypto++ website.
 
 ```shell
-cd ~
 wget https://github.com/weidai11/cryptopp/archive/CRYPTOPP_5_6_5.tar.gz
 tar -zxf CRYPTOPP_5_6_5.tar.gz
 cd cryptopp-CRYPTOPP_5_6_5
