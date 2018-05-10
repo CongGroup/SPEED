@@ -7,6 +7,7 @@
  * Configuration
  * Compiling
  * Usage
+ * Extend
  * Maintainers
 
 # INTRODUCTION
@@ -102,6 +103,19 @@ int rc = dedup_pcre(pcre_engine, 0, // pcre engine
 ```
 
  We provide pcre and libz as samples in path SPEED/speed_sample
+ 
+# Extend
+
+You can extend speed to support other library, just three steps.
+
+For example, there is a library "SomeLib" have a function "LongTimeCall".
+
+1. You need to create c++ class extend FunctionDB.
+2. You need to implement "LongTimeCall" of the new library.
+*2.1 Use marco DEDUP_FUNCTION_INIT, then write function input to input_buffer.
+*2.2 Use marco DEDUP_FUNCTION_QUERY, then write function output to output_buffer.
+*2.3 Use marco DEDUP_FUNCTION_UPDATE, then return the function.
+3. Finally, you need to update FunctionDBFactory.h to add "Somelib" and it`s version info.
  
 # MAINTAINER
 
