@@ -1,14 +1,110 @@
-# SPEED
-Secure Computation deduplication for SGX-assisted applications
+# SPEED: Secure Computation deduplication for SGX-assisted applications
 
-Support generic API-level runtime deduplication of redundant in-enclave computations
+ * Introduction
+ * Publication
+ * Requirements
+ * Installation
+ * Configuration
+ * Compiling
+ * Usage
+ * Maintainers
 
-# Examples
-_TBC_
+# INTRODUCTION
 
-# Build
-_TBC_
-## Dependency
+To be continued.
 
----
-*More description will be provided.*
+# PUBLICATION
+
+To be continued.
+
+# REQUIREMENTS
+
+Recommended Environment: Ubuntu 16.04 LTS with gcc version 4.8.4. Intel® Software Guard Extensions enable.
+
+This software requires the following libraries:
+
+ * Intel SGX (https://software.intel.com/en-us/sgx)
+ * libz (https://zlib.net/)
+ * pcre (https://www.pcre.org/)
+ * Crypto++ (https://www.cryptopp.com/)
+
+# INSTALLATION
+
+Environment setup:
+
+```shell
+ * apt-get update
+ * apt-get install gcc g++ make cmake automake git
+```
+
+Crypto++ installation:
+
+You can find the latest version 5.6.5 on https://www.cryptopp.com/cryptopp565.zip
+
+```shell
+cd ~
+wget https://github.com/weidai11/cryptopp/archive/CRYPTOPP_5_6_5.tar.gz
+tar -zxf CRYPTOPP_5_6_5.tar.gz
+cd cryptopp-CRYPTOPP_5_6_5
+make libcryptopp.a libcryptopp.so 
+sudo make install PREFIX=/usr/local
+```
+
+SGX installation:
+
+You need to enable SGX follow the [Intel_SGX_Installation_Guide_Linux](https://download.01.org/intel-sgx/linux-2.1/docs/Intel_SGX_Installation_Guide_Linux_2.1_Open_Source.pdf)
+
+
+# CONFIGURATION
+
+ * Configure the environment
+
+	Add the libraries paths to $LD_LIBRARY_PATH.
+
+	```shell
+	* export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+	```
+
+# COMPILING
+
+ Compile SPEED:
+
+```shell
+ * git clone https://github.com/CongGroup/SPEED.git
+ * cd SPEED
+ * cd speed_core && make
+```
+
+# USAGE
+
+ Speed support generic API-level runtime deduplication of redundant in-enclave computations
+
+ When we use pcre without speed, it maybe like this.
+ 
+```shell
+int rc = pcre_exec(pcre_engine, 0, // pcre engine
+			str_buffer, str_len, // query string
+			0, // starting offset
+			0, // options
+			pcre_output_buffer, output_buffer_len); 
+```
+
+ With SPEED library we can dedup pcre computation like this.
+ 
+```shell
+Deduplicable<int, const pcre *, const pcre_extra *, const char*, int, int, int, int *, int> 
+		dedup_pcre("libpcre", "10.23", "pcre_exec");
+int rc = dedup_pcre(pcre_engine, 0, // pcre engine
+				str_buffer, str_len, // query string
+				0, // starting offset
+				0, // options
+				pcre_output_buffer, output_buffer_len); 
+```
+
+ We provide pcre and libz as samples in path SPEED/speed_sample
+ 
+# MAINTAINER
+
+  - Helei Cui, City University of Hong Kong, heleicui2-c@my.cityu.edu.hk
+  - Huayi Duan, City University of Hong Kong, hduan2-c@my.cityu.edu.hk
+  - Mengyu Yao, City University of Hong Kong, mengycs@gmail.com
