@@ -1,0 +1,29 @@
+enclave {
+	trusted {
+		public void ecall_cache_get([in, size=32] const uint8_t *tag,
+									[out, size=64] uint8_t *meta,
+									[out, size=expt_size] uint8_t *rlt, int expt_size,
+									[out, size=4] int *true_size);
+
+		public void ecall_cache_put([in, size=32] const uint8_t *tag,
+									[in, size=64] const uint8_t *meta,
+									[in, size=rlt_size] const uint8_t *rlt, int rlt_size);
+	};
+
+    /* 
+     * ocall_print_string - invokes OCALL to display string buffer inside the enclave.
+     *  [in]: copy the string buffer to App outside.
+     *  [string]: specifies 'str' is a NULL terminated buffer.
+     */
+    untrusted {
+        void ocall_print_string([in, string] const char *str);
+
+		void ocall_load_text_file([in, string] const char *filename,
+							      [out, size=buffer_size] char *buffer, int buffer_size,
+								  [out, size=4] int *filesize);
+
+		void ocall_get_time([out, size=4] int *second,
+							[out, size=4] int *nanosecond);
+    };
+
+};

@@ -1,0 +1,171 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="crypto.cpp" />
+    <ClCompile Include="instance.cpp" />
+    <ClCompile Include="sysutils.cpp" />
+    <ClCompile Include="compression.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="sift_function.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="word_count.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="pattern_matching.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="dedup_service.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="Enclave_t.c">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="function.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="mr_wordcount.cpp">
+      <Filter>application\mapreduce</Filter>
+    </ClCompile>
+    <ClCompile Include="words5000.cpp">
+      <Filter>application\mapreduce</Filter>
+    </ClCompile>
+    <ClCompile Include="mapreduce.cpp">
+      <Filter>application\mapreduce</Filter>
+    </ClCompile>
+    <ClCompile Include="mr_bow.cpp">
+      <Filter>application\mapreduce</Filter>
+    </ClCompile>
+    <ClCompile Include="zipfolder.cpp">
+      <Filter>application\foldertar</Filter>
+    </ClCompile>
+    <ClCompile Include="sift.cpp">
+      <Filter>application\picsimilar</Filter>
+    </ClCompile>
+    <ClCompile Include="siftcmp.cpp">
+      <Filter>application\picsimilar</Filter>
+    </ClCompile>
+    <ClCompile Include="middlebox.cpp">
+      <Filter>application\middlebox</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="crypto.h" />
+    <ClInclude Include="sysutils.h" />
+    <ClInclude Include="compression.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="sift_function.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="word_count.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="pattern_matching.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="FunctionDB.h">
+      <Filter>dedupFunctionDB</Filter>
+    </ClInclude>
+    <ClInclude Include="FunctionDBFactory.h">
+      <Filter>dedupFunctionDB</Filter>
+    </ClInclude>
+    <ClInclude Include="dedup_service.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="Deduplicable.h">
+      <Filter>dedupFunctionDB</Filter>
+    </ClInclude>
+    <ClInclude Include="Enclave_t.h">
+      <Filter>res</Filter>
+    </ClInclude>
+    <ClInclude Include="siftppDB_0_8_1.h">
+      <Filter>dedupFunctionDB</Filter>
+    </ClInclude>
+    <ClInclude Include="function.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="libz_1_12_11.h">
+      <Filter>dedupFunctionDB</Filter>
+    </ClInclude>
+    <ClInclude Include="libpcre_10_23.h">
+      <Filter>dedupFunctionDB</Filter>
+    </ClInclude>
+    <ClInclude Include="mapreduce.h">
+      <Filter>application\mapreduce</Filter>
+    </ClInclude>
+    <ClInclude Include="mr_bow.h">
+      <Filter>application\mapreduce</Filter>
+    </ClInclude>
+    <ClInclude Include="mr_wordcount.h">
+      <Filter>application\mapreduce</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\config.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\data_type.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="zipfolder.h">
+      <Filter>application\foldertar</Filter>
+    </ClInclude>
+    <ClInclude Include="sift.h">
+      <Filter>application\picsimilar</Filter>
+    </ClInclude>
+    <ClInclude Include="siftcmp.h">
+      <Filter>application\picsimilar</Filter>
+    </ClInclude>
+    <ClInclude Include="middlebox.h">
+      <Filter>application\middlebox</Filter>
+    </ClInclude>
+    <ClInclude Include="pktreader.h">
+      <Filter>application\middlebox</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Enclave.edl">
+      <Filter>res</Filter>
+    </None>
+    <None Include="Enclave.lds">
+      <Filter>res</Filter>
+    </None>
+    <None Include="..\Makefile">
+      <Filter>res</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="common">
+      <UniqueIdentifier>{d5ea6a85-d049-4ac0-b1d5-3382e7af0b3c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="functions">
+      <UniqueIdentifier>{64d54c1a-c23d-485b-9193-eda6b70b28c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="res">
+      <UniqueIdentifier>{1ed8df9b-1bc1-4bce-a029-f7c637be43d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dedupFunctionDB">
+      <UniqueIdentifier>{472daa60-c4c2-42dd-83f3-e72a774d89f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="application">
+      <UniqueIdentifier>{710a21a3-0b3b-4b2f-9fda-a4bf635ea0d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="application\mapreduce">
+      <UniqueIdentifier>{87b97373-3520-4e80-bf38-a9e7e3ec47d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="application\middlebox">
+      <UniqueIdentifier>{4b617f2a-1ab7-4cf3-bebf-eeef4e91680f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="application\foldertar">
+      <UniqueIdentifier>{4de12eab-0f14-4da2-869e-af3a7f63413d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="application\picsimilar">
+      <UniqueIdentifier>{6447b987-0228-43bc-b6fd-c5e0cf733497}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="Enclave.config.xml">
+      <Filter>res</Filter>
+    </Xml>
+  </ItemGroup>
+</Project>

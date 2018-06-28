@@ -1,0 +1,57 @@
+enclave 
+{
+	// thread import
+	from "sgx_tstdc.edl" import sgx_thread_wait_untrusted_event_ocall, sgx_thread_set_untrusted_event_ocall, sgx_thread_setwait_untrusted_events_ocall, sgx_thread_set_multiple_untrusted_events_ocall;
+
+
+    trusted 
+	{
+		public void ecall_entrance(int id,  [in, string]const char* path, int count);
+
+		//mapreduce
+		public void ecall_map_thread(int no);
+		public void ecall_reduce_thread(int no);
+	};
+
+    untrusted 
+	{
+		// utilities
+        void ocall_print_string([in, string] const char *str);
+
+		void ocall_load_text_file([in, string] const char *filename,
+							      [out] char **buffer, int buffer_size,
+								  [out] int *filesize);
+
+		void ocall_write_text_file([in, string] const char *filename,
+							      [in, size=buffer_size]const char *buffer, int buffer_size);
+
+		void ocall_get_time([out, size=4] int *second,
+							[out, size=4] int *nanosecond);
+		
+		// dedup api
+		void ocall_request_find([in, size=32] const uint8_t *tag,
+								[out, size=64] uint8_t *meta,
+								[out, size=expt_size] uint8_t *rlt, int expt_size,
+								[out] int *true_size);
+		
+		void ocall_request_put([in, size=32] const uint8_t *tag,
+							   [in, size=64] const uint8_t *meta,
+							   [in, size=rlt_size] const uint8_t *rlt, int rlt_size);
+
+		//mapreduce
+		void ocall_begin_map(int mapper_count);
+		void ocall_begin_reduce(int reducer_count);
+		
+		int ocall_open([in, string] const char* filename, int mode);
+		int ocall_read(int file, [out, size=size] void *buf, unsigned int size);
+        int ocall_write(int file, [in, size=size] void *buf, unsigned int size);
+        void ocall_close(int file);
+
+		int ocall_file_size([in, string] const char* filename);
+		int ocall_read_dir([in, string] const char* filename, [out, size=size] char* buffer, int max_file_count, unsigned int size);
+
+		void ocall_delete_array([in] char* pointer);
+		void ocall_load_pkt_file([in, string] const char *filename, [out] char **buffer, [in, out] int *pkt_count);
+    };
+
+};

@@ -10,27 +10,27 @@
 #include <sstream>
 
 
-
-
-int ocall_open(const char* filename, int mode) {
-
-	return open(filename, (mode_t)mode);
-}
-
-int ocall_read(int file, void *buf, unsigned int size)
-{
-	return read(file, buf, size);
-}
-
-int ocall_write(int file, void *buf, unsigned int size)
-{
-	return write(file, buf, size);
-}
-
-void ocall_close(int file)
-{
-	close(file);
-}
+//
+//
+//int ocall_open(const char* filename, int mode) {
+//
+//	return open(filename, (mode_t)mode);
+//}
+//
+//int ocall_read(int file, void *buf, unsigned int size)
+//{
+//	return read(file, buf, size);
+//}
+//
+//int ocall_write(int file, void *buf, unsigned int size)
+//{
+//	return write(file, buf, size);
+//}
+//
+//void ocall_close(int file)
+//{
+//	close(file);
+//}
 
 /* OCall functions */
 //void ocall_print_string(const char *str)
