@@ -104,7 +104,7 @@ int rc = dedup_pcre(pcre_engine, 0, // pcre engine
 
  We provide pcre and libz as samples in path SPEED/speed_sample
  
-# Extend
+# EXTEND
 
 You can extend speed to support other library, just three steps.
 
