@@ -2,8 +2,9 @@
 #include "Enclave_u.h"
 #include <stdio.h>
 #include <time.h>
-#include "../common/config.h"
-#include "../common/data_type.h"
+#include "../../common/config.h"
+#include "../../common/data_type.h"
+#include "../../common/network/network.h"
 
 #include <fstream>
 #include <sstream>
@@ -120,11 +121,71 @@ void ocall_write_text_file(const char *filename, const char *buffer, int buffer_
 #include <time.h>
 #include <thread>
 
+std::auto_ptr<Network> requester;
+
+void ocall_request_find(const uint8_t *tag,
+	uint8_t *meta,
+	uint8_t *rlt, int expt_size,
+	int *true_size)
+{
+	int req_size = REQ_TYPE_SIZE + TAG_SIZE + sizeof(int);
+
+	if (req_size <= TX_BUFFER_SIZE) {
+		requester->set_send_buffer(&Request::Get, REQ_TYPE_SIZE, 0);
+		requester->set_send_buffer(tag, TAG_SIZE, REQ_TYPE_SIZE);
+		requester->set_send_buffer((uint8_t *)(&expt_size), sizeof(int), REQ_TYPE_SIZE + TAG_SIZE);
+
+		Request req(requester->get_send_buffer(), req_size);
+
+		requester->send_request(&req);
+
+		std::auto_ptr<Response> resp(requester->recv_response());
+
+		if (resp->get_answer() == Response::Positive) {
+			// copy back responsed data
+			memcpy(meta, resp->get_meta(), sizeof(metadata));
+			memcpy(rlt, resp->get_rlt(), resp->get_rlt_size());
+			*true_size = resp->get_rlt_size();
+		}
+		else {
+			*true_size = 0;
+		}
+	}
+	else {
+		printf("[*] The get request is oversized!\n");
+	}
+}
+
+void ocall_request_put(const uint8_t *tag,
+	const uint8_t *meta,
+	const uint8_t *rlt, int rlt_size)
+{
+	int req_size = REQ_TYPE_SIZE + TAG_SIZE + sizeof(metadata) + rlt_size;
+
+	if (req_size <= TX_BUFFER_SIZE) {
+		requester->set_send_buffer(&Request::Put, REQ_TYPE_SIZE, 0);
+		requester->set_send_buffer(tag, TAG_SIZE, REQ_TYPE_SIZE);
+		requester->set_send_buffer(meta, sizeof(metadata), REQ_TYPE_SIZE + TAG_SIZE);
+		requester->set_send_buffer(rlt, rlt_size, REQ_TYPE_SIZE + TAG_SIZE + sizeof(metadata));
+
+		Request req(requester->get_send_buffer(), req_size);
+
+		// send out request
+		requester->send_request(&req);
+
+		// no need to wait for response since the put is made asyncrounous, immediately return
+	}
+	else {
+		printf("[*] The put request is oversized!\n");
+	}
+};
+
+/*
 typedef std::vector<uint8_t> binary;
 typedef std::pair<binary, binary> entry_t;
 // TODO: replace with unordered_map
 // We need to know map max size to use unordered_map
-//typedef std::unordered_map<binary, entry_t> cache_t;
+// typedef std::unordered_map<binary, entry_t> cache_t;
 typedef std::map<binary, entry_t> cache_t;
 
 cache_t cache;
@@ -170,7 +231,7 @@ void ocall_request_put(const uint8_t *tag,
 
 	cache[key] = entry_t(entry_meta, entry_rlt);
 }
-
+*/
 extern sgx_enclave_id_t global_eid;
 
 void call_ecall_map(int no)

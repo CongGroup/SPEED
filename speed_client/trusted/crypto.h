@@ -3,7 +3,7 @@
 
 #include "sgx_tcrypto.h"
 
-#include "../common/data_type.h"
+#include "../../common/data_type.h"
 
 void key_gen(byte *key, int len);
 

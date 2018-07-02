@@ -27,7 +27,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{7701a9e2-4079-4d30-8fc2-26c887534835}</ProjectGuid>
+    <ProjectGuid>{1D0FE1CD-A0C6-49BC-97DF-F601A2AD026E}</ProjectGuid>
     <Keyword>Linux</Keyword>
     <RootNamespace>enclave</RootNamespace>
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
@@ -35,7 +35,6 @@
     <ApplicationTypeRevision>1.0</ApplicationTypeRevision>
     <TargetLinuxPlatform>Generic</TargetLinuxPlatform>
     <LinuxProjectType>{2238F9CD-F817-4ECC-BD14-2524D2669B35}</LinuxProjectType>
-    <ProjectName>trusted</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
@@ -68,54 +67,17 @@
     <Xml Include="Enclave.config.xml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Makefile" />
     <None Include="Enclave.edl" />
     <None Include="Enclave.lds" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="compression.cpp" />
-    <ClCompile Include="crypto.cpp" />
-    <ClCompile Include="dedup_service.cpp" />
+    <ClCompile Include="cache.cpp" />
     <ClCompile Include="Enclave_t.c" />
-    <ClCompile Include="function.cpp" />
-    <ClCompile Include="instance.cpp" />
-    <ClCompile Include="mapreduce.cpp" />
-    <ClCompile Include="middlebox.cpp" />
-    <ClCompile Include="mr_bow.cpp" />
-    <ClCompile Include="pattern_matching.cpp" />
-    <ClCompile Include="siftcmp.cpp" />
-    <ClCompile Include="sift.cpp" />
-    <ClCompile Include="sift_function.cpp" />
     <ClCompile Include="sysutils.cpp" />
-    <ClCompile Include="mr_wordcount.cpp" />
-    <ClCompile Include="words5000.cpp" />
-    <ClCompile Include="word_count.cpp" />
-    <ClCompile Include="zipfolder.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="compression.h" />
-    <ClInclude Include="crypto.h" />
-    <ClInclude Include="Deduplicable.h" />
-    <ClInclude Include="dedup_service.h" />
     <ClInclude Include="Enclave_t.h" />
-    <ClInclude Include="function.h" />
-    <ClInclude Include="FunctionDB.h" />
-    <ClInclude Include="FunctionDBFactory.h" />
-    <ClInclude Include="libpcre_10_23.h" />
-    <ClInclude Include="libz_1_12_11.h" />
-    <ClInclude Include="mapreduce.h" />
-    <ClInclude Include="middlebox.h" />
-    <ClInclude Include="mr_bow.h" />
-    <ClInclude Include="mr_wordcount.h" />
-    <ClInclude Include="pattern_matching.h" />
-    <ClInclude Include="pktreader.h" />
-    <ClInclude Include="siftcmp.h" />
-    <ClInclude Include="sift.h" />
-    <ClInclude Include="siftppDB_0_8_1.h" />
-    <ClInclude Include="sift_function.h" />
     <ClInclude Include="sysutils.h" />
-    <ClInclude Include="word_count.h" />
-    <ClInclude Include="zipfolder.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>

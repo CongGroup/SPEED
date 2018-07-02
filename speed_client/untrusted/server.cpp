@@ -4,13 +4,18 @@
 #include "sgx_urts.h"
 #include <memory>
 #include <signal.h>
+#include "../../common/network/network.h"
 
 extern sgx_enclave_id_t global_eid;
+
+extern std::auto_ptr<Network> requester;
 
 void shutdown(int sig) {
     printf("[*] Stopping caching server ...\n");
 
     sgx_destroy_enclave(global_eid);
+
+	requester.release();
 
     // Do whatever tear-down
 	abort();
@@ -25,7 +30,8 @@ void init_server() {
     signal(SIGTSTP, shutdown); // Ctrl + z
     signal(SIGINT, shutdown); // Ctrl + c
 
-    //printf("[*] Connecting to caching server ...\n");
+	printf("[*] Connecting to caching server ...\n");
+	requester.reset(new Network(SERV_IP));
 
     printf("[*] Initialization is finished!\n");
 

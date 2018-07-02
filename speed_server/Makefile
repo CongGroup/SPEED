@@ -1,7 +1,7 @@
 
 ### Default to pre-release mode ###
-SGX_DEBUG = 0
-SGX_PRERELEASE = 1
+SGX_DEBUG = 1
+SGX_PRERELEASE = 0
 
 ######## SGX SDK Settings ########
 
@@ -48,8 +48,8 @@ else
 	Urts_Library_Name := sgx_urts
 endif
 
-App_Cpp_Files := $(wildcard host/*.cpp) $(wildcard ../common/network/*.cpp)
-App_Include_Paths := -Ihost -I$(SGX_SDK)/include
+App_Cpp_Files := $(wildcard untrusted/*.cpp) $(wildcard ../common/network/*.cpp)
+App_Include_Paths := -Iuntrusted -I$(SGX_SDK)/include
 
 App_C_Flags := $(SGX_COMMON_CFLAGS) -fPIC -Wno-attributes $(App_Include_Paths)
 
@@ -76,7 +76,7 @@ endif
 
 App_Cpp_Objects := $(App_Cpp_Files:.cpp=.o)
 
-App_Name := cache
+App_Name := cacheServer
 
 ######## Enclave Settings ########
 
@@ -89,8 +89,8 @@ else
 endif
 Crypto_Library_Name := sgx_tcrypto
 
-Enclave_Cpp_Files := $(wildcard enclave/*.cpp)
-Enclave_Include_Paths := -Ienclave -I$(SGX_SDK)/include -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/include/stlport
+Enclave_Cpp_Files := $(wildcard trusted/*.cpp)
+Enclave_Include_Paths := -Itrusted -I$(SGX_SDK)/include -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/include/stlport
 
 Enclave_C_Flags := $(SGX_COMMON_CFLAGS) -nostdinc -fvisibility=hidden -fpie -fstack-protector $(Enclave_Include_Paths)
 Enclave_Cpp_Flags := $(Enclave_C_Flags) -nostdinc++
@@ -108,13 +108,13 @@ Enclave_Link_Flags := $(SGX_COMMON_CFLAGS) -Wl,--no-undefined -nostdlib -nodefau
 	-Wl,-Bstatic -Wl,-Bsymbolic -Wl,--no-undefined \
 	-Wl,-pie,-eenclave_entry -Wl,--export-dynamic  \
 	-Wl,--defsym,__ImageBase=0 \
-	-Wl,--version-script=enclave/Enclave.lds
+	-Wl,--version-script=trusted/Enclave.lds
 
 Enclave_Cpp_Objects := $(Enclave_Cpp_Files:.cpp=.o)
 
 Enclave_Name := enclave.so
 Signed_Enclave_Name := enclave.signed.so
-Enclave_Config_File := enclave/Enclave.config.xml
+Enclave_Config_File := trusted/Enclave.config.xml
 
 ifeq ($(SGX_MODE), HW)
 ifeq ($(SGX_DEBUG), 1)
@@ -168,49 +168,49 @@ endif
 
 ######## Host Objects ########
 
-host/Enclave_u.c: $(SGX_EDGER8R) enclave/Enclave.edl
-	@cd host && $(SGX_EDGER8R) --untrusted ../enclave/Enclave.edl --search-path ../enclave --search-path $(SGX_SDK)/include
+untrusted/Enclave_u.c: $(SGX_EDGER8R) trusted/Enclave.edl
+	@cd untrusted && $(SGX_EDGER8R) --untrusted ../trusted/Enclave.edl --search-path ../trusted --search-path $(SGX_SDK)/include
 	@echo "GEN  =>  $@"
 
-host/Enclave_u.o: host/Enclave_u.c
+untrusted/Enclave_u.o: untrusted/Enclave_u.c
 	@$(CC) $(App_C_Flags) -c $< -o $@
 	@echo "CC   <=  $<"
 
-host/%.o: host/%.cpp
+untrusted/%.o: untrusted/%.cpp
 	@$(CXX) $(App_Cpp_Flags) -c $< -o $@
 	@echo "CXX  <=  $<"
 
-$(App_Name): host/Enclave_u.o $(App_Cpp_Objects)
+$(App_Name): untrusted/Enclave_u.o $(App_Cpp_Objects)
 	@$(CXX) $^ -o $@ $(App_Link_Flags)
 	@echo "LINK =>  $@"
 
 .config_$(Build_Mode)_$(SGX_ARCH):
-	@rm -f .config_* $(App_Name) $(Enclave_Name) $(Signed_Enclave_Name) $(App_Cpp_Objects) host/Enclave_u.* $(Enclave_Cpp_Objects) Enclave/Enclave_t.*
+	@rm -f .config_* $(App_Name) $(Enclave_Name) $(Signed_Enclave_Name) $(App_Cpp_Objects) untrusted/Enclave_u.* $(Enclave_Cpp_Objects) Enclave/Enclave_t.*
 	@touch .config_$(Build_Mode)_$(SGX_ARCH)
 
 ######## Enclave Objects ########
 
-enclave/Enclave_t.c: $(SGX_EDGER8R) enclave/Enclave.edl
-	@cd enclave && $(SGX_EDGER8R) --trusted ../enclave/Enclave.edl --search-path ../enclave --search-path $(SGX_SDK)/include
+trusted/Enclave_t.c: $(SGX_EDGER8R) trusted/Enclave.edl
+	@cd trusted && $(SGX_EDGER8R) --trusted ../trusted/Enclave.edl --search-path ../trusted --search-path $(SGX_SDK)/include
 	@echo "GEN  =>  $@"
 
-enclave/Enclave_t.o: enclave/Enclave_t.c
+trusted/Enclave_t.o: trusted/Enclave_t.c
 	@$(CC) $(Enclave_C_Flags) -c $< -o $@
 	@echo "CC   <=  $<"
 
-enclave/%.o: enclave/%.cpp
+trusted/%.o: trusted/%.cpp
 	@$(CXX) $(Enclave_Cpp_Flags) -c $< -o $@
 	@echo "CXX  <=  $<"
 
-$(Enclave_Name): enclave/Enclave_t.o $(Enclave_Cpp_Objects)
+$(Enclave_Name): trusted/Enclave_t.o $(Enclave_Cpp_Objects)
 	@$(CXX) $^ -o $@ $(Enclave_Link_Flags)
 	@echo "LINK =>  $@"
 
 $(Signed_Enclave_Name): $(Enclave_Name)
-	@$(SGX_ENCLAVE_SIGNER) sign -key enclave/Enclave_private.pem -enclave $(Enclave_Name) -out $@ -config $(Enclave_Config_File)
+	@$(SGX_ENCLAVE_SIGNER) sign -key trusted/Enclave_private.pem -enclave $(Enclave_Name) -out $@ -config $(Enclave_Config_File)
 	@echo "SIGN =>  $@"
 
 .PHONY: clean
 
 clean:
-	@rm -f .config_* $(App_Name) $(Enclave_Name) $(Signed_Enclave_Name) $(App_Cpp_Objects) host/Enclave_u.* $(Enclave_Cpp_Objects) enclave/Enclave_t.*
+	@rm -f .config_* $(App_Name) $(Enclave_Name) $(Signed_Enclave_Name) $(App_Cpp_Objects) untrusted/Enclave_u.* $(Enclave_Cpp_Objects) trusted/Enclave_t.*

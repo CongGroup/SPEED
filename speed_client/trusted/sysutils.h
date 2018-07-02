@@ -5,7 +5,7 @@
 #include <assert.h>
 #include <time.h>
 
-#include "../common/data_type.h"
+#include "../../common/data_type.h"
 
 #if defined(__cplusplus)
 extern "C" {

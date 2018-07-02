@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="network">
+      <UniqueIdentifier>{706f65e8-569b-42c1-a558-7a916dd9e9f0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="network\client.cpp">
+      <Filter>network</Filter>
+    </ClCompile>
+    <ClCompile Include="network\network.cpp">
+      <Filter>network</Filter>
+    </ClCompile>
+    <ClCompile Include="network\request.cpp">
+      <Filter>network</Filter>
+    </ClCompile>
+    <ClCompile Include="network\response.cpp">
+      <Filter>network</Filter>
+    </ClCompile>
+    <ClCompile Include="network\server.cpp">
+      <Filter>network</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="network\Makefile">
+      <Filter>network</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="network\network.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="network\request.h">
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="network\response.h">
+      <Filter>network</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

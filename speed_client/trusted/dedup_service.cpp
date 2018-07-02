@@ -5,8 +5,8 @@
 
 #include "Enclave_t.h"
 
-#include "../common/config.h"
-#include "../common/data_type.h"
+#include "../../common/config.h"
+#include "../../common/data_type.h"
 
 #include <assert.h>
 #include <cstring>

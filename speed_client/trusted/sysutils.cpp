@@ -66,6 +66,7 @@ char* strsep(char** dummy, const char* chs)
 				break;
 			}
 		}
+
 		if (*str)
 		{
 			str++;

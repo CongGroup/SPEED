@@ -1,7 +1,7 @@
 #ifndef FUNCTION_H
 #define FUNCTION_H
 
-#include "../common/data_type.h"
+#include "../../common/data_type.h"
 
 #include <string>
 

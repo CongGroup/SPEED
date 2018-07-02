@@ -101,12 +101,6 @@
     <ClInclude Include="mr_wordcount.h">
       <Filter>application\mapreduce</Filter>
     </ClInclude>
-    <ClInclude Include="..\common\config.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\common\data_type.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="zipfolder.h">
       <Filter>application\foldertar</Filter>
     </ClInclude>
@@ -135,9 +129,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="common">
-      <UniqueIdentifier>{d5ea6a85-d049-4ac0-b1d5-3382e7af0b3c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="functions">
       <UniqueIdentifier>{64d54c1a-c23d-485b-9193-eda6b70b28c6}</UniqueIdentifier>
     </Filter>

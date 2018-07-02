@@ -2,6 +2,7 @@
 #define CONFIG_H
 
 #undef TEST_PUT_AND_GET
+#define TEST_RSA
 
 #include <stdint.h>
 
@@ -16,10 +17,10 @@
 #define RAND_SIZE 32
 
 // file buffer for I/O wrapper
-#define FILE_BUFFER_SIZE 5*1024*1024 // 5M
+#define FILE_BUFFER_SIZE 200*1024*1024 // 200M
 
 // network
-#define SERV_IP "192.168.1.5"
+#define SERV_IP "192.168.1.101"
 #define SERV_PORT 8888
 
 #define TX_BUFFER_SIZE 1024*1024*10 // 10M
@@ -28,5 +29,14 @@
 // function types
 #define FUNC_WC 1 // word count
 #define FUNC_PM 2 // pattern matching
-#define FUNC_CP 2 // compression
+#define FUNC_CP 3 // compression
+#define FUNC_SF 4 // picture freature
+
+
+const int pkt_buffer_size = 1514;
+const int tcp_reassembly_buffer_size = 4096;
+const int max_stream_size = 2000;
+const int pcre_output_size = 64;
+
+
 #endif

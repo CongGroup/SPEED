@@ -10,3 +10,7 @@ remote_A=192.168.1.2
 remote_B=192.168.1.15
 
 rsync "$flags" "${filter[@]}" conggroup@"$remote_B":"$remote_dir" "$local_dir"
+
+
+
+
