@@ -32,6 +32,8 @@ int SGX_UBRIDGE(SGX_NOCONVENTION, ocall_file_size, (const char* filename));
 int SGX_UBRIDGE(SGX_NOCONVENTION, ocall_read_dir, (const char* filename, char* buffer, int max_file_count, unsigned int size));
 void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_delete_array, (char* pointer));
 void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_load_pkt_file, (const char* filename, char** buffer, int* pkt_count));
+int SGX_UBRIDGE(SGX_NOCONVENTION, ocall_get_network_get_time, ());
+int SGX_UBRIDGE(SGX_NOCONVENTION, ocall_get_network_put_time, ());
 int SGX_UBRIDGE(SGX_CDECL, sgx_thread_wait_untrusted_event_ocall, (const void* self));
 int SGX_UBRIDGE(SGX_CDECL, sgx_thread_set_untrusted_event_ocall, (const void* waiter));
 int SGX_UBRIDGE(SGX_CDECL, sgx_thread_setwait_untrusted_events_ocall, (const void* waiter, const void* self));

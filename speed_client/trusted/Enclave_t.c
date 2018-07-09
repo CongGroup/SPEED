@@ -123,6 +123,14 @@ typedef struct ms_ocall_load_pkt_file_t {
 	int* ms_pkt_count;
 } ms_ocall_load_pkt_file_t;
 
+typedef struct ms_ocall_get_network_get_time_t {
+	int ms_retval;
+} ms_ocall_get_network_get_time_t;
+
+typedef struct ms_ocall_get_network_put_time_t {
+	int ms_retval;
+} ms_ocall_get_network_put_time_t;
+
 typedef struct ms_sgx_thread_wait_untrusted_event_ocall_t {
 	int ms_retval;
 	void* ms_self;
@@ -213,10 +221,12 @@ SGX_EXTERNC const struct {
 
 SGX_EXTERNC const struct {
 	size_t nr_ocall;
-	uint8_t entry_table[20][3];
+	uint8_t entry_table[22][3];
 } g_dyn_entry_table = {
-	20,
+	22,
 	{
+		{0, 0, 0, },
+		{0, 0, 0, },
 		{0, 0, 0, },
 		{0, 0, 0, },
 		{0, 0, 0, },
@@ -980,6 +990,56 @@ sgx_status_t SGX_CDECL ocall_load_pkt_file(const char* filename, char** buffer, 
 	return status;
 }
 
+sgx_status_t SGX_CDECL ocall_get_network_get_time(int* retval)
+{
+	sgx_status_t status = SGX_SUCCESS;
+
+	ms_ocall_get_network_get_time_t* ms = NULL;
+	size_t ocalloc_size = sizeof(ms_ocall_get_network_get_time_t);
+	void *__tmp = NULL;
+
+
+	__tmp = sgx_ocalloc(ocalloc_size);
+	if (__tmp == NULL) {
+		sgx_ocfree();
+		return SGX_ERROR_UNEXPECTED;
+	}
+	ms = (ms_ocall_get_network_get_time_t*)__tmp;
+	__tmp = (void *)((size_t)__tmp + sizeof(ms_ocall_get_network_get_time_t));
+
+	status = sgx_ocall(16, ms);
+
+	if (retval) *retval = ms->ms_retval;
+
+	sgx_ocfree();
+	return status;
+}
+
+sgx_status_t SGX_CDECL ocall_get_network_put_time(int* retval)
+{
+	sgx_status_t status = SGX_SUCCESS;
+
+	ms_ocall_get_network_put_time_t* ms = NULL;
+	size_t ocalloc_size = sizeof(ms_ocall_get_network_put_time_t);
+	void *__tmp = NULL;
+
+
+	__tmp = sgx_ocalloc(ocalloc_size);
+	if (__tmp == NULL) {
+		sgx_ocfree();
+		return SGX_ERROR_UNEXPECTED;
+	}
+	ms = (ms_ocall_get_network_put_time_t*)__tmp;
+	__tmp = (void *)((size_t)__tmp + sizeof(ms_ocall_get_network_put_time_t));
+
+	status = sgx_ocall(17, ms);
+
+	if (retval) *retval = ms->ms_retval;
+
+	sgx_ocfree();
+	return status;
+}
+
 sgx_status_t SGX_CDECL sgx_thread_wait_untrusted_event_ocall(int* retval, const void* self)
 {
 	sgx_status_t status = SGX_SUCCESS;
@@ -998,7 +1058,7 @@ sgx_status_t SGX_CDECL sgx_thread_wait_untrusted_event_ocall(int* retval, const 
 	__tmp = (void *)((size_t)__tmp + sizeof(ms_sgx_thread_wait_untrusted_event_ocall_t));
 
 	ms->ms_self = SGX_CAST(void*, self);
-	status = sgx_ocall(16, ms);
+	status = sgx_ocall(18, ms);
 
 	if (retval) *retval = ms->ms_retval;
 
@@ -1024,7 +1084,7 @@ sgx_status_t SGX_CDECL sgx_thread_set_untrusted_event_ocall(int* retval, const v
 	__tmp = (void *)((size_t)__tmp + sizeof(ms_sgx_thread_set_untrusted_event_ocall_t));
 
 	ms->ms_waiter = SGX_CAST(void*, waiter);
-	status = sgx_ocall(17, ms);
+	status = sgx_ocall(19, ms);
 
 	if (retval) *retval = ms->ms_retval;
 
@@ -1051,7 +1111,7 @@ sgx_status_t SGX_CDECL sgx_thread_setwait_untrusted_events_ocall(int* retval, co
 
 	ms->ms_waiter = SGX_CAST(void*, waiter);
 	ms->ms_self = SGX_CAST(void*, self);
-	status = sgx_ocall(18, ms);
+	status = sgx_ocall(20, ms);
 
 	if (retval) *retval = ms->ms_retval;
 
@@ -1090,7 +1150,7 @@ sgx_status_t SGX_CDECL sgx_thread_set_multiple_untrusted_events_ocall(int* retva
 	}
 	
 	ms->ms_total = total;
-	status = sgx_ocall(19, ms);
+	status = sgx_ocall(21, ms);
 
 	if (retval) *retval = ms->ms_retval;
 

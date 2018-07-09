@@ -8,6 +8,7 @@
 class Response
 {
 public:
+	// sign the server have data or not
     static const byte Positive;
     static const byte Negative;
 

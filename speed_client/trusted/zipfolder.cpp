@@ -109,13 +109,15 @@ extern bool dedup_switch;
 
 static void compress_file(const char* path)
 {
+	const int compress_block_size = 2 * 1024 * 1024;
+
 	int file_size = 0;
 	ocall_file_size(&file_size, path);
 	if (file_size > 0)
 	{
 		 // read file
 		 char* file_in = (char*)malloc(file_size);
-		 char* file_out = (char*)malloc(file_size*1.2);
+		 char* file_out = (char*)malloc(compress_block_size*1.2);
 
 		 int fileid = 0;
 		 ocall_open(&fileid, path, 0);
@@ -124,23 +126,32 @@ static void compress_file(const char* path)
 			 eprintf("%s error in open.\n", path);
 			 return;
 		 }
-		 int readret = 0;
-		 ocall_read(&readret, fileid, file_in, file_size);
-		 if (readret != file_size)
+
+		 int size_to_read = file_size;
+		 int cmp_size = 0;
+		 while (size_to_read > 0)
 		 {
-			 eprintf("%s error in read %d/%d\n", path, readret, file_size);
+			 int readRet = 0;
+			 ocall_read(&readRet, fileid, file_in, size_to_read>compress_block_size ? compress_block_size : size_to_read);
+			 if (readRet <0)
+			 {
+				 eprintf("%s error in read %d/%d\n", path, readRet, size_to_read);
+			 }
+			 size_to_read -= readRet;
+
+			 if (dedup_switch)
+			 {
+				 cmp_size += zlibfile_with_dedup(file_in, file_out, readRet);
+			 }
+			 else
+			 {
+				 cmp_size += zlibfile_without_dedup(file_in, file_out, readRet);
+			 }
+
 		 }
+
 		 ocall_close(fileid);
 
-		 int cmp_size = 0;
-		 if (dedup_switch)
-		 {
-			 cmp_size = zlibfile_with_dedup(file_in, file_out, file_size);
-		 }
-		 else
-		 {
-			 cmp_size = zlibfile_without_dedup(file_in, file_out, file_size);
-		 }
 
 		 eprintf("%s after compress %d/%d\n", path, cmp_size, file_size);
 

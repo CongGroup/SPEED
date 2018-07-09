@@ -6,7 +6,7 @@ enclave
 
     trusted 
 	{
-		public void ecall_entrance(int id,  [in, string]const char* path, int count);
+		public void ecall_entrance(int id,  [in, string]const char* path, int count, int dedup_switch);
 
 		//mapreduce
 		public void ecall_map_thread(int no);
@@ -52,6 +52,12 @@ enclave
 
 		void ocall_delete_array([in] char* pointer);
 		void ocall_load_pkt_file([in, string] const char *filename, [out] char **buffer, [in, out] int *pkt_count);
-    };
+    
+		int ocall_get_network_get_time();
+		int ocall_get_network_put_time();
+
+		void ocall_free([user_check]void* pointer, int isArray);
+	
+	};
 
 };

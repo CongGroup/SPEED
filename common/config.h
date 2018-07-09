@@ -20,7 +20,7 @@
 #define FILE_BUFFER_SIZE 200*1024*1024 // 200M
 
 // network
-#define SERV_IP "192.168.1.101"
+#define SERV_IP "192.168.1.107"
 #define SERV_PORT 8888
 
 #define TX_BUFFER_SIZE 1024*1024*10 // 10M
@@ -32,10 +32,15 @@
 #define FUNC_CP 3 // compression
 #define FUNC_SF 4 // picture freature
 
+#define USE_LOCAL_CACHE
 
-const int pkt_buffer_size = 1514;
-const int tcp_reassembly_buffer_size = 4096;
-const int max_stream_size = 2000;
+#define USER_AES_KEY "1234567890abced"
+
+
+const int pkt_buffer_size = 1514*10;
+const int tcp_reassembly_buffer_size = 4096*10;
+
+const int max_stream_size = 20;
 const int pcre_output_size = 64;
 
 

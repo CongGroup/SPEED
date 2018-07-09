@@ -7,7 +7,7 @@ local_dir=./
 remote_dir=speed/
 
 remote_A=192.168.1.2
-remote_B=192.168.1.101
+remote_B=192.168.1.107
 
-#rsync "$flags" "${filter[@]}" "$local_dir" conggroup@"$remote_A":"$remote_dir"
+rsync "$flags" "${filter[@]}" "$local_dir" conggroup@"$remote_A":"$remote_dir"
 rsync "$flags" "${filter[@]}" "$local_dir" conggroup@"$remote_B":"$remote_dir"

@@ -107,6 +107,14 @@ typedef struct ms_ocall_load_pkt_file_t {
 	int* ms_pkt_count;
 } ms_ocall_load_pkt_file_t;
 
+typedef struct ms_ocall_get_network_get_time_t {
+	int ms_retval;
+} ms_ocall_get_network_get_time_t;
+
+typedef struct ms_ocall_get_network_put_time_t {
+	int ms_retval;
+} ms_ocall_get_network_put_time_t;
+
 typedef struct ms_sgx_thread_wait_untrusted_event_ocall_t {
 	int ms_retval;
 	void* ms_self;
@@ -257,6 +265,22 @@ static sgx_status_t SGX_CDECL Enclave_ocall_load_pkt_file(void* pms)
 	return SGX_SUCCESS;
 }
 
+static sgx_status_t SGX_CDECL Enclave_ocall_get_network_get_time(void* pms)
+{
+	ms_ocall_get_network_get_time_t* ms = SGX_CAST(ms_ocall_get_network_get_time_t*, pms);
+	ms->ms_retval = ocall_get_network_get_time();
+
+	return SGX_SUCCESS;
+}
+
+static sgx_status_t SGX_CDECL Enclave_ocall_get_network_put_time(void* pms)
+{
+	ms_ocall_get_network_put_time_t* ms = SGX_CAST(ms_ocall_get_network_put_time_t*, pms);
+	ms->ms_retval = ocall_get_network_put_time();
+
+	return SGX_SUCCESS;
+}
+
 static sgx_status_t SGX_CDECL Enclave_sgx_thread_wait_untrusted_event_ocall(void* pms)
 {
 	ms_sgx_thread_wait_untrusted_event_ocall_t* ms = SGX_CAST(ms_sgx_thread_wait_untrusted_event_ocall_t*, pms);
@@ -291,9 +315,9 @@ static sgx_status_t SGX_CDECL Enclave_sgx_thread_set_multiple_untrusted_events_o
 
 static const struct {
 	size_t nr_ocall;
-	void * table[20];
+	void * table[22];
 } ocall_table_Enclave = {
-	20,
+	22,
 	{
 		(void*)Enclave_ocall_print_string,
 		(void*)Enclave_ocall_load_text_file,
@@ -311,6 +335,8 @@ static const struct {
 		(void*)Enclave_ocall_read_dir,
 		(void*)Enclave_ocall_delete_array,
 		(void*)Enclave_ocall_load_pkt_file,
+		(void*)Enclave_ocall_get_network_get_time,
+		(void*)Enclave_ocall_get_network_put_time,
 		(void*)Enclave_sgx_thread_wait_untrusted_event_ocall,
 		(void*)Enclave_sgx_thread_set_untrusted_event_ocall,
 		(void*)Enclave_sgx_thread_setwait_untrusted_events_ocall,

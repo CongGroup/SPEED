@@ -1,5 +1,7 @@
 #include "Enclave_t.h"
 
+#include <string>
+
 #include "compression.h"
 #include "dedup_service.h"
 #include "function.h"
@@ -13,6 +15,8 @@
 #include "zipfolder.h"
 #include "siftcmp.h"
 #include "middlebox.h"
+
+using std::string;
 
 //#include "../../speed_sample/data/pattern/"
 
@@ -161,62 +165,60 @@ static const char* num2str(int num, int minSize = 0)
 }
 
 // test cases go here
-void ecall_entrance(int id, const char *path, int count)
+void ecall_entrance(int id, const char *path, int count, int dedup)
 {
 	hrtime start_time, end_time;
 
+	int netGetTime, netPutTime;
+
+	string dedupStr;
+
+	if (dedup != 0)
+	{
+		dedup_switch = true;
+		dedupStr.append("With dedup, ");
+	}
+	else
+	{
+		dedup_switch = false;
+		dedupStr.append("Without dedup, ");
+	}
+
+	
+
 	switch (id)
 	{
-	//zlib
+		//zlib
 	case 1:
 	{
-
-		dedup_switch = true;
 		get_time(&start_time);
 		zipfolder_run(path);
 		get_time(&end_time);
-		eprintf("with dedup, first use time %d\n\n", time_elapsed_in_us(&start_time, &end_time));
+		eprintf("%s use time %d us. \n", dedupStr.c_str(), time_elapsed_in_us(&start_time, &end_time));
 
-		get_time(&start_time);
-		zipfolder_run(path);
-		get_time(&end_time);
-		eprintf("with dedup, second use time %d\n\n", time_elapsed_in_us(&start_time, &end_time));
-
-		dedup_switch = false;
-		get_time(&start_time);
-		zipfolder_run(path);
-		get_time(&end_time);
-		eprintf("without dedup, first use time %d\n\n", time_elapsed_in_us(&start_time, &end_time));
+#ifndef USE_LOCAL_CACHE
+		ocall_get_network_get_time(&netGetTime);
+		ocall_get_network_put_time(&netPutTime);
+		eprintf("            network get use %d us, network put use %d us.\n\n", netGetTime, netPutTime);
+#endif // !USE_LOCAL_CACHE
 
 
-		
 		break;
 	}
 	//pcre
 	case 2:
 	{
-
-
-		dedup_switch = true;
 		clearCounter();
 		get_time(&start_time);
 		middlebox_run(path, count);
 		get_time(&end_time);
-		eprintf("with dedup, first use time %d\n\n", time_elapsed_in_us(&start_time, &end_time));
+		eprintf("%s use time %d us. \n", dedupStr.c_str(), time_elapsed_in_us(&start_time, &end_time));
 
-		clearCounter();
-		get_time(&start_time);
-		middlebox_run(path, count);
-		get_time(&end_time);
-		eprintf("with dedup, second use time %d\n\n", time_elapsed_in_us(&start_time, &end_time));
-
-		dedup_switch = false;
-		clearCounter();
-		get_time(&start_time);
-		middlebox_run(path, count);
-		get_time(&end_time);
-		eprintf("without dedup, first use time %d\n\n", time_elapsed_in_us(&start_time, &end_time));
-
+#ifndef USE_LOCAL_CACHE
+		ocall_get_network_get_time(&netGetTime);
+		ocall_get_network_put_time(&netPutTime);
+		eprintf("            network get use %d us, network put use %d us.\n\n", netGetTime, netPutTime);
+#endif // !USE_LOCAL_CACHE
 
 
 		break;
@@ -228,66 +230,209 @@ void ecall_entrance(int id, const char *path, int count)
 		for (int i = 0; i < count; i++)
 		{
 			allFiles[i] = new char[64];
-			snprintf(allFiles[i], 64, "%s%s.txt", path, num2str(i + 1,2));
+			snprintf(allFiles[i], 64, "%s%s.txt", path, num2str(i + 1, 2));
 		}
 
 
-
-		dedup_switch = true;
 		get_time(&start_time);
 		bow_run(count, allFiles);
 		get_time(&end_time);
-		eprintf("with dedup, first use time %d\n\n", time_elapsed_in_us(&start_time, &end_time));
+		eprintf("%s use time %d us. \n", dedupStr.c_str(), time_elapsed_in_us(&start_time, &end_time));
 
-		get_time(&start_time);
-		bow_run(count, allFiles);
-		get_time(&end_time);
-		eprintf("with dedup, second use time %d\n\n", time_elapsed_in_us(&start_time, &end_time));
-
-
-
-		dedup_switch = false;
-		get_time(&start_time);
-		bow_run(count, allFiles);
-		get_time(&end_time);
-		eprintf("without dedup, first use time %d\n\n", time_elapsed_in_us(&start_time, &end_time));
-
-
+#ifndef USE_LOCAL_CACHE
+		ocall_get_network_get_time(&netGetTime);
+		ocall_get_network_put_time(&netPutTime);
+		eprintf("            network get use %d us, network put use %d us.\n\n", netGetTime, netPutTime);
+#endif // !USE_LOCAL_CACHE
 
 		break;
 	}
 	//sift
 	case 4:
 	{
-
-
-		dedup_switch = true;
 		get_time(&start_time);
 		siftcmp_run(path);
 		get_time(&end_time);
-		eprintf("with dedup, first use time %d\n\n", time_elapsed_in_us(&start_time, &end_time));
+		eprintf("%s use time %d us. \n", dedupStr.c_str(), time_elapsed_in_us(&start_time, &end_time));
 
-		get_time(&start_time);
-		siftcmp_run(path);
-		get_time(&end_time);
-		eprintf("with dedup, second use time %d\n\n", time_elapsed_in_us(&start_time, &end_time));
-
-
-	
-
-		dedup_switch = false;
-		get_time(&start_time);
-		siftcmp_run(path);
-		get_time(&end_time);
-		eprintf("without dedup, first use time %d\n\n", time_elapsed_in_us(&start_time, &end_time));
-
-
+#ifndef USE_LOCAL_CACHE
+		ocall_get_network_get_time(&netGetTime);
+		ocall_get_network_put_time(&netPutTime);
+		eprintf("            network get use %d us, network put use %d us.\n\n", netGetTime, netPutTime);
+#endif // !USE_LOCAL_CACHE
 
 		break;
 	}
 	}
-	
+
 	return;
+	//hrtime start_time, end_time;
+
+	//int netGetTime, netPutTime;
+
+	//switch (id)
+	//{
+	////zlib
+	//case 1:
+	//{
+
+	//	dedup_switch = true;
+	//	get_time(&start_time);
+	//	zipfolder_run(path);
+	//	get_time(&end_time);
+	//	ocall_get_network_get_time(&netGetTime);
+	//	ocall_get_network_put_time(&netPutTime);
+	//	eprintf("with dedup, first use time %d us. \n", time_elapsed_in_us(&start_time, &end_time));
+	//	//eprintf("            network get use %d us, network put use %d us.\n\n", netGetTime, netPutTime);
+
+
+
+	//	get_time(&start_time);
+	//	zipfolder_run(path);
+	//	get_time(&end_time);
+	//	ocall_get_network_get_time(&netGetTime);
+	//	ocall_get_network_put_time(&netPutTime);
+	//	eprintf("with dedup, second use time %d us. \n", time_elapsed_in_us(&start_time, &end_time));
+	//	//eprintf("            network get use %d us, network put use %d us.\n\n", netGetTime, netPutTime);
+
+	//	dedup_switch = false;
+	//	get_time(&start_time);
+	//	zipfolder_run(path);
+	//	get_time(&end_time);
+	//	ocall_get_network_get_time(&netGetTime);
+	//	ocall_get_network_put_time(&netPutTime);
+	//	eprintf("without dedup, first use time %d us. \n", time_elapsed_in_us(&start_time, &end_time));
+	//	eprintf("            network get use %d us, network put use %d us.\n\n", netGetTime, netPutTime);
+
+
+	//	
+	//	break;
+	//}
+	////pcre
+	//case 2:
+	//{
+
+
+	//	dedup_switch = true;
+	//	clearCounter();
+	//	get_time(&start_time);
+	//	middlebox_run(path, count);
+	//	get_time(&end_time);
+	//	ocall_get_network_get_time(&netGetTime);
+	//	ocall_get_network_put_time(&netPutTime);
+	//	eprintf("with dedup, first use time %d us. \n", time_elapsed_in_us(&start_time, &end_time));
+	//	eprintf("            network get use %d us, network put use %d us.\n\n", netGetTime, netPutTime);
+
+
+	//	clearCounter();
+	//	get_time(&start_time);
+	//	middlebox_run(path, count);
+	//	get_time(&end_time);
+	//	ocall_get_network_get_time(&netGetTime);
+	//	ocall_get_network_put_time(&netPutTime);
+	//	eprintf("with dedup, second use time %d us. \n", time_elapsed_in_us(&start_time, &end_time));
+	//	eprintf("            network get use %d us, network put use %d us.\n\n", netGetTime, netPutTime);
+
+	//	dedup_switch = false;
+	//	clearCounter();
+	//	get_time(&start_time);
+	//	middlebox_run(path, count);
+	//	get_time(&end_time);
+	//	ocall_get_network_get_time(&netGetTime);
+	//	ocall_get_network_put_time(&netPutTime);
+	//	eprintf("without dedup, first use time %d us. \n", time_elapsed_in_us(&start_time, &end_time));
+	//	eprintf("            network get use %d us, network put use %d us.\n\n", netGetTime, netPutTime);
+
+
+
+	//	break;
+	//}
+	////mapreduce bow
+	//case 3:
+	//{
+	//	char ** allFiles = new char*[count];
+	//	for (int i = 0; i < count; i++)
+	//	{
+	//		allFiles[i] = new char[64];
+	//		snprintf(allFiles[i], 64, "%s%s.txt", path, num2str(i + 1,2));
+	//	}
+
+
+
+	//	dedup_switch = true;
+	//	get_time(&start_time);
+	//	bow_run(count, allFiles);
+	//	get_time(&end_time);
+	//	ocall_get_network_get_time(&netGetTime);
+	//	ocall_get_network_put_time(&netPutTime);
+	//	eprintf("with dedup, first use time %d us. \n", time_elapsed_in_us(&start_time, &end_time));
+	//	eprintf("            network get use %d us, network put use %d us.\n\n", netGetTime, netPutTime);
+
+
+	//	get_time(&start_time);
+	//	bow_run(count, allFiles);
+	//	get_time(&end_time);
+	//	ocall_get_network_get_time(&netGetTime);
+	//	ocall_get_network_put_time(&netPutTime);
+	//	eprintf("with dedup, second use time %d us. \n", time_elapsed_in_us(&start_time, &end_time));
+	//	eprintf("            network get use %d us, network put use %d us.\n\n", netGetTime, netPutTime);
+
+
+
+	//	dedup_switch = false;
+	//	get_time(&start_time);
+	//	bow_run(count, allFiles);
+	//	get_time(&end_time);
+	//	ocall_get_network_get_time(&netGetTime);
+	//	ocall_get_network_put_time(&netPutTime);
+	//	eprintf("without dedup, first use time %d us. \n", time_elapsed_in_us(&start_time, &end_time));
+	//	eprintf("            network get use %d us, network put use %d us.\n\n", netGetTime, netPutTime);
+
+
+
+	//	break;
+	//}
+	////sift
+	//case 4:
+	//{
+
+
+	//	dedup_switch = true;
+	//	get_time(&start_time);
+	//	siftcmp_run(path);
+	//	get_time(&end_time);
+	//	ocall_get_network_get_time(&netGetTime);
+	//	ocall_get_network_put_time(&netPutTime);
+	//	eprintf("with dedup, first use time %d us. \n", time_elapsed_in_us(&start_time, &end_time));
+	//	eprintf("            network get use %d us, network put use %d us.\n\n", netGetTime, netPutTime);
+
+	//	get_time(&start_time);
+	//	siftcmp_run(path);
+	//	get_time(&end_time);
+	//	ocall_get_network_get_time(&netGetTime);
+	//	ocall_get_network_put_time(&netPutTime);
+	//	eprintf("with dedup, second use time %d us. \n", time_elapsed_in_us(&start_time, &end_time));
+	//	eprintf("            network get use %d us, network put use %d us.\n\n", netGetTime, netPutTime);
+
+
+	//
+
+	//	dedup_switch = false;
+	//	get_time(&start_time);
+	//	siftcmp_run(path);
+	//	get_time(&end_time);
+	//	ocall_get_network_get_time(&netGetTime);
+	//	ocall_get_network_put_time(&netPutTime);
+	//	eprintf("without dedup, first use time %d us. \n", time_elapsed_in_us(&start_time, &end_time));
+	//	eprintf("            network get use %d us, network put use %d us.\n\n", netGetTime, netPutTime);
+
+
+
+	//	break;
+	//}
+	//}
+	//
+	//return;
 
 	//test sift and zip
 

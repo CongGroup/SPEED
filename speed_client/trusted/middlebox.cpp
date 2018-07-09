@@ -199,6 +199,8 @@ int middlebox_run(const char * pcap_path, const int pkt_used)
 
 		auto res = std::find(streamList.begin(), streamList.end(), t4);
 
+		//eprintf("payloadLength is %d .\n", reader.getPayloadLength());
+
 		if (reader.getPayloadLength() > 0)
 			if (res != streamList.end())
 			{
@@ -224,6 +226,7 @@ int middlebox_run(const char * pcap_path, const int pkt_used)
 				streamList.push_back(std::move(t4));
 				res = streamList.end() - 1;
 			}
+
 
 
 		if (reader.getPSHFlag() && res != streamList.end())

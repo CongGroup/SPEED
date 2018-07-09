@@ -15,27 +15,39 @@
 
 Network::Network(char * server_ip)
     : requester (0),
-      responser (0)
+      responser (0),
+	server_socket(0)
 {
+
+	m_send_buffer = new byte[TX_BUFFER_SIZE];
+	m_recv_buffer = new byte[RX_BUFFER_SIZE];
+
+	
+
     // client
     if (server_ip) {
         serv_addr = new_addr(server_ip);
         requester = socket(AF_INET, SOCK_STREAM, 0);
 
         // TODO error handling
-        connect(requester, (sockaddr *)&serv_addr, sizeof(serv_addr));
+		if (connect(requester, (sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+			printf("connect server %s error.", server_ip);
     }
     // server
     else {
-        int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+		server_socket = socket(AF_INET, SOCK_STREAM, 0);
 
-        bind_socket(sockfd, 0);
+        bind_socket(server_socket, 0);
 
-        listen(sockfd, BACKLOG);
+        listen(server_socket, BACKLOG);
 
         // TODO error handling
         socklen_t len = sizeof(client_addr);
-        responser = accept(sockfd, (sockaddr *)&client_addr, &len);
+        responser = accept(server_socket, (sockaddr *)&client_addr, &len);
+		if (responser < 0)
+		{
+			printf("accept client error %d.", responser);
+		}
 	}
 }
 
@@ -45,42 +57,100 @@ Network::~Network()
         close(requester);
     if(responser)
 	    close(responser);
+	if (server_socket)
+		close(server_socket);
+
+	delete[] m_send_buffer;
+	delete[] m_recv_buffer;
+}
+
+static void get_hrtime(hrtime *time)
+{
+	timespec wall_clock;
+	clock_gettime(CLOCK_REALTIME, &wall_clock);
+	time->second = wall_clock.tv_sec;
+	time->nanosecond = wall_clock.tv_nsec;
+}
+
+static int diff_hrtime(const hrtime *start, const hrtime *end) {
+	return (end->second - start->second) * 1000000.0 +
+		(end->nanosecond - start->nanosecond) / 1000.0;
 }
 
 int Network::send_request(const Request* request)
 {
+	hrtime start_time, end_time;
+	get_hrtime(&start_time);
 	send_msg(requester, request->get_data(), request->get_size());
+	get_hrtime(&end_time);
+	last_send_request_time = diff_hrtime(&start_time, &end_time);
 	return 0;
 }
 
 Request *Network::recv_request()
 {
+	hrtime start_time, end_time;
+	get_hrtime(&start_time);
+
 	int size = recv_msg(responser);
+	Request* req;
     if (size > 0) {
-        Request* req = new Request(m_recv_buffer, size);
-        return req;
+		req = new Request(m_recv_buffer, size);
     }
     else {
-        return NULL;
+		req =  NULL;
     }
+
+	get_hrtime(&end_time);
+	last_recv_request_time = diff_hrtime(&start_time, &end_time);
+
+	return req;
 }
 
 int Network::send_response(const Response* response)
 {
+	hrtime start_time, end_time;
+	get_hrtime(&start_time);
+
 	send_msg(responser, response->get_data(), response->get_size());
+
+	get_hrtime(&end_time);
+	last_send_response_time = diff_hrtime(&start_time, &end_time);
 	return 0;
 }
 
 Response * Network::recv_response()
 {
+	hrtime start_time, end_time;
+	get_hrtime(&start_time);
+
+	Response* resp;
     int resp_size = recv_msg(requester);
     if (resp_size > 0) {
-        Response* resp = new Response(m_recv_buffer, resp_size);
-        return resp;
+        resp = new Response(m_recv_buffer, resp_size);
     }
     else {
-        return NULL;
+		resp = NULL;
+
     }
+
+	get_hrtime(&end_time);
+	last_recv_response_time = diff_hrtime(&start_time, &end_time);
+
+	return resp;
+}
+
+void Network::reset()
+{
+	if (responser)
+		close(responser);
+
+	socklen_t len = sizeof(client_addr);
+	responser = accept(server_socket, (sockaddr *)&client_addr, &len);
+	if (responser < 0)
+	{
+		printf("accept client error %d.", responser);
+	}
 }
 
 void Network::set_send_buffer(const byte * data, int size, int pos)
@@ -98,6 +168,7 @@ byte *Network::get_send_buffer()
 int Network::send_msg(int sockfd, const byte *data, int data_size)
 {
     int size = data_size;
+	//printf("send msg size , size is %d \n", data_size);
 	send(sockfd, &size, sizeof(int), SEND_FLAG);
 	int complete_size = 0;
 	while (size>0)

@@ -48,11 +48,14 @@ else
 	Urts_Library_Name := sgx_urts
 endif
 
+#redis3m
+REDIS3M_LINK=-lredis3m 
+REDIS3M_LIB=-L/usr/local
+REDIS3M_INC=-I/usr/local/include
 
 
-
-App_Cpp_Files := $(wildcard untrusted/*.cpp)
-App_Include_Paths := -Ihost -I$(SGX_SDK)/include 
+App_Cpp_Files := $(wildcard untrusted/*.cpp) $(wildcard ../common/network/*.cpp)
+App_Include_Paths := -Ihost -I$(SGX_SDK)/include $(REDIS3M_INC)
 
 App_C_Flags := $(SGX_COMMON_CFLAGS) -fPIC -Wno-attributes $(App_Include_Paths)
 
@@ -69,7 +72,7 @@ else
 endif
 
 App_Cpp_Flags := $(App_C_Flags) -Wno-write-strings -std=c++11 -g
-App_Link_Flags := $(SGX_COMMON_CFLAGS) -L$(SGX_LIBRARY_PATH) -l$(Urts_Library_Name) -lpthread -Luntrusted/ -lpcap
+App_Link_Flags := $(SGX_COMMON_CFLAGS) -L$(SGX_LIBRARY_PATH) -l$(Urts_Library_Name) -lpthread -Luntrusted/ -lpcap $(REDIS3M_LINK)
 
 ifneq ($(SGX_MODE), HW)
 	App_Link_Flags += -lsgx_uae_service_sim

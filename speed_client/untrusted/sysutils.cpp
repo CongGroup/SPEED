@@ -9,6 +9,7 @@
 #include <fstream>
 #include <sstream>
 
+
 #include "pgm_tool.h"
 
 void ocall_print_string(const char *str)
@@ -113,13 +114,23 @@ void ocall_write_text_file(const char *filename, const char *buffer, int buffer_
 	outfile.close();
 }
 
-#include <stdio.h>
 #include <sstream>
 #include <vector>
 #include <map>
 #include <stdint.h>
 #include <time.h>
 #include <thread>
+#include <mutex>
+#include "../../common/config.h"
+
+
+
+using std::mutex;
+mutex cacheLock;
+int network_get_time;
+int network_put_time;
+
+#ifndef USE_LOCAL_CACHE
 
 std::auto_ptr<Network> requester;
 
@@ -129,6 +140,7 @@ void ocall_request_find(const uint8_t *tag,
 	int *true_size)
 {
 	int req_size = REQ_TYPE_SIZE + TAG_SIZE + sizeof(int);
+	cacheLock.lock();
 
 	if (req_size <= TX_BUFFER_SIZE) {
 		requester->set_send_buffer(&Request::Get, REQ_TYPE_SIZE, 0);
@@ -150,16 +162,23 @@ void ocall_request_find(const uint8_t *tag,
 		else {
 			*true_size = 0;
 		}
+		network_get_time += requester->last_send_request_time + requester->last_recv_response_time;
+		//printf("[*] Query server to get data use %d us!\n", 
+		//	requester.get()->last_send_request_time + requester.get()->last_recv_response_time
+		//);
 	}
 	else {
 		printf("[*] The get request is oversized!\n");
 	}
+
+	cacheLock.unlock();
 }
 
 void ocall_request_put(const uint8_t *tag,
 	const uint8_t *meta,
 	const uint8_t *rlt, int rlt_size)
 {
+	cacheLock.lock();
 	int req_size = REQ_TYPE_SIZE + TAG_SIZE + sizeof(metadata) + rlt_size;
 
 	if (req_size <= TX_BUFFER_SIZE) {
@@ -174,13 +193,25 @@ void ocall_request_put(const uint8_t *tag,
 		requester->send_request(&req);
 
 		// no need to wait for response since the put is made asyncrounous, immediately return
+		network_put_time += requester->last_send_request_time;
+		//printf("[*] Query server to put data use %d us!\n",
+		//	requester.get()->last_send_request_time
+		//);
 	}
 	else {
 		printf("[*] The put request is oversized!\n");
 	}
+	cacheLock.unlock();
 };
 
-/*
+#else
+
+#include <redis3m/redis3m.hpp>
+
+using namespace redis3m;
+connection::ptr_t m_ptrConnection;
+
+
 typedef std::vector<uint8_t> binary;
 typedef std::pair<binary, binary> entry_t;
 // TODO: replace with unordered_map
@@ -190,48 +221,124 @@ typedef std::map<binary, entry_t> cache_t;
 
 cache_t cache;
 
+using std::string;
+
+static void init_local_cache()
+{
+	static bool done = false;
+	if (!done)
+	{
+		const char* host = "localhost";
+		const int port = 6379;
+		m_ptrConnection = connection::create(host, port);
+
+		done = true;
+	}
+
+}
+
+static void redis_put(const string& key, const string& value)
+{
+	m_ptrConnection->run(command("SET") << key << value);
+}
+
+static void redis_get(const string&key, string& value)
+{
+	reply oReply = m_ptrConnection->run(command("GET") << key);
+	value = oReply.str();
+}
+
 void ocall_request_find(const uint8_t *tag,
 	uint8_t *meta,
 	uint8_t *rlt, int expt_size,
 	int *true_size)
 {
-	//printf("find begin.\n");
-	binary key(TAG_SIZE, 0);
-	memcpy(&key[0], tag, TAG_SIZE);
+	init_local_cache();
 
-	cache_t::const_iterator it = cache.find(key);
+	string key, value;
+	key.assign((char*)tag, TAG_SIZE);
 
-	if (it == cache.end())
+	cacheLock.lock();
+	redis_get(key, value);
+	cacheLock.unlock();
+
+	if (value.size() > 0)
 	{
-		//printf("cache miss.\n");
-		*true_size = 0;
+		*true_size = value.size()- sizeof(metadata);
+		memcpy(meta, value.data(), sizeof(metadata));
+		memcpy(rlt, value.data()+ sizeof(metadata), *true_size);
 	}
 	else
 	{
-		//printf("cache hit.\n");
-		const entry_t &entry = it->second;
-		*true_size = entry.second.size();
-		memcpy(meta, &entry.first[0], entry.first.size());
-		memcpy(rlt, &entry.second[0], std::min(*true_size, expt_size));
+		*true_size = 0;
 	}
+	//printf("find begin.\n");
+	//binary key(TAG_SIZE, 0);
+	//memcpy(&key[0], tag, TAG_SIZE);
+
+	//cache_t::const_iterator it = cache.find(key);
+
+	//if (it == cache.end())
+	//{
+	//	//printf("cache miss.\n");
+	//	*true_size = 0;
+	//}
+	//else
+	//{
+	//	//printf("cache hit.\n");
+	//	const entry_t &entry = it->second;
+	//	*true_size = entry.second.size();
+	//	memcpy(meta, &entry.first[0], entry.first.size());
+	//	memcpy(rlt, &entry.second[0], std::min(*true_size, expt_size));
+	//}
 }
 
 void ocall_request_put(const uint8_t *tag,
 	const uint8_t *meta,
 	const uint8_t *rlt, int rlt_size)
 {
-	binary key(TAG_SIZE, 0);
-	memcpy(&key[0], tag, TAG_SIZE);
+	string key;
+	key.assign((char*)tag, TAG_SIZE);
 
-	binary entry_meta(sizeof(metadata), 0);
-	memcpy(&entry_meta[0], meta, sizeof(metadata));
+	string value;
+	value.assign((char*)meta, sizeof(metadata));
 
-	binary entry_rlt(rlt_size, 0);
-	memcpy(&entry_rlt[0], rlt, rlt_size);
+	value.append((char*)rlt, rlt_size);
 
-	cache[key] = entry_t(entry_meta, entry_rlt);
+	cacheLock.lock();
+	redis_put(key, value);
+	cacheLock.unlock();
+	//
+	//binary key(TAG_SIZE, 0);
+	//memcpy(&key[0], tag, TAG_SIZE);
+
+	//binary entry_meta(sizeof(metadata), 0);
+	//memcpy(&entry_meta[0], meta, sizeof(metadata));
+
+	//binary entry_rlt(rlt_size, 0);
+	//memcpy(&entry_rlt[0], rlt, rlt_size);
+
+	//cacheLock.lock();
+	//cache[key] = entry_t(entry_meta, entry_rlt);
+	//cacheLock.unlock();
 }
-*/
+
+#endif // !USE_LOCAL_CACHE
+
+int ocall_get_network_get_time()
+{
+	int tmp = network_get_time;
+	network_get_time = 0;
+	return tmp;
+}
+
+int ocall_get_network_put_time()
+{
+	int tmp = network_put_time;
+	network_put_time = 0;
+	return tmp;
+}
+
 extern sgx_enclave_id_t global_eid;
 
 void call_ecall_map(int no)
@@ -485,4 +592,19 @@ void ocall_load_pkt_file(const char *filename, char **buffer, int *pkt_count)
 	}
 	/* And close the session */
 	pcap_close(handle);
+}
+
+void ocall_free(void* pointer, int isArray)
+{
+	if (pointer)
+	{
+		if (isArray)
+		{
+			delete[] pointer;
+		}
+		else
+		{
+			delete pointer;
+		}
+	}
 }

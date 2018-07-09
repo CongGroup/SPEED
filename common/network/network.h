@@ -49,6 +49,13 @@ public:
 	 */
     Response *recv_response();
 
+	/*
+	* caller
+	* server
+	*/
+	void reset();
+
+
     /*
      * buffer accesser
      */
@@ -68,8 +75,17 @@ public:
     int responser;
     sockaddr_in serv_addr;
 
-    byte m_send_buffer[TX_BUFFER_SIZE];
-    byte m_recv_buffer[RX_BUFFER_SIZE];
+	int server_socket;
+
+    byte* m_send_buffer;
+    byte* m_recv_buffer;
+
+//private:
+
+	int last_send_request_time;
+	int last_recv_request_time;
+	int last_send_response_time;
+	int last_recv_response_time;
 };
 
 #endif

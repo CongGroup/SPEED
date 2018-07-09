@@ -15,7 +15,11 @@ void shutdown(int sig) {
 
     sgx_destroy_enclave(global_eid);
 
+#ifndef USE_LOCAL_CACHE
 	requester.release();
+#endif // !USE_LOCAL_CACHE
+
+
 
     // Do whatever tear-down
 	abort();
@@ -30,16 +34,18 @@ void init_server() {
     signal(SIGTSTP, shutdown); // Ctrl + z
     signal(SIGINT, shutdown); // Ctrl + c
 
+#ifndef USE_LOCAL_CACHE
 	printf("[*] Connecting to caching server ...\n");
 	requester.reset(new Network(SERV_IP));
+#endif // !USE_LOCAL_CACHE
 
     printf("[*] Initialization is finished!\n");
 
 }
 
-void run_server(int id, const char* path, int count) {
+void run_server(int id, const char* path, int count, int dedup) {
     sgx_status_t ret = SGX_ERROR_UNEXPECTED;
-    ret = ecall_entrance(global_eid, id, path, count);
+    ret = ecall_entrance(global_eid, id, path, count, dedup);
     if (ret != SGX_SUCCESS) {
         printf("[*] Fail to run computing!\n");
     }

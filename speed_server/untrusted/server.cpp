@@ -104,7 +104,8 @@ void run_server() {
 		// block until timeout (20s)
 		req.reset(responser->recv_request());
 
-		if (req.get()) {
+		if (req.get()) 
+		{
 			switch (req->get_type())
 			{
 			case 1: //Request::Get:
@@ -131,8 +132,7 @@ void run_server() {
 		}
 		else
 		{
-			printf("Null request,exit. \n");
-			break;
+			responser.get()->reset();
 		}
 	}
 }

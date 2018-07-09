@@ -218,25 +218,25 @@ void siftcmp_run(const char * path)
 			}
 		}
 
-		for (int i = 0; i < file_count; i++)
-		{
-			char simFiles[512] = { 0 };
-			char* writePos = simFiles;
-			for (int j = 0; j < file_count; j++)
-			{
-				if (i == j)
-					continue;
-				if (cmpSift(ress[i], ress[j]))
-				{
-					snprintf(writePos, 64, "%s ", buffer[j]);
-					writePos += strlen(buffer[j]);
-				}
-			}
-			if (strlen(simFiles) == 0)
-			{
-				snprintf(writePos, 64, "%s ", " none");
-			}
-			eprintf("%s is similar with %s\n", buffer[i], simFiles);
-		}
+		//for (int i = 0; i < file_count; i++)
+		//{
+		//	char simFiles[512] = { 0 };
+		//	char* writePos = simFiles;
+		//	for (int j = 0; j < file_count; j++)
+		//	{
+		//		if (i == j)
+		//			continue;
+		//		if (cmpSift(ress[i], ress[j]))
+		//		{
+		//			snprintf(writePos, 64, "%s ", buffer[j]);
+		//			writePos += strlen(buffer[j]);
+		//		}
+		//	}
+		//	if (strlen(simFiles) == 0)
+		//	{
+		//		snprintf(writePos, 64, "%s ", " none");
+		//	}
+		//	eprintf("%s is similar with %s\n", buffer[i], simFiles);
+		//}
 	}
 }
