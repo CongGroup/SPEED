@@ -63,7 +63,6 @@ meta.enc_key[i] = enc_key[i] ^ hashr[i];\
 
 
 
-
 /*dedup function template with Macros
 ReturnType FunctionName(Args...)
 {

@@ -8,6 +8,7 @@
 #include <vector>
 #include <pcre.h>
 #include <algorithm>
+#include "dedupTool.h"
 
 #include "FunctionDB.h"
 
@@ -138,6 +139,39 @@ struct tuple4
 		delete[] input_with_r_buffer;
 		delete[] output_buffer;
 	}
+
+	string patternMatching(const string& pattern)
+	{
+		const char* pPattern = pattern.c_str();
+
+		doPcre_without_dedup((char**)&pPattern);
+
+		return std::to_string(pcreResValue);
+	}
+
+	string patternMatching_dedup(const string& pattern)
+	{
+		string returnValue;
+
+		std::string hash = computeStringHash(pattern);
+
+		bool exist = queryByHash(hash);
+
+		if (exist)
+		{
+			returnValue = getResultByHash(hash);
+		}
+		else
+		{
+			returnValue = patternMatching(pattern);
+			putResultByHash(hash, returnValue);
+		}
+
+		return returnValue;
+	}
+
+
+
 
 	uint32_t src_ip;
 	uint32_t dst_ip;

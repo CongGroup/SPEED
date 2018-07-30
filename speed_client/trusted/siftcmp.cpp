@@ -14,6 +14,7 @@
 #include "siftcmp.h"
 
 #include "FunctionDB.h"
+#include "dedupTool.h"
 using namespace std;
 using namespace VL;
 
@@ -116,7 +117,6 @@ static std::string computeSift(const float*const  _im_pt, int _width, int _heigh
 }
 
 
-
 static std::string computeSift_with_dedup(const float*const  _im_pt, int _width, int _height)
 {
 	DEDUP_FUNCTION_INIT;
@@ -154,6 +154,8 @@ static std::string computeSift_with_dedup(const float*const  _im_pt, int _width,
 	delete[] output_buffer;
 	return siftres;
 }
+
+
 static void readfile(const char* path, PgmBuffer& data)
 {
 	char *textfile;
@@ -177,6 +179,41 @@ bool cmpSift(const string& sift1, const string& sift2)
 {
 	return sift1.size()== sift2.size();
 }
+
+
+
+static string picFileSift(const char* path)
+{
+	PgmBuffer pgmStruct;
+	readfile(path, pgmStruct);
+
+	return computeSift_with_dedup(pgmStruct.data, pgmStruct.width, pgmStruct.height);
+}
+
+static string picFileSift_dedup(const char* path)
+{
+	string returnValue;
+	
+	std::string hash = computeFileHash(path);
+
+	bool exist = queryByHash(hash);
+
+	if (exist)
+	{
+		returnValue = getResultByHash(hash);
+	}
+	else
+	{
+		returnValue = picFileSift(path);
+		putResultByHash(hash, returnValue);
+	}
+
+	return returnValue;
+}
+
+
+
+
 
 void siftcmp_run(const char * path)
 {

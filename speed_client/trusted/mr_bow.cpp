@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include "FunctionDB.h"
 
+#include "dedupTool.h"
+
 const int buffer_size = 512;
 
 extern bool dedup_switch;
@@ -79,7 +81,7 @@ static void bowaddequal(int* dst, const int * src)
 	}
 }
 
-
+// split buffer by delim and lookup with dic get keyword`s count to block_bow
 void bow_map_word_without_dedup(char* buffer, const char* delim, int* block_bow)
 {
 	char *token, *dummy = buffer;
@@ -133,7 +135,36 @@ void bow_map_word_with_dedup(char* buffer, const char* delim, int* block_bow)
 	delete[] output_buffer;
 }
 
+static std::string computStringBow(const string& src)
+{
+	int block_bow[DIC_SIZE];
+	const char* delim = " \t\r\n!@#$%^&*()-=_+[]{};':,./<>?|`~";
 
+	bow_map_word_without_dedup((char*)src.c_str(), delim, block_bow);
+
+	return  loadArraytoString(block_bow, DIC_SIZE, sizeof(int));
+}
+
+static std::string computStringBow_dedup(const string& src)
+{
+	std::string returnValue;
+
+	std::string hash = computeStringHash(src);
+
+	bool exist = queryByHash(hash);
+
+	if (exist)
+	{
+		returnValue = getResultByHash(hash);
+	}
+	else
+	{
+		returnValue = computStringBow(src);
+		putResultByHash(hash, returnValue);
+	}
+
+	return returnValue;
+}
 
 void bow_map(char * file_name)
 {

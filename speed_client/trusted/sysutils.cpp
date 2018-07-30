@@ -4,6 +4,7 @@
 #include "sysutils.h"
 #include "Enclave_t.h"
 #include "string.h"
+#include "crypto.h"
 
 void eprintf(const char *fmt, ...)
 {
@@ -41,6 +42,33 @@ void write_text_file(const char *filename, const char *textfile, int filesize)
 	ocall_write_text_file(filename, textfile, filesize);
 }
 
+std::string loadFiletoString(const char * path)
+{
+	char *textfile;
+	int filesize;
+	load_text_file(path, &textfile, &filesize);
+	return std::string(textfile, filesize);
+}
+
+std::string loadArraytoString(void * src, int count, int eleSize)
+{
+	std::string res;
+	char* pointer = (char*)src;
+	for (int i = 0; i < count; i++)
+	{
+		res.append(pointer, eleSize);
+		pointer += eleSize;
+	}
+	return res;
+}
+
+std::string hashString(const std::string src)
+{
+	byte hashr[HASH_SIZE] = { 0 };
+	::hash((byte*)src.c_str(), src.size(), hashr); 
+	return std::string((char*)hashr, HASH_SIZE);
+}
+
 char* strsep(char** dummy, const char* chs)
 {
 	char* beg = *dummy;
@@ -63,7 +91,8 @@ char* strsep(char** dummy, const char* chs)
 			if (*str == *ch)
 			{
 				*str = 0;
-				break;
+				*dummy = str + 1;
+				return beg;
 			}
 		}
 
@@ -72,6 +101,7 @@ char* strsep(char** dummy, const char* chs)
 			str++;
 		}
 	}
-	*dummy = str + 1;
+	
+	*dummy = str;
 	return beg;
 }

@@ -376,6 +376,7 @@ void ocall_begin_map(int count)
 		delete(ths[i]);
 		ths[i] = 0;
 	}
+	delete[] ths;
 	return;
 }
 
@@ -393,6 +394,7 @@ void ocall_begin_reduce(int count)
 		delete(ths[i]);
 		ths[i] = 0;
 	}
+	delete[] ths;
 	return;
 }
 
@@ -515,7 +517,7 @@ int ocall_file_size(const char* filename)
 	struct stat s_buf;
 
 	// get path info
-	stat(filename, &s_buf);
+	::stat(filename, &s_buf);
 
 	if (strstr(filename, ".pgm") != 0)
 	{

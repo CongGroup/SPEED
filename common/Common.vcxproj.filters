@@ -37,5 +37,7 @@
     <ClInclude Include="network\response.h">
       <Filter>network</Filter>
     </ClInclude>
+    <ClInclude Include="config.h" />
+    <ClInclude Include="data_type.h" />
   </ItemGroup>
 </Project>

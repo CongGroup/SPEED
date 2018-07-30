@@ -3,6 +3,7 @@
 #include "stdlib.h"
 #include "Enclave_t.h"
 #include "sysutils.h"
+#include "dedupTool.h"
 
 #include <zlib.h>
 
@@ -103,9 +104,35 @@ static int zlibfile_with_dedup(char* in, char* out, int size)
 	return output_true_size;
 }
 
+static string cmpressOneFile(const char* path)
+{
+	string fileContext = loadFiletoString(path);
+	int fileLength = fileContext.size();
+	char* outputBuffer = new char[(int)(fileLength*1.2)];
+	int resLength = zlibfile_with_dedup((char*)fileContext.c_str(), outputBuffer, fileLength);
+	return string(outputBuffer, resLength);
+}
+
+static string cmpressOneFile_dedup(const char* path)
+{
+	std::string hash = computeFileHash(path);
+	std::string output;
+	bool exist = queryByHash(hash);
+
+	if (exist)
+	{
+		output = getResultByHash(hash);
+	}
+	else
+	{
+		cmpressOneFile(path);
+		putResultByHash(hash, output);
+	}
+
+	return output;
+}
 
 extern bool dedup_switch;
-
 
 static void compress_file(const char* path)
 {
@@ -159,6 +186,7 @@ static void compress_file(const char* path)
 		 free(file_out);
 	}
 }
+
 
 
 
