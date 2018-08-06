@@ -1,0 +1,33 @@
+
+
+
+[libName = zlib]
+[version = 1.2.11]
+int deflateInit_(z_stream_s*, int, const char *, int);
+int deflate(z_stream_s*, int);
+int deflateEnd(z_stream_s*);
+
+[version = 0.8.1]
+[libName = libsiftpp]
+string computeSift(const float*, int, int, float, float, int, int, int, int, int);
+
+
+[libName = libpcre]
+[version = 10.23]
+pcre* pcre_compile(const char *, int, const char **, int *, const unsigned char *);
+int pcre_exec(const pcre *, const pcre_extra *, const char*, int, int, int, int *, int);
+
+
+[libName = libBow]
+[version = 0.1.0]
+string computStringBow(const string& src);
+
+
+
+
+string bow = computeStringBow(str);
+
+Deduplicable<string> dedup_computeStringBow("libBow, "0.1.0", "computeStringBow");
+string bow = dedup_computeStringBow(str);
+
+

@@ -31,6 +31,7 @@ int SGX_CDECL main(int argc, char *argv[])
 		run_server(id, path, count, dedup);
 
 		/* Destroy the enclave */
+		clear_server();
 		destroy_enlave();
 
 	}

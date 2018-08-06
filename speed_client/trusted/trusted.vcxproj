@@ -75,6 +75,7 @@
   <ItemGroup>
     <ClCompile Include="compression.cpp" />
     <ClCompile Include="crypto.cpp" />
+    <ClCompile Include="dedupTool.cpp" />
     <ClCompile Include="dedup_service.cpp" />
     <ClCompile Include="Enclave_t.c" />
     <ClCompile Include="function.cpp" />
@@ -82,10 +83,12 @@
     <ClCompile Include="mapreduce.cpp" />
     <ClCompile Include="middlebox.cpp" />
     <ClCompile Include="mr_bow.cpp" />
+    <ClCompile Include="pattern_loader.cpp" />
     <ClCompile Include="pattern_matching.cpp" />
     <ClCompile Include="siftcmp.cpp" />
     <ClCompile Include="sift.cpp" />
     <ClCompile Include="sift_function.cpp" />
+    <ClCompile Include="snort.cpp" />
     <ClCompile Include="sysutils.cpp" />
     <ClCompile Include="mr_wordcount.cpp" />
     <ClCompile Include="words5000.cpp" />
@@ -96,6 +99,7 @@
     <ClInclude Include="compression.h" />
     <ClInclude Include="crypto.h" />
     <ClInclude Include="Deduplicable.h" />
+    <ClInclude Include="dedupTool.h" />
     <ClInclude Include="dedup_service.h" />
     <ClInclude Include="Enclave_t.h" />
     <ClInclude Include="function.h" />
@@ -107,6 +111,7 @@
     <ClInclude Include="middlebox.h" />
     <ClInclude Include="mr_bow.h" />
     <ClInclude Include="mr_wordcount.h" />
+    <ClInclude Include="pattern_loader.h" />
     <ClInclude Include="pattern_matching.h" />
     <ClInclude Include="pktreader.h" />
     <ClInclude Include="siftcmp.h" />

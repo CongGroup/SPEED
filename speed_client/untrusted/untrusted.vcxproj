@@ -62,6 +62,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <IncludePath>D:\package\c++\include;$(IncludePath)</IncludePath>
+    <SourcePath>D:\package\c++\include;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="pgm_tool.cpp" />

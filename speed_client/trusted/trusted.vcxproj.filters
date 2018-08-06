@@ -49,6 +49,15 @@
     <ClCompile Include="middlebox.cpp">
       <Filter>application\middlebox</Filter>
     </ClCompile>
+    <ClCompile Include="dedupTool.cpp">
+      <Filter>application</Filter>
+    </ClCompile>
+    <ClCompile Include="pattern_loader.cpp">
+      <Filter>application\middlebox</Filter>
+    </ClCompile>
+    <ClCompile Include="snort.cpp">
+      <Filter>application\middlebox</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="crypto.h" />
@@ -114,6 +123,12 @@
       <Filter>application\middlebox</Filter>
     </ClInclude>
     <ClInclude Include="pktreader.h">
+      <Filter>application\middlebox</Filter>
+    </ClInclude>
+    <ClInclude Include="dedupTool.h">
+      <Filter>application</Filter>
+    </ClInclude>
+    <ClInclude Include="pattern_loader.h">
       <Filter>application\middlebox</Filter>
     </ClInclude>
   </ItemGroup>

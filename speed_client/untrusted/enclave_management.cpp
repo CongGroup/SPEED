@@ -175,7 +175,10 @@ int initialize_enclave(void)
     return 0;
 }
 
+
 void destroy_enlave()
 {
     sgx_destroy_enclave(global_eid);
+
+
 }

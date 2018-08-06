@@ -5,10 +5,14 @@
 #include <memory>
 #include <signal.h>
 #include "../../common/network/network.h"
+#include <redis3m/redis3m.hpp>
+#include "server.h"
 
 extern sgx_enclave_id_t global_eid;
 
 extern std::auto_ptr<Network> requester;
+
+extern redis3m::connection::ptr_t m_ptrConnection;
 
 void shutdown(int sig) {
     printf("[*] Stopping caching server ...\n");
@@ -17,9 +21,9 @@ void shutdown(int sig) {
 
 #ifndef USE_LOCAL_CACHE
 	requester.release();
+#else
+	m_ptrConnection.reset((redis3m::connection*)0);
 #endif // !USE_LOCAL_CACHE
-
-
 
     // Do whatever tear-down
 	abort();
@@ -49,5 +53,17 @@ void run_server(int id, const char* path, int count, int dedup) {
     if (ret != SGX_SUCCESS) {
         printf("[*] Fail to run computing!\n");
     }
+}
+
+void clear_server()
+{
+
+#ifndef USE_LOCAL_CACHE
+	requester.release();
+#else
+	m_ptrConnection.reset((redis3m::connection*)0);
+#endif // !USE_LOCAL_CACHE
+
+
 }
 

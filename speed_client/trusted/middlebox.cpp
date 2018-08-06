@@ -9,7 +9,7 @@
 #include <pcre.h>
 #include <algorithm>
 #include "dedupTool.h"
-
+#include "pattern_loader.h"
 #include "FunctionDB.h"
 
 using std::vector;
@@ -43,7 +43,7 @@ struct tuple4
 			return true;
 		}
 		else
-		return false;
+			return false;
 	}
 
 	void doPcre(char** patterns)
@@ -61,21 +61,35 @@ struct tuple4
 
 	void doPcre_without_dedup(char** patterns)
 	{
-		char** patternPos = patterns;
-		while (*patternPos != 0)
+		if (!patternInit)
 		{
-			char*pattern = *(patternPos++);
-			if (!size)
-				return;
+			pcres = new pcre*[pattern_count];
+			memset(pcres, 0, sizeof(pcre*)*pattern_count);
+
 			const char* m_error;
 			int m_erroffset;
-			pcre* m_pcre;
-			m_pcre = pcre_compile(pattern, 0, &m_error, &m_erroffset, NULL);
-			int rc = pcre_exec(m_pcre, 0, data, size, 0, 0, pcre_output, pcre_output_size);
-			pcre_free(m_pcre);
 
-			if (rc > 0)
-				pcreResValue += rc;
+			char** patternPos = patterns;
+			for (int i = 0; i < pattern_count; i++)
+			{
+				char*pattern = patterns[i];
+				//eprintf("%d pattern is %s\n", i, pattern);
+				if (pattern)
+				{
+					pcres[i] = pcre_compile(pattern, 0, &m_error, &m_erroffset, NULL);
+				}
+			}
+			patternInit = true;
+		}
+
+		for (int i = 0; i < pattern_count; i++)
+		{
+			if (pcres[i])
+			{
+				int rc = pcre_exec(pcres[i], 0, data, size, 0, 0, pcre_output, pcre_output_size);
+				if (rc > 0)
+					pcreResValue += rc;
+			}
 		}
 
 		//clear tuple4
@@ -90,14 +104,7 @@ struct tuple4
 		byte* pb;
 		int rc = pcreResValue;
 
-		int patternLen = 0;
-		char** patternPos = patterns;
-		while (*patternPos != 0)
-		{
-			patternLen += strlen(*(patternPos++));
-		}
-
-		input_with_r_buffer_size = patternLen + sizeof(size) + sizeof(data) + HASH_SIZE;
+		input_with_r_buffer_size = sizeof(size) + sizeof(data) + HASH_SIZE;
 		input_with_r_buffer = new byte[input_with_r_buffer_size];
 		memset(input_with_r_buffer, 0, input_with_r_buffer_size);
 
@@ -108,12 +115,6 @@ struct tuple4
 		pb = input_with_r_buffer;
 		COPY_OBJECT(pb, size);
 		COPY_OBJECT(pb, data);
-		patternPos = patterns;
-		while (*patternPos != 0)
-		{
-			COPY_POINTER(pb, *patternPos, strlen(*patternPos));
-			patternPos++;
-		}
 
 		DEDUP_FUNCTION_QUERY;
 		doPcre_without_dedup(patterns);
@@ -182,17 +183,31 @@ struct tuple4
 	int pcre_output[pcre_output_size * 3];
 	int size;
 
-	static int pcreResValue;
-	static int pcreTimes;
+	static bool patternInit;
+	static pcre** pcres;
+
+	static unsigned long long pcreResValue;
+	static unsigned long long pcreTimes;
 };
 
-int tuple4::pcreResValue = 0;
-int tuple4::pcreTimes = 0;
+unsigned long long tuple4::pcreResValue = 0;
+unsigned long long tuple4::pcreTimes = 0;
+bool tuple4::patternInit = false;
+pcre** tuple4::pcres = 0;
 
+char* strdup(const char* str)
+{
+	int len = strlen(str);
+	char* res = (char*)malloc(len + 1);
+	memcpy(res, str, len);
+	res[len] = 0;
+	return res;
+}
 
 int middlebox_run(const char * pcap_path, const int pkt_used)
 {
 	char(*packets)[pkt_buffer_size] = 0;
+
 	int pkt_count = pkt_used;
 
 	ocall_load_pkt_file(pcap_path, (char**)&packets, &pkt_count);
@@ -201,30 +216,32 @@ int middlebox_run(const char * pcap_path, const int pkt_used)
 	vector<tuple4> streamList;
 	streamList.reserve(max_stream_size);
 
-	const int patternCount = 1;
+	PatternSet snortSet;
+	PatternLoader::load_pattern_array(snortSet);
 
-	char** patterns = new char*[patternCount +1];
-	char* simplePattern = "void";
-	char* complexPattern = "^\s*struct\s+\w+\s+\**\s*\w+\s*=\s*\w+\((\w+(,)*)+\);";
-	char* pattern = ".*";
+	const int patternCount = snortSet.size();
+	// need a extern patterns to indicate patterns end
+	char** patterns = new char*[patternCount + 1];
+	//char* simplePattern = "void";
+	//char* complexPattern = "^\s*struct\s+\w+\s+\**\s*\w+\s*=\s*\w+\((\w+(,)*)+\);";
+	//char* pattern = ".*";
 
 	for (int i = 0; i < patternCount; i++)
 	{
-		patterns[i] = pattern;
+
+		patterns[i] = strdup(PatternLoader::binary_to_string(snortSet[i]).c_str());
 	}
 	patterns[patternCount] = 0;
 
+	eprintf("Use pattern count %d.\n", patternCount);
+
 	PktReader reader;
+	tuple4 t4;
 
 	for (int i = 0; i < pkt_count; i++, packets++)
 	{
 		reader.attach((const char*)packets);
-		if (reader.getPayloadLength() >= pkt_buffer_size - 54)
-		{
-			eprintf("error pay load size %d: %d\n", i, reader.getPayloadLength());
-			continue;
-		}
-		tuple4 t4;
+		int pktLen = reader.getPayloadLength();
 
 		t4.src_ip = reader.getSrcIP();
 		t4.dst_ip = reader.getDstIP();
@@ -232,42 +249,40 @@ int middlebox_run(const char * pcap_path, const int pkt_used)
 		t4.dst_port = reader.getDstPort();
 
 		auto res = std::find(streamList.begin(), streamList.end(), t4);
+		//eprintf("payloadLength is %d .\n", pktLen);
 
-		//eprintf("payloadLength is %d .\n", reader.getPayloadLength());
-
-		if (reader.getPayloadLength() > 0)
-			if (res != streamList.end())
-			{
-				// find stream add it
-				if (!res->appendData(reader.getPayload(), reader.getPayloadLength()))
-				{
-					//eprintf("pm when buffer full.\n");
-					res->doPcre(patterns);
-				}
-				res->appendData(reader.getPayload(), reader.getPayloadLength());
-			}
-			else
-			{
-				// add new stream
-				if (streamList.size() >= max_stream_size)
-				{
-					res = streamList.begin();
-					//eprintf("pm when stream full.\n");
-					res->doPcre(patterns);
-					streamList.erase(res);
-				}
-				t4.appendData(reader.getPayload(), reader.getPayloadLength());
-				streamList.push_back(std::move(t4));
-				res = streamList.end() - 1;
-			}
-
-
-
-		if (reader.getPSHFlag() && res != streamList.end())
+		if (res != streamList.end())
 		{
-			//eprintf("pm when push.\n");
-			res->doPcre(patterns);
+			// find stream add it
+			if (!res->appendData(reader.getPayload(), pktLen))
+			{
+				//eprintf("pm when buffer full.\n");
+				res->doPcre(patterns);
+			}
+			res->appendData(reader.getPayload(), pktLen);
 		}
+		else
+		{
+			// add new stream
+			if (streamList.size() >= max_stream_size)
+			{
+				res = streamList.begin();
+				//eprintf("pm when stream full.\n");
+				res->doPcre(patterns);
+				streamList.erase(res);
+			}
+
+			streamList.push_back(t4);
+			res = streamList.end() - 1;
+
+			res->appendData(reader.getPayload(), pktLen);
+		}
+
+		//if (reader.getPSHFlag() && res != streamList.end())
+		//{
+		//	//eprintf("pm when push.\n");
+		//	res->doPcre(patterns);
+		//}
 		if (reader.getFINFlag() && res != streamList.end())
 		{
 			//eprintf("pm when fin.\n");
@@ -275,7 +290,7 @@ int middlebox_run(const char * pcap_path, const int pkt_used)
 			streamList.erase(res);
 		}
 	}
-	
+
 	eprintf("do pattern match times is %d.\n", tuple4::pcreTimes);
 	eprintf("do pattern match res is %d.\n", tuple4::pcreResValue);
 

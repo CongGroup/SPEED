@@ -5,7 +5,7 @@
 #include "../../common/config.h"
 #include "../../common/data_type.h"
 #include "../../common/network/network.h"
-
+#include <assert.h>
 #include <fstream>
 #include <sstream>
 
@@ -535,7 +535,9 @@ void ocall_delete_array(char* pointer)
 	}
 }
 
+
 #include <pcap/pcap.h>
+#include "../trusted/pktreader.h"
 void ocall_load_pkt_file(const char *filename, char **buffer, int *pkt_count)
 {
 	pcap_t *handle;			/* Session handle */
@@ -544,7 +546,7 @@ void ocall_load_pkt_file(const char *filename, char **buffer, int *pkt_count)
 	char filter_exp[] = "tcp";	/* The filter expression */
 	bpf_u_int32 mask;		/* Our netmask */
 	bpf_u_int32 net;		/* Our IP */
-	
+	PktReader reader;
 
 	/* Open the session in promiscuous mode */
 	handle = pcap_open_offline(filename, errbuf);
@@ -560,12 +562,35 @@ void ocall_load_pkt_file(const char *filename, char **buffer, int *pkt_count)
 		fprintf(stderr, "Couldn't install filter %s: %s\n", filter_exp, pcap_geterr(handle));
 	}
 
-	*buffer = new char[pkt_buffer_size**pkt_count];
-	memset(*buffer, 0, pkt_buffer_size**pkt_count);
+	size_t maxPktCount = (*pkt_count)<=0?6000000: (*pkt_count);
+	int loadPktCount = 0;
+	size_t pktTotalSize = pkt_buffer_size * maxPktCount;
+	char* pktBuffer = (char*)malloc(pktTotalSize);
+	char* curPktBuffer = pktBuffer;
+
+	if (!pktBuffer)
+	{
+		fprintf(stderr, "Not enouth memory %s: %s\n", filter_exp, pcap_geterr(handle));
+	}
+
+	memset(pktBuffer, 0, pktTotalSize);
+	//printf("max pkt_count is %d packet, size_t len is %d\n", maxPktCount, sizeof(size_t));
+	//for (int i = 0; i < maxPktCount; i++)
+	//{
+	//	memset(curPktBuffer, 0, pkt_buffer_size);
+	//	curPktBuffer += pkt_buffer_size;
+	//	if (i % 10000 == 0)
+	//	{
+	//		printf("have clear %d packet. %d/%ld\n", i, i * pkt_buffer_size, pktTotalSize);
+	//	}
+	//}
+	//exit(1);
+
 	const uint8_t *packet;		/* The actual packet */
 	struct pcap_pkthdr header;	/* The header that pcap gives us */
+	int pageloadSize;
 
-	for(int i=0; *pkt_count>0; )
+	while (maxPktCount > 0)
 	{
 		/* Grab a packet */
 		packet = pcap_next(handle, &header);
@@ -573,27 +598,47 @@ void ocall_load_pkt_file(const char *filename, char **buffer, int *pkt_count)
 		// eof
 		if (!packet)
 		{
-			*pkt_count = i;
 			break;
 		}
 
-		if (header.len >= pkt_buffer_size)
+		// not full packet
+		if (header.len > header.caplen)
 		{
 			continue;
 		}
 
-		memcpy(*buffer + i * pkt_buffer_size, packet, header.len);
-		*pkt_count -= 1;
-		i += 1;
-
-		if (*pkt_count <= 0)
+		// packet too big
+		if (header.caplen >= pkt_buffer_size)
 		{
-			*pkt_count = i;
-			break;
+			continue;
+		}
+
+		// tcp pageload size too big or zero
+		reader.attach((const char*)packet);
+		pageloadSize = reader.getPayloadLength();
+		if (pageloadSize==0 ||pageloadSize > pkt_buffer_size - 54)
+		{
+			continue;
+		}
+
+		memcpy(curPktBuffer, packet, header.caplen);
+		//memcpy(pktBuffer , packet, header.caplen);
+		++loadPktCount;
+		--maxPktCount;
+		curPktBuffer += pkt_buffer_size;
+
+		if (loadPktCount % 100000 == 0)
+		{
+			printf("have load %d packet\n", loadPktCount);
 		}
 	}
 	/* And close the session */
 	pcap_close(handle);
+
+	*buffer = pktBuffer;
+	*pkt_count = loadPktCount;
+
+
 }
 
 void ocall_free(void* pointer, int isArray)

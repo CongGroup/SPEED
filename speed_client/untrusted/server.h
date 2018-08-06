@@ -5,4 +5,6 @@ void init_server();
 
 void run_server(int id, const char* path, int count, int dedup);
 
+void clear_server();
+
 #endif

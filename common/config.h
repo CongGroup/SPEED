@@ -37,11 +37,16 @@
 #define USER_AES_KEY "1234567890abced"
 
 
-const int pkt_buffer_size = 1514*10;
-const int tcp_reassembly_buffer_size = 4096*10;
+const int pkt_buffer_size = 1514;
+const int tcp_reassembly_buffer_size = 4096;
 
-const int max_stream_size = 20;
+const int max_stream_size = 128;
 const int pcre_output_size = 64;
 
+const int pattern_count = 3700;
+
+
+//m57 5707845
+//chrissanders  120648
 
 #endif

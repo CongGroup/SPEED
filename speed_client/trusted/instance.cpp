@@ -164,6 +164,19 @@ static const char* num2str(int num, int minSize = 0)
 	return buffer;
 }
 
+static void printTime(const hrtime& b, const hrtime& e, string& info)
+{
+	if (e.second - b.second < 30)
+	{
+		eprintf("%s use time %d us. \n", info.c_str(), time_elapsed_in_us(&b, &e));
+	}
+	else
+	{
+		eprintf("%s use time %d s. \n", info.c_str(), e.second - b.second);
+	}
+	
+}
+
 // test cases go here
 void ecall_entrance(int id, const char *path, int count, int dedup)
 {
@@ -194,7 +207,7 @@ void ecall_entrance(int id, const char *path, int count, int dedup)
 		get_time(&start_time);
 		zipfolder_run(path);
 		get_time(&end_time);
-		eprintf("%s use time %d us. \n", dedupStr.c_str(), time_elapsed_in_us(&start_time, &end_time));
+		printTime(start_time, end_time, dedupStr);
 
 #ifndef USE_LOCAL_CACHE
 		ocall_get_network_get_time(&netGetTime);
@@ -212,7 +225,7 @@ void ecall_entrance(int id, const char *path, int count, int dedup)
 		get_time(&start_time);
 		middlebox_run(path, count);
 		get_time(&end_time);
-		eprintf("%s use time %d us. \n", dedupStr.c_str(), time_elapsed_in_us(&start_time, &end_time));
+		printTime(start_time, end_time, dedupStr);
 
 #ifndef USE_LOCAL_CACHE
 		ocall_get_network_get_time(&netGetTime);
@@ -237,7 +250,7 @@ void ecall_entrance(int id, const char *path, int count, int dedup)
 		get_time(&start_time);
 		bow_run(count, allFiles);
 		get_time(&end_time);
-		eprintf("%s use time %d us. \n", dedupStr.c_str(), time_elapsed_in_us(&start_time, &end_time));
+		printTime(start_time, end_time, dedupStr);
 
 #ifndef USE_LOCAL_CACHE
 		ocall_get_network_get_time(&netGetTime);
@@ -253,7 +266,23 @@ void ecall_entrance(int id, const char *path, int count, int dedup)
 		get_time(&start_time);
 		siftcmp_run(path);
 		get_time(&end_time);
-		eprintf("%s use time %d us. \n", dedupStr.c_str(), time_elapsed_in_us(&start_time, &end_time));
+		printTime(start_time, end_time, dedupStr);
+
+#ifndef USE_LOCAL_CACHE
+		ocall_get_network_get_time(&netGetTime);
+		ocall_get_network_put_time(&netPutTime);
+		eprintf("            network get use %d us, network put use %d us.\n\n", netGetTime, netPutTime);
+#endif // !USE_LOCAL_CACHE
+
+		break;
+	}
+	// put and get 
+	case 5:
+	{
+		get_time(&start_time);
+		
+		get_time(&end_time);
+		printTime(start_time, end_time, dedupStr);
 
 #ifndef USE_LOCAL_CACHE
 		ocall_get_network_get_time(&netGetTime);
