@@ -16,7 +16,7 @@ extern "C" {
 #endif
 
 
-void ecall_entrance(int id, const char* path, int count);
+void ecall_entrance(int id, const char* path, int count, int dedup_switch);
 void ecall_map_thread(int no);
 void ecall_reduce_thread(int no);
 
@@ -38,6 +38,8 @@ sgx_status_t SGX_CDECL ocall_delete_array(char* pointer);
 sgx_status_t SGX_CDECL ocall_load_pkt_file(const char* filename, char** buffer, int* pkt_count);
 sgx_status_t SGX_CDECL ocall_get_network_get_time(int* retval);
 sgx_status_t SGX_CDECL ocall_get_network_put_time(int* retval);
+sgx_status_t SGX_CDECL ocall_free(void* pointer, int isArray);
+sgx_status_t SGX_CDECL ocall_put_get_time();
 sgx_status_t SGX_CDECL sgx_thread_wait_untrusted_event_ocall(int* retval, const void* self);
 sgx_status_t SGX_CDECL sgx_thread_set_untrusted_event_ocall(int* retval, const void* waiter);
 sgx_status_t SGX_CDECL sgx_thread_setwait_untrusted_events_ocall(int* retval, const void* waiter, const void* self);

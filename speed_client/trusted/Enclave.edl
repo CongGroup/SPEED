@@ -57,7 +57,8 @@ enclave
 		int ocall_get_network_put_time();
 
 		void ocall_free([user_check]void* pointer, int isArray);
-	
+
+		void ocall_put_get_time();
 	};
 
 };

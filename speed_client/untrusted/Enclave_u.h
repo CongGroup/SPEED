@@ -34,12 +34,14 @@ void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_delete_array, (char* pointer));
 void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_load_pkt_file, (const char* filename, char** buffer, int* pkt_count));
 int SGX_UBRIDGE(SGX_NOCONVENTION, ocall_get_network_get_time, ());
 int SGX_UBRIDGE(SGX_NOCONVENTION, ocall_get_network_put_time, ());
+void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_free, (void* pointer, int isArray));
+void SGX_UBRIDGE(SGX_NOCONVENTION, ocall_put_get_time, ());
 int SGX_UBRIDGE(SGX_CDECL, sgx_thread_wait_untrusted_event_ocall, (const void* self));
 int SGX_UBRIDGE(SGX_CDECL, sgx_thread_set_untrusted_event_ocall, (const void* waiter));
 int SGX_UBRIDGE(SGX_CDECL, sgx_thread_setwait_untrusted_events_ocall, (const void* waiter, const void* self));
 int SGX_UBRIDGE(SGX_CDECL, sgx_thread_set_multiple_untrusted_events_ocall, (const void** waiters, size_t total));
 
-sgx_status_t ecall_entrance(sgx_enclave_id_t eid, int id, const char* path, int count);
+sgx_status_t ecall_entrance(sgx_enclave_id_t eid, int id, const char* path, int count, int dedup_switch);
 sgx_status_t ecall_map_thread(sgx_enclave_id_t eid, int no);
 sgx_status_t ecall_reduce_thread(sgx_enclave_id_t eid, int no);
 

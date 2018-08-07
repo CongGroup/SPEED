@@ -32,25 +32,25 @@ void dedupCase(int type, char* fileName)
 	eprintf("File %s size is %d\n", fileName, filesize);
 
 	// pattern matching
-	const char regex[] ="nil";
-//	const char regex[] = "(Twain)|\
-//(^[^ ]*?Twain)|\
-//([[:alpha:]]+ing)|\
-//(Huck[[:alpha:]]+)|\
-//([a-z]shing)|\
-//(\b\w+nn\b)|\
-//([a-q][^u-z]{13}x)|\
-//((?i)Tom|Sawyer|Huckleberry|Finn)|\
-//(.{0,2}(Tom|Sawyer|Huckleberry|Finn))|\
-//(.{2,4}(Tom|Sawyer|Huckleberry|Finn))|\
-//([a-zA-Z]+ing)|\
-//(\s[a-zA-Z]{0,12}ing\s)|\
-//(([A-Za-z]awyer|[A-Za-z]inn)\s)|\
-//([d-hx-z])|\
-//((?:a|b)aa(?:aa|bb)cc(?:a|b))|\
-//((?:a|b)aa(?:aa|bb)cc(?:a|b)abcabcabd)|\
-//((2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(2[0-4]\d|25[0-5]|[01]?\d\d?)";
-//
+	const char regex[] = "nil";
+	//	const char regex[] = "(Twain)|\
+	//(^[^ ]*?Twain)|\
+	//([[:alpha:]]+ing)|\
+	//(Huck[[:alpha:]]+)|\
+	//([a-z]shing)|\
+	//(\b\w+nn\b)|\
+	//([a-q][^u-z]{13}x)|\
+	//((?i)Tom|Sawyer|Huckleberry|Finn)|\
+	//(.{0,2}(Tom|Sawyer|Huckleberry|Finn))|\
+	//(.{2,4}(Tom|Sawyer|Huckleberry|Finn))|\
+	//([a-zA-Z]+ing)|\
+	//(\s[a-zA-Z]{0,12}ing\s)|\
+	//(([A-Za-z]awyer|[A-Za-z]inn)\s)|\
+	//([d-hx-z])|\
+	//((?:a|b)aa(?:aa|bb)cc(?:a|b))|\
+	//((?:a|b)aa(?:aa|bb)cc(?:a|b)abcabcabd)|\
+	//((2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(2[0-4]\d|25[0-5]|[01]?\d\d?)";
+	//
 
 	switch (type)
 	{
@@ -106,36 +106,36 @@ void dedupCase(int type, char* fileName)
 		delete cp2;
 		break;
 	}
-case 4:
+	case 4:
 	{
-	Function *sf1 = 0, *sf2 = 0;
+		Function *sf1 = 0, *sf2 = 0;
 
-	int width;
-	int height;
+		int width;
+		int height;
 
-	byte* pic_Data = (byte *)textfile;
+		byte* pic_Data = (byte *)textfile;
 
-	memcpy(&width, pic_Data, sizeof(int));
-	pic_Data += sizeof(int);
-	memcpy(&height, pic_Data, sizeof(int));
-	pic_Data += sizeof(int);
+		memcpy(&width, pic_Data, sizeof(int));
+		pic_Data += sizeof(int);
+		memcpy(&height, pic_Data, sizeof(int));
+		pic_Data += sizeof(int);
 
-	sf1 = new sift_function(fid++, pic_Data, width, height);
-	get_time(&start_time);
-	dedup(sf1);
-	get_time(&end_time);
-	eprintf("##SF cache miss total use [%d us]\n", time_elapsed_in_us(&start_time, &end_time));
-	delete sf1;
-	
+		sf1 = new sift_function(fid++, pic_Data, width, height);
+		get_time(&start_time);
+		dedup(sf1);
+		get_time(&end_time);
+		eprintf("##SF cache miss total use [%d us]\n", time_elapsed_in_us(&start_time, &end_time));
+		delete sf1;
 
-	sf2 = new sift_function(fid++, pic_Data, width, height);
-	get_time(&start_time);
-	dedup(sf2);
-	get_time(&end_time);
-	eprintf("##SF cache hit total use[%d us]\n\n", time_elapsed_in_us(&start_time, &end_time));
-	delete sf2;
 
-	break;
+		sf2 = new sift_function(fid++, pic_Data, width, height);
+		get_time(&start_time);
+		dedup(sf2);
+		get_time(&end_time);
+		eprintf("##SF cache hit total use[%d us]\n\n", time_elapsed_in_us(&start_time, &end_time));
+		delete sf2;
+
+		break;
 	}//end case 
 	}//end switch
 
@@ -149,7 +149,7 @@ static const char* num2str(int num, int minSize = 0)
 	buffer[0] = 0;
 	if (minSize == 2)
 	{
-		if (num > -1 && num <100)
+		if (num > -1 && num < 100)
 		{
 			if (num < 10)
 			{
@@ -174,7 +174,7 @@ static void printTime(const hrtime& b, const hrtime& e, string& info)
 	{
 		eprintf("%s use time %d s. \n", info.c_str(), e.second - b.second);
 	}
-	
+
 }
 
 // test cases go here
@@ -197,7 +197,7 @@ void ecall_entrance(int id, const char *path, int count, int dedup)
 		dedupStr.append("Without dedup, ");
 	}
 
-	
+
 
 	switch (id)
 	{
@@ -279,21 +279,10 @@ void ecall_entrance(int id, const char *path, int count, int dedup)
 	// put and get 
 	case 5:
 	{
-		get_time(&start_time);
-		
-		get_time(&end_time);
-		printTime(start_time, end_time, dedupStr);
-
-#ifndef USE_LOCAL_CACHE
-		ocall_get_network_get_time(&netGetTime);
-		ocall_get_network_put_time(&netPutTime);
-		eprintf("            network get use %d us, network put use %d us.\n\n", netGetTime, netPutTime);
-#endif // !USE_LOCAL_CACHE
-
+		ocall_put_get_time();
 		break;
-	}
-	}
-
+	}// end case 5
+	}// end switch
 	return;
 	//hrtime start_time, end_time;
 
@@ -490,7 +479,7 @@ void ecall_entrance(int id, const char *path, int count, int dedup)
 
 
 	// mapreduce test//
-	
+
 	//char* argv[2] = { "a.txt", "b.txt" };
 	//char* argv[] = {"file01.txt","file02.txt","file03.txt" ,"file04.txt" ,"file05.txt" 
 	//	,"file06.txt" ,"file07.txt" ,"file08.txt" ,"file09.txt" ,"file10.txt" };

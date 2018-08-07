@@ -30,7 +30,6 @@ void ocall_get_time(int *second, int *nanosecond)
 
 int ocall_file_size(const char* filename);
 
-
 void ocall_load_text_file(const char *filename,char **pbuffer, int buffer_size,int *filesize) 
 {
     // consider alternative impl to speed up loading of large file
@@ -99,7 +98,6 @@ void ocall_load_text_file(const char *filename,char **pbuffer, int buffer_size,i
     infile.close();
 }
 
-
 void ocall_write_text_file(const char *filename, const char *buffer, int buffer_size)
 {
 	std::ofstream outfile(filename, std::ios::out&std::ios::trunc);
@@ -122,8 +120,6 @@ void ocall_write_text_file(const char *filename, const char *buffer, int buffer_
 #include <thread>
 #include <mutex>
 #include "../../common/config.h"
-
-
 
 using std::mutex;
 mutex cacheLock;
@@ -341,7 +337,7 @@ int ocall_get_network_put_time()
 
 extern sgx_enclave_id_t global_eid;
 
-void call_ecall_map(int no)
+static void call_ecall_map(int no)
 {
 	//std::this_thread::sleep_for(std::chrono::seconds(1));
 	sgx_status_t ret = SGX_ERROR_UNEXPECTED;
@@ -350,7 +346,7 @@ void call_ecall_map(int no)
 		abort();
 }
 
-void call_ecall_reduce(int no)
+static void call_ecall_reduce(int no)
 {
 	//std::this_thread::sleep_for(std::chrono::seconds(1));
 	sgx_status_t ret = SGX_ERROR_UNEXPECTED;
@@ -360,7 +356,6 @@ void call_ecall_reduce(int no)
 }
 
 using std::thread;
-
 
 void ocall_begin_map(int count)
 {
@@ -535,7 +530,6 @@ void ocall_delete_array(char* pointer)
 	}
 }
 
-
 #include <pcap/pcap.h>
 #include "../trusted/pktreader.h"
 void ocall_load_pkt_file(const char *filename, char **buffer, int *pkt_count)
@@ -654,4 +648,79 @@ void ocall_free(void* pointer, int isArray)
 			delete pointer;
 		}
 	}
+}
+
+static char* nextTag(bool clear = false)
+{
+	static byte tag[TAG_SIZE] = { 0 };
+
+	if (!clear)
+	{
+		(*(long*)tag)++;
+	}
+	else
+	{
+		memset(tag, 0, sizeof(tag));
+	}
+
+	return (char*)tag;
+}
+
+
+void ocall_put_get_time()
+{
+	hrtime start_time, end_time;
+	const int dataSizes[] = { 1024 * 1, 1024 * 1024, 1024 * 100, 1024 * 10, 1024 * 1 };
+	const int round = 100;
+	const bool hit_cache = true;
+
+	for (int nn = 0; nn < sizeof(dataSizes) / sizeof(int); nn++)
+	{
+		printf("DataSize is %d bytes.\n", dataSizes[nn]);
+
+		byte** tags = new byte*[round];
+		metadata metas[round];
+		byte** datas = new byte*[round];
+		byte** dataBuffer = new byte*[round];
+
+		for (int i = 0; i < round; i++)
+		{
+			tags[i] = new byte[TAG_SIZE];
+			memcpy(tags[i], nextTag(), TAG_SIZE);
+
+			datas[i] = new byte[dataSizes[nn]];
+			dataBuffer[i] = new byte[dataSizes[nn]];
+		}
+
+		ocall_get_time(&start_time.second, &start_time.nanosecond);
+		for (int i = 0; i < round; i++)
+		{
+			ocall_request_put(tags[i], (uint8_t*)&metas[i], datas[i], dataSizes[nn]);
+		}
+		ocall_get_time(&end_time.second, &end_time.nanosecond);
+		printf("In local put %d round use %d us.\n", round, time_elapsed_in_us(&start_time, &end_time));
+
+		if (!hit_cache)
+		{
+			for (int i = 0; i < round; i++)
+			{
+				memcpy(tags[i], nextTag(), TAG_SIZE);
+			}
+			printf("All get request will miss cache");
+		}
+
+		int trueSize = 0;
+		ocall_get_time(&start_time.second, &start_time.nanosecond);
+		for (int i = 0; i < round; i++)
+		{
+			ocall_request_find(tags[i], (uint8_t*)&metas[i], dataBuffer[i], dataSizes[nn], &trueSize);
+			if (trueSize > 0)
+			{
+				memcpy(datas[i], dataBuffer[i], trueSize);
+			}
+		}
+		ocall_get_time(&end_time.second, &end_time.nanosecond);
+		printf("In local get %d round use %d us.\n\n", round, time_elapsed_in_us(&start_time, &end_time));
+
+	}// end for loop
 }
