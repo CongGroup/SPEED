@@ -672,14 +672,15 @@ void ocall_put_get_time()
 	hrtime start_time, end_time;
 	const int dataSizes[] = { 1024 * 1, 1024 * 1024, 1024 * 100, 1024 * 10, 1024 * 1 };
 	const int round = 100;
-	const bool hit_cache = true;
+	const bool hit_cache = false;
+	init_local_cache();
 
 	for (int nn = 0; nn < sizeof(dataSizes) / sizeof(int); nn++)
 	{
 		printf("DataSize is %d bytes.\n", dataSizes[nn]);
 
 		byte** tags = new byte*[round];
-		metadata metas[round];
+		metadata* metas = new metadata[round];
 		byte** datas = new byte*[round];
 		byte** dataBuffer = new byte*[round];
 
@@ -689,13 +690,14 @@ void ocall_put_get_time()
 			memcpy(tags[i], nextTag(), TAG_SIZE);
 
 			datas[i] = new byte[dataSizes[nn]];
+
 			dataBuffer[i] = new byte[dataSizes[nn]];
 		}
 
 		ocall_get_time(&start_time.second, &start_time.nanosecond);
 		for (int i = 0; i < round; i++)
 		{
-			ocall_request_put(tags[i], (uint8_t*)&metas[i], datas[i], dataSizes[nn]);
+			ocall_request_put(tags[i], (byte*)&metas[i], datas[i], dataSizes[nn]);
 		}
 		ocall_get_time(&end_time.second, &end_time.nanosecond);
 		printf("In local put %d round use %d us.\n", round, time_elapsed_in_us(&start_time, &end_time));
@@ -713,7 +715,7 @@ void ocall_put_get_time()
 		ocall_get_time(&start_time.second, &start_time.nanosecond);
 		for (int i = 0; i < round; i++)
 		{
-			ocall_request_find(tags[i], (uint8_t*)&metas[i], dataBuffer[i], dataSizes[nn], &trueSize);
+			ocall_request_find(tags[i], (byte*)&metas[i], dataBuffer[i], dataSizes[nn], &trueSize);
 			if (trueSize > 0)
 			{
 				memcpy(datas[i], dataBuffer[i], trueSize);
