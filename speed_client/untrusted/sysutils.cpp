@@ -28,7 +28,6 @@ void ocall_get_time(int *second, int *nanosecond)
     *nanosecond = wall_clock.tv_nsec;
 }
 
-int ocall_file_size(const char* filename);
 
 void ocall_load_text_file(const char *filename,char **pbuffer, int buffer_size,int *filesize) 
 {
@@ -230,8 +229,8 @@ static void init_local_cache()
 
 		done = true;
 	}
-
 }
+
 
 static void redis_put(const string& key, const string& value)
 {
@@ -490,25 +489,33 @@ static void dir_oper(char const*path, vector<string>& files, bool recursion)
 	}
 }
 
-int ocall_read_dir(const char* filename, char* buffer, int max_file_count, unsigned int size)
+int ocall_read_dir(const char* filename, char** buffer, int file_path_len)
 {
 	vector<string> child_files;
-	memset(buffer, 0, size);
 	if (dir_files(filename, child_files, true))
 	{
-		for (int i = 0; i < max_file_count&& i < child_files.size(); i++)
+		int file_count = child_files.size();
+		if (file_count>0)
 		{
-			strncpy(buffer, child_files.at(i).c_str(), size / max_file_count);
-			buffer += size / max_file_count;
+			*buffer = new char[file_path_len * file_count];
+			memset(*buffer, 0, file_path_len * file_count);
+			
+			char* temp = *buffer;
+			for (int i = 0;  i < child_files.size(); i++)
+			{
+				strncpy(temp, child_files.at(i).c_str(), file_path_len);
+				temp += file_path_len;
+			}
 		}
 	}
-	
-	return child_files.size()<max_file_count? child_files.size(): max_file_count;
+	//do open ahead 
+	init_local_cache();
+	return child_files.size();
 }
 
 int ocall_file_size(const char* filename)
 {
-
+	//printf("Query %s size.\n", filename);
 	struct stat s_buf;
 
 	// get path info
@@ -518,6 +525,8 @@ int ocall_file_size(const char* filename)
 	{
 		s_buf.st_size = s_buf.st_size * 4 + 8;
 	}
+
+	//printf("%s size is %d\n", filename, s_buf.st_size);
 
 	return s_buf.st_size;
 }

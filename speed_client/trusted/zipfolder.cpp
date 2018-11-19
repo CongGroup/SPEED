@@ -1,24 +1,26 @@
- 
 #include "zipfolder.h"
 #include "stdlib.h"
 #include "Enclave_t.h"
 #include "sysutils.h"
 #include "dedupTool.h"
+#include "FunctionDB.h"
+#include "zlib.h"
+#include "Deduplicable.h"
 
-#include <zlib.h>
 
-static int zlibfile_without_dedup(char* input, char* output, int size)
+// using zlib to compress file and return the result
+static string zlib_compress_wrapper(const string& fileContext)
 {
 #define CHUNK 16384
 #define CP_LEVEL 9 
 
+	int fileLength = fileContext.size();
+	const byte *in = (byte *)fileContext.c_str();
+	byte *out = new byte[(int)(fileLength*1.2)];
 	int processed = 0, compressed = 0;
 	int ret, flush;
 	unsigned have;
 	z_stream strm;
-	int in_size = size;
-	byte *in = (byte *)input;
-	byte *out = (byte *)output;
 
 	/* allocate deflate state */
 	strm.zalloc = Z_NULL;
@@ -32,12 +34,12 @@ static int zlibfile_without_dedup(char* input, char* output, int size)
 
 	/* compress until end of file */
 	do {
-		if ((processed + CHUNK) < in_size) {
+		if ((processed + CHUNK) < fileLength) {
 			strm.avail_in = CHUNK;
 			flush = Z_NO_FLUSH;
 		}
 		else {
-			strm.avail_in = in_size - processed;
+			strm.avail_in = fileLength - processed;
 			flush = Z_FINISH;
 		}
 		strm.next_in = (Bytef*)&in[processed];
@@ -61,91 +63,28 @@ static int zlibfile_without_dedup(char* input, char* output, int size)
 		assert(strm.avail_in == 0);     /* all input will be used */
 		processed += CHUNK;
 	}
-	/* done when last data in file processed */
 	while (flush != Z_FINISH);
-	//assert(ret == Z_STREAM_END);        /* stream will be complete */
-
-										/* clean up and return */
 	(void)deflateEnd(&strm);
 
-	return compressed;
-}
-
-#include "FunctionDB.h"
-
-static int zlibfile_with_dedup(char* in, char* out, int size)
-{
-	DEDUP_FUNCTION_INIT;
-	byte* pb;
-
-	input_with_r_buffer_size = size + HASH_SIZE;
-	input_with_r_buffer = new byte[input_with_r_buffer_size];
-	memset(input_with_r_buffer, 0, input_with_r_buffer_size);
-
-	output_buffer_size = size*1.2;
-	output_buffer = new byte[output_buffer_size];
-	memset(output_buffer, 0, output_buffer_size);
-	pb = input_with_r_buffer;
-
-	memcpy(pb, in, size);
-
-	DEDUP_FUNCTION_QUERY;
-	output_true_size = zlibfile_without_dedup(in,out,size);
-	pb = output_buffer;
-	memcpy(pb, out, output_true_size);
-
-	DEDUP_FUNCTION_UPDATE;
-	if (doDedup) {
-		pb = output_buffer;
-		memcpy(out, pb, output_true_size);
-	}
-	delete[] input_with_r_buffer;
-	delete[] output_buffer;
-	return output_true_size;
-}
-
-static string cmpressOneFile(const char* path)
-{
-	string fileContext = loadFiletoString(path);
-	int fileLength = fileContext.size();
-	char* outputBuffer = new char[(int)(fileLength*1.2)];
-	int resLength = zlibfile_with_dedup((char*)fileContext.c_str(), outputBuffer, fileLength);
-	return string(outputBuffer, resLength);
-}
-
-static string cmpressOneFile_dedup(const char* path)
-{
-	std::string hash = computeFileHash(path);
-	std::string output;
-	bool exist = queryByHash(hash);
-
-	if (exist)
-	{
-		output = getResultByHash(hash);
-	}
-	else
-	{
-		cmpressOneFile(path);
-		putResultByHash(hash, output);
-	}
-
-	return output;
+	return string((char*)out,compressed);
 }
 
 extern bool dedup_switch;
 
 static void compress_file(const char* path)
 {
-	const int compress_block_size = 2 * 1024 * 1024;
+	const int compress_block_size = 4 * 1024 * 1024;
 
 	int file_size = 0;
 	ocall_file_size(&file_size, path);
+
+	// read file
+	char* file_in = (char*)malloc(compress_block_size + 1);
+	char* file_out = (char*)malloc(compress_block_size*1.2);
+	string str_in, str_out;
+
 	if (file_size > 0)
 	{
-		 // read file
-		 char* file_in = (char*)malloc(file_size);
-		 char* file_out = (char*)malloc(compress_block_size*1.2);
-
 		 int fileid = 0;
 		 ocall_open(&fileid, path, 0);
 		 if (fileid < 0)
@@ -160,6 +99,7 @@ static void compress_file(const char* path)
 		 {
 			 int readRet = 0;
 			 ocall_read(&readRet, fileid, file_in, size_to_read>compress_block_size ? compress_block_size : size_to_read);
+			 str_in.assign(file_in, readRet);
 			 if (readRet <0)
 			 {
 				 eprintf("%s error in read %d/%d\n", path, readRet, size_to_read);
@@ -168,36 +108,40 @@ static void compress_file(const char* path)
 
 			 if (dedup_switch)
 			 {
-				 cmp_size += zlibfile_with_dedup(file_in, file_out, readRet);
+				 Deduplicable<string, const string&> dedup_func("libz", "1.2.11", "zlib_compress_wrapper", zlib_compress_wrapper);
+				 str_out = dedup_func(str_in);
+				 cmp_size += str_out.size();
 			 }
 			 else
 			 {
-				 cmp_size += zlibfile_without_dedup(file_in, file_out, readRet);
+				 str_out = zlib_compress_wrapper(str_in);
+				 cmp_size += str_out.size();
 			 }
-
 		 }
-
 		 ocall_close(fileid);
-
-
 		 eprintf("%s after compress %d/%d\n", path, cmp_size, file_size);
-
-		 free(file_in);
-		 free(file_out);
 	}
+	else
+	{
+		eprintf("file %s is empty or not exist.\n", path);
+	}
+
+	free(file_in);
+	free(file_out);
 }
-
-
-
 
 int zipfolder_run(const char * path)
 {
-	const int each_file_path_buffer_len = 200;
-	const int max_file_count = 20;
-	const int buffer_size = each_file_path_buffer_len * max_file_count;
-	char(*buffer)[each_file_path_buffer_len] = (char(*)[each_file_path_buffer_len])malloc(buffer_size);
+	const int each_file_path_buffer_len = 128;
+	char(*buffer_out)[each_file_path_buffer_len];
+	
 	int file_count= 0;
-	ocall_read_dir(&file_count, path, (char*)buffer, max_file_count, buffer_size);
+	ocall_read_dir(&file_count, path, (char**)&buffer_out, each_file_path_buffer_len);
+
+	char(*buffer)[each_file_path_buffer_len] = (char(*)[each_file_path_buffer_len])new char[file_count*each_file_path_buffer_len+1];
+	memcpy(buffer, buffer_out, file_count*each_file_path_buffer_len);
+	
+	eprintf("Find %d files in path %s\n", file_count, path);
 	if (file_count > 0)
 	{
 		for (int i = 0; i < file_count; i++)

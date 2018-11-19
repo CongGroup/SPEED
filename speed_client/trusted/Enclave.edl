@@ -48,7 +48,7 @@ enclave
         void ocall_close(int file);
 
 		int ocall_file_size([in, string] const char* filename);
-		int ocall_read_dir([in, string] const char* filename, [out, size=size] char* buffer, int max_file_count, unsigned int size);
+		int ocall_read_dir([in, string] const char* filename, [out] char** buffer, int file_path_len);
 
 		void ocall_delete_array([in] char* pointer);
 		void ocall_load_pkt_file([in, string] const char *filename, [out] char **buffer, [in, out] int *pkt_count);

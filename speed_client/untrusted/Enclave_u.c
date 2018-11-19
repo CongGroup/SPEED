@@ -4,6 +4,7 @@
 typedef struct ms_ecall_entrance_t {
 	int ms_id;
 	char* ms_path;
+	size_t ms_path_len;
 	int ms_count;
 	int ms_dedup_switch;
 } ms_ecall_entrance_t;
@@ -93,9 +94,8 @@ typedef struct ms_ocall_file_size_t {
 typedef struct ms_ocall_read_dir_t {
 	int ms_retval;
 	char* ms_filename;
-	char* ms_buffer;
-	int ms_max_file_count;
-	unsigned int ms_size;
+	char** ms_buffer;
+	int ms_file_path_len;
 } ms_ocall_read_dir_t;
 
 typedef struct ms_ocall_delete_array_t {
@@ -250,7 +250,7 @@ static sgx_status_t SGX_CDECL Enclave_ocall_file_size(void* pms)
 static sgx_status_t SGX_CDECL Enclave_ocall_read_dir(void* pms)
 {
 	ms_ocall_read_dir_t* ms = SGX_CAST(ms_ocall_read_dir_t*, pms);
-	ms->ms_retval = ocall_read_dir((const char*)ms->ms_filename, ms->ms_buffer, ms->ms_max_file_count, ms->ms_size);
+	ms->ms_retval = ocall_read_dir((const char*)ms->ms_filename, ms->ms_buffer, ms->ms_file_path_len);
 
 	return SGX_SUCCESS;
 }
@@ -372,6 +372,7 @@ sgx_status_t ecall_entrance(sgx_enclave_id_t eid, int id, const char* path, int 
 	ms_ecall_entrance_t ms;
 	ms.ms_id = id;
 	ms.ms_path = (char*)path;
+	ms.ms_path_len = path ? strlen(path) + 1 : 0;
 	ms.ms_count = count;
 	ms.ms_dedup_switch = dedup_switch;
 	status = sgx_ecall(eid, 0, &ocall_table_Enclave, &ms);

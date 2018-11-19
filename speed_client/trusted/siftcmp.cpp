@@ -12,6 +12,7 @@
 #include "sysutils.h"
 
 #include "siftcmp.h"
+#include "Deduplicable.h"
 
 #include "FunctionDB.h"
 #include "dedupTool.h"
@@ -19,9 +20,18 @@ using namespace std;
 using namespace VL;
 
 //string computeDefaultSift(VL::PgmBuffer& buffer)
-static std::string computeSift(const float*const  _im_pt, int _width, int _height,
-	float _sigman = 0.5f, float _sigma0 = 2.0f, int _O = -1, int _S = 3, int _omin = -1, int _smin= -1, int _smax = 4)
+static std::string sift_wrapper(const string& pic, int _width, int _height)
 {
+	const float*const  _im_pt = (const float*)pic.data();
+
+	float _sigman = 0.5f;
+	float _sigma0 = 2.0f;
+	int _O = -1;
+	int _S = 3;
+	int _omin = -1;
+	int _smin = -1;
+	int _smax = 4;
+
 	int    first = -1;
 	int    octaves = -1;
 	int    levels = 3;
@@ -116,46 +126,6 @@ static std::string computeSift(const float*const  _im_pt, int _width, int _heigh
 	return out;
 }
 
-
-static std::string computeSift_with_dedup(const float*const  _im_pt, int _width, int _height)
-{
-	DEDUP_FUNCTION_INIT;
-	string siftres;
-	byte* pb;
-
-	input_with_r_buffer_size = sizeof(int) * 2 + _width * _height * sizeof(float) + HASH_SIZE;
-	input_with_r_buffer = new byte[input_with_r_buffer_size];
-	memset(input_with_r_buffer, 0, input_with_r_buffer_size);
-
-	output_buffer_size = input_with_r_buffer_size;
-	output_buffer = new byte[output_buffer_size];
-	memset(output_buffer, 0, output_buffer_size);
-
-	pb = input_with_r_buffer;
-	COPY_OBJECT(pb, _width);
-	COPY_OBJECT(pb, _height);
-	//memcpy(pb, _im_pt, _width* _height * sizeof(float));
-
-	DEDUP_FUNCTION_QUERY;
-	siftres = computeSift(_im_pt, _width, _height);
-	output_true_size = siftres.size();
-
-	pb = output_buffer;
-	memcpy(pb, siftres.c_str(), output_true_size);
-
-	DEDUP_FUNCTION_UPDATE;
-	if (doDedup)
-	{
-		pb = output_buffer;
-		siftres.assign((char*)pb, output_true_size);
-	}
-	// clear memory
-	delete[] input_with_r_buffer;
-	delete[] output_buffer;
-	return siftres;
-}
-
-
 static void readfile(const char* path, PgmBuffer& data)
 {
 	char *textfile;
@@ -181,49 +151,17 @@ bool cmpSift(const string& sift1, const string& sift2)
 }
 
 
-
-static string picFileSift(const char* path)
-{
-	PgmBuffer pgmStruct;
-	readfile(path, pgmStruct);
-
-	return computeSift_with_dedup(pgmStruct.data, pgmStruct.width, pgmStruct.height);
-}
-
-static string picFileSift_dedup(const char* path)
-{
-	string returnValue;
-	
-	std::string hash = computeFileHash(path);
-
-	bool exist = queryByHash(hash);
-
-	if (exist)
-	{
-		returnValue = getResultByHash(hash);
-	}
-	else
-	{
-		returnValue = picFileSift(path);
-		putResultByHash(hash, returnValue);
-	}
-
-	return returnValue;
-}
-
-
-
-
-
 void siftcmp_run(const char * path)
 {
 	const int each_file_path_buffer_len = 200;
-	const int max_file_count = 20;
-	const int buffer_size = each_file_path_buffer_len * max_file_count;
-	char(*buffer)[each_file_path_buffer_len] = (char(*)[each_file_path_buffer_len])malloc(buffer_size);
+	char(*buffer_out)[each_file_path_buffer_len];
 	int file_count = 0;
-	ocall_read_dir(&file_count, path, (char*)buffer, max_file_count, buffer_size);
+	ocall_read_dir(&file_count, path, (char**)&buffer_out, each_file_path_buffer_len);
 
+	char(*buffer)[each_file_path_buffer_len] = (char(*)[each_file_path_buffer_len])new char[file_count*each_file_path_buffer_len + 1];
+	memcpy(buffer, buffer_out, file_count*each_file_path_buffer_len);
+
+	eprintf("Find %d files in path %s\n", file_count, path);
 	if (file_count > 0)
 	{
 		PgmBuffer* files = new PgmBuffer[file_count];
@@ -232,14 +170,16 @@ void siftcmp_run(const char * path)
 		{
 			readfile(buffer[i], files[i]);
 			//eprintf("run %p\n", (char*)files[i].data - sizeof(int) * 2);
-			int cmp_size = 0;
+			int pic_size = sizeof(float) * files[i].width * files[i].height;
+			string strPic = string((char*)files[i].data, pic_size);
 			if (dedup_switch)
 			{
-				ress[i] = computeSift_with_dedup(files[i].data, files[i].width, files[i].height);
+				Deduplicable<string, const string&, int, int> dedup_func("libsiftpp", "0.8.1", "sift_wrapper", sift_wrapper);
+				ress[i] = dedup_func(strPic, files[i].width, files[i].height);
 			}
 			else
 			{
-				ress[i] = computeSift(files[i].data, files[i].width, files[i].height);
+				ress[i] = sift_wrapper(strPic, files[i].width, files[i].height);
 			}
 			eprintf("%s, w:%d, h:%d, siftsize:%d\n", buffer[i], files[i].width, files[i].height, ress[i].size());
 		

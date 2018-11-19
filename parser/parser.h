@@ -34,10 +34,6 @@ public:
 	string funcLibraryVersion;
 };
 
-
-
-
-
 class dedupConfigType
 {
 public:
@@ -47,3 +43,11 @@ public:
 	string swtichName;
 	int localOnly;
 };
+
+
+
+
+
+
+
+

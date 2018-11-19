@@ -9,10 +9,10 @@
 #include "sysutils.h"
 
 // Max mapper count 809
-#define MAPS 13
+#define MAPS 300323
 
 // Max reducer count 64
-#define REDUCES 4
+//#define REDUCES 4
 
 
 
@@ -65,10 +65,13 @@ sgx_thread_mutex_t job_lock;
 int map_done_count;
 
 // same as readucer count
-ht_t ht[REDUCES];
+ht_t* ht;
 
 void initialize(int file_count, char ** file_pahts, Mapper mapp, int num_reducers, Partitioner part, Reducer red) 
 {
+	const int REDUCES = num_reducers;
+	ht = new ht_t[REDUCES];
+	memset(ht, 0, sizeof(ht_t)*REDUCES);
 	job_lock = SGX_THREAD_MUTEX_INITIALIZER;
 
 	// Initialize globals
@@ -247,6 +250,8 @@ void MR_Run(int argc, char *argv[],
 	Reducer reduce, int num_reducers,
 	Partitioner partition) 
 {
+
+
 	// argc argv is file names;
 	initialize(argc, argv, map, num_reducers, partition, reduce);
 
@@ -281,10 +286,10 @@ void MR_Run(int argc, char *argv[],
 }
 
 // the value must be alloc in the memory.
-void MR_Emit(char *key, char *value)
+void MR_Emit(const char *key, const char *value)
 {
-	unsigned long partition_num = (*partitioner)(key, NUM_REDUCER);
-	unsigned long map_num = MR_DefaultHashPartition(key, MAPS);
+	unsigned long partition_num = (*partitioner)((char*)key, NUM_REDUCER);
+	unsigned long map_num = MR_DefaultHashPartition((char*)key, MAPS);
 
 	sgx_thread_mutex_lock(&ht[partition_num].map[map_num].lock);
 	keys_t *tmp = ht[partition_num].map[map_num].head;
@@ -304,7 +309,7 @@ void MR_Emit(char *key, char *value)
 
 	//new_val->value = (char*)malloc(sizeof(char) * strlen(value)+1);
 	//strncpy(new_val->value, value, strlen(value)+1);
-	new_val->value = value;
+	new_val->value = (char*)value;
 	new_val->next = NULL;
 
 	if (tmp == NULL) 

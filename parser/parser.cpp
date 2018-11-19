@@ -23,9 +23,7 @@ dedupConfigType parseConfigFile(string configFile);
 // use config replace source file
 void replaceSourceWithDedupConfig(const dedupConfigType config, string srcFileName, string dstFileName);
 
-
-
-int main(int argc, char** argv)
+int main2(int argc, char** argv)
 {
 	// check param
 	if (argc != 3)
@@ -213,8 +211,6 @@ void replaceSourceWithDedupConfig(const dedupConfigType config, string srcFileNa
 	fin.close();
 	fout.close();
 }
-
-
 
 string trim(const string& src)
 {
