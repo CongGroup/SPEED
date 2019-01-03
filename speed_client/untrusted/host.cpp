@@ -345,7 +345,7 @@ int SGX_CDECL main(int argc, char *argv[])
 	}
 	else
 	{
-		printf("Usage : dedupApplication <applicationID> <Path> <Count>\n");
+		printf("Usage : dedupApplication <applicationID> <Path> <Count> <Dedup>\n");
 		printf("       <applicationID> : 1:BackupFolder, 2:MiddleboxIDS, 3:MapreduceBow, 4:PicFolderDiff.\n");
 		printf("       <Path>          : The input data path.\n");
 		printf("       <Count>         : The input data count.\n");
