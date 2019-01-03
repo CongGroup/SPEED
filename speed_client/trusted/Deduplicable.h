@@ -3,6 +3,36 @@
 #include "FunctionDB.h"
 #include "tuple"
 
+class DataContainer
+{
+public:
+	DataContainer(const char* data, const int size) {};
+	virtual ~DataContainer() {};
+	virtual int size() const = 0;
+	virtual const char* data() const = 0;
+};
+
+class DataContainerImpl : public DataContainer
+{
+public:
+	DataContainerImpl(const char* data, const int size)
+		:DataContainer(data, size)
+	{
+		str.assign(data, size);
+	};
+	~DataContainerImpl() {};
+	int size() const
+	{
+		return str.size();
+	}
+	const char* data() const
+	{
+		return str.data();
+	}
+private:
+	std::string str;
+};
+
 template<typename Object>
 static int obj2buf(byte* buff, const Object& obj)
 {
@@ -40,6 +70,24 @@ std::string buf2obj(const byte* buff, int size)
 {
 	return std::string((const char*)buff, size);
 }
+
+template <>
+int obj2buf(byte* buff, const DataContainerImpl& obj)
+{
+	int size = obj.size();
+	if (buff)
+	{
+		COPY_POINTER(buff, obj.data(), obj.size());
+	}
+	return size;
+}
+
+template<>
+DataContainerImpl buf2obj(const byte* buff, int size)
+{
+	return DataContainerImpl((const char*)buff, size);
+}
+
 
 template<class Last>
 static int setInputBuffer(byte* buff, Last obj)

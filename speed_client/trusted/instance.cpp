@@ -49,7 +49,16 @@ static void printTime(const hrtime& b, const hrtime& e, string& info)
 	}
 	else
 	{
-		eprintf("%s use time %d s. \n", info.c_str(), e.second - b.second);
+		int tail = e.nanosecond - b.nanosecond;
+		if (tail> 0)
+		{
+			eprintf("%s use time %d s, %d us. \n", info.c_str(), e.second - b.second, tail/1000);
+		}
+		else
+		{
+			eprintf("%s use time %d s, %d us. \n", info.c_str(), e.second - b.second -1, tail/1000+1000000);
+		}
+		
 	}
 
 }

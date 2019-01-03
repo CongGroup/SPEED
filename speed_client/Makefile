@@ -72,7 +72,7 @@ else
 endif
 
 App_Cpp_Flags := $(App_C_Flags) -Wno-write-strings -std=c++11 -g
-App_Link_Flags := $(SGX_COMMON_CFLAGS) -L$(SGX_LIBRARY_PATH) -l$(Urts_Library_Name) -lpthread -Luntrusted/ -lpcap $(REDIS3M_LINK)
+App_Link_Flags := $(SGX_COMMON_CFLAGS) -L$(SGX_LIBRARY_PATH) -l$(Urts_Library_Name) -lpthread -Luntrusted/ -lpcap -lcryptopp $(REDIS3M_LINK)
 
 ifneq ($(SGX_MODE), HW)
 	App_Link_Flags += -lsgx_uae_service_sim
