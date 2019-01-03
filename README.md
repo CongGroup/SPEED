@@ -139,49 +139,59 @@ Usage : dedupApplication <applicationID> <Path> <Count> <Dedup>
                4. PicFeature: use sift to compute pic feature in folder <Path>.
 
 ```
-1. BackupFolder
+* BackupFolder
 This application will compress all files in the <Path> folder, it will print the process time.
+	
 The test data is in the speed/speed_client/data/compress
+
 you can run this application without speed like this
 ./appDedup 1 ./data/compress/file-3M 0 0
 enable speed like this
 ./appDedup 1 ./data/compress/file-3M 0 1
+
 We also have 1M Size folder and 2M Size folder, you can try it by yourself.
 
-2. MiddleboxIDS
+* MiddleboxIDS
 This application will read a local pcap files' packets, and do the IDS middlebox functions, it will print the process time.
-We use two big datasets in our papers, [m57](https://digitalcorpora.org/corpora/network-packet-dumps) and [4SICS](https://www.netresec.com/?page=PCAP4SICS). It is too big to put to GitHub, we provide a small pcap file for the test run.
+
+We use two big datasets in our papers, [m57](https://digitalcorpora.org/corpora/network-packet-dumps) and [4SICS](https://www.netresec.com/?page=PCAP4SICS). 
+
+It is too big to put to GitHub, we provide a small pcap file for the test run.
+
 The test data is in the speed/speed_client/data/patternMatching
+
 you can run this application without speed like this
 ./appDedup 2 data/patternMatching/tcp300.pcap 100 0
 then, enable speed like this
 ./appDedup 2 data/patternMatching/tcp300.pcap 100 1
 
 
-3. MapreduceBow
+* MapreduceBow
 This application can compute some text files' bow value with our sgx-mapreduce engine.
+
 We use [CommonCrawl](http://commoncrawl.org/) web page to test our program in the paper, and we use 5000 words as the dictionary in words5000.cpp. 
+
 It is too big to put to GitHub, we provide a small dataset for a test run. We use 36 files named 3M01, 3M02...3M36 in the folder 3M-36files. It will print the mapper count and the reducer count and the process time.
 
 The test data is in the speed/speed_client/data/bow/3M-36files
+
 you can run this application without speed like this
 ./appDedup 3 ./data/bow/3M-36files/3M 36 0
 then, enable speed like this
 ./appDedup 3 ./data/bow/3M-36files/3M 36 1
 We also have 1M Size folder and 2M Size folder, you can try it by yourself.
 
-4. PicFeature
+* PicFeature
 This application will compute all pictures sift feature in the <Path> folder, it will print the process time.
+	
 The test data is in the speed/speed_client/data/compress
+
 you can run this application without speed like this
 ./appDedup 4 ./data/sift/pic-500kb 0 0
 then, enable speed like this
 ./appDedup 4 ./data/sift/pic-500kb 0 1
+
 We also have a 1M Size folder and 1.5M Size Pic, you can try it by yourself.
-
-
-
-
 
 
 
