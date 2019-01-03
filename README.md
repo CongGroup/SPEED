@@ -140,6 +140,7 @@ Usage : dedupApplication <applicationID> <Path> <Count> <Dedup>
 
 ```
 * BackupFolder
+
 	This application will compress all files in the <Path> folder, it will print the process time.
 
 	The test data is in the speed/speed_client/data/compress
@@ -156,6 +157,7 @@ Usage : dedupApplication <applicationID> <Path> <Count> <Dedup>
 	We also have 1M Size folder and 2M Size folder, you can try it by yourself.
 
 * MiddleboxIDS
+
 	This application will read a local pcap files' packets, and do the IDS middlebox functions, it will print the process time.
 
 	We use two big datasets in our papers, [m57](https://digitalcorpora.org/corpora/network-packet-dumps) and [4SICS](https://www.netresec.com/?page=PCAP4SICS). 
@@ -174,6 +176,7 @@ Usage : dedupApplication <applicationID> <Path> <Count> <Dedup>
 	```
 
 * MapreduceBow
+
 	This application can compute some text files' bow value with our sgx-mapreduce engine.
 
 	We use [CommonCrawl](http://commoncrawl.org/) web page to test our program in the paper, and we use 5000 words as the dictionary in words5000.cpp. 
@@ -193,6 +196,7 @@ Usage : dedupApplication <applicationID> <Path> <Count> <Dedup>
 	We also have 1M Size folder and 2M Size folder, you can try it by yourself.
 
 * PicFeature
+
 	This application will compute all pictures sift feature in the <Path> folder, it will print the process time.
 
 	The test data is in the speed/speed_client/data/compress
