@@ -12,12 +12,11 @@
 
 # INTRODUCTION
 
-SPEED is a secure computation deduplication library for SGX-assisted applications.
-To be continued.
+SPEED is a generic system that enables secure computation deduplication over SGX-enabled applications. It enables these applications to identify redundant computations and reuse computation results, while protecting the confidentiality and integrity of the involved code, inputs, and results. To maximize the result utilization, our extended cross-application deduplication scheme empowers other applications to securely utilize the shared results, without sharing a system-wide key. To ease the use of SPEED, our fully functional prototype provides a concise and expressive API for developers to deduplicate rich computations with minimal effort, as few as 2 lines of code per function call.
 
 # PUBLICATION
 
-To be continued.
+Helei Cui, Huayi Duan, Zhan Qin, Cong Wang, and Yajin Zhou, "SPEED: Accelerating Enclave Applications via Secure Deduplication", in the 39th IEEE International Conference on Distributed Computing Systems (ICDCS), Dallas, Texas, USA, 7-10 Jul, 2019.
 
 # REQUIREMENTS
 
@@ -216,6 +215,6 @@ Usage : dedupApplication <applicationID> <Path> <Count> <Dedup>
 
 # MAINTAINER
 
-  - Helei Cui, City University of Hong Kong, heleicui2-c@my.cityu.edu.hk
+  - Helei Cui, City University of Hong Kong, cuihelei@outlook.com
   - Huayi Duan, City University of Hong Kong, hduan2-c@my.cityu.edu.hk
   - Mengyu Yao, City University of Hong Kong, mengycs@gmail.com
