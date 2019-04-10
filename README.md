@@ -113,7 +113,7 @@ string output = compress_file(file_context);
  
 ```shell
 Deduplicable<string, const string&> 
-		dedup_func("libz", "1.12.11", "compress_file", compress_file);
+		dedup_func("zlib", "1.2.11", "compress_file", compress_file);
 
 string output = dedup_func(file_context); 
 ```
