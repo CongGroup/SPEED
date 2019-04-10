@@ -127,7 +127,7 @@ After compiling with speed, you can find a program named appDedup in SPEED/speed
 ```shell
 ~/SPEED/speed_client$ ./appDedup 
 Usage : dedupApplication <applicationID> <Path> <Count> <Dedup>
-       <applicationID> : 1:BackupFolder, 2:MiddleboxIDS, 3:MapreduceBow, 4:PicFolderDiff.
+       <applicationID> : 1:BackupFolder, 2:MiddleboxIDS, 3:MapreduceBow, 4:PicFeature.
        <Path>          : The input data path.
        <Count>         : The input data count.
        <Dedup>         : 0: disable deduplication  1: enable deduplication.
